@@ -173,11 +173,14 @@
                     <div>Menghubungkan kamera...</div>
                 </div>
             </div>
+            <div id="faceCheckStatus" class="alert alert-info py-2 small" role="status" aria-live="polite">
+                Menyiapkan pemeriksaan wajah...
+            </div>
 
             <!-- Tombol Kamera -->
             <div class="d-flex gap-2">
                 <button type="button" class="btn btn-outline-dark btn-sm flex-grow-1" id="btnSnapPhoto" disabled>
-                    <i class="bi bi-camera-fill me-1"></i> Ambil Foto Selfie
+                    <i class="bi bi-camera-fill me-1"></i> Menyiapkan deteksi wajah...
                 </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="btnRetakePhoto">
                     <i class="bi bi-arrow-repeat me-1"></i> Foto Ulang
@@ -284,6 +287,9 @@
     // Global State
     let streamCamera = null;
     let signaturePad = null;
+    let faceDetector = null;
+    let cameraReady = false;
+    let faceDetectedForCurrentPhoto = false;
     let userCoordinates = { lat: null, lng: null, distance: null };
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -296,9 +302,41 @@
 
         initSignaturePad();
         initCamera();
+        initFaceDetector();
         detectGeolocation();
         setupEventListeners();
     });
+
+    async function initFaceDetector() {
+        const status = document.getElementById('faceCheckStatus');
+        status.textContent = 'Memuat model pemeriksaan wajah...';
+
+        try {
+            faceDetector = await window.createFaceDetector();
+            updateCaptureButton();
+            status.className = 'alert alert-info py-2 small';
+            status.textContent = 'Wajah diperiksa di perangkat ini. Foto tetap dikirim ke server saat presensi disimpan.';
+        } catch (error) {
+            console.error('Model deteksi wajah gagal dimuat:', error);
+            status.className = 'alert alert-danger py-2 small';
+            status.textContent = 'Pemeriksaan wajah gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.';
+            updateCaptureButton();
+        }
+    }
+
+    function updateCaptureButton() {
+        const button = document.getElementById('btnSnapPhoto');
+        button.disabled = !cameraReady || !faceDetector;
+        button.innerHTML = button.disabled
+            ? '<i class="bi bi-camera-fill me-1"></i> Menyiapkan deteksi wajah...'
+            : '<i class="bi bi-camera-fill me-1"></i> Ambil Foto Selfie';
+    }
+
+    function setFaceCheckStatus(type, message) {
+        const status = document.getElementById('faceCheckStatus');
+        status.className = `alert alert-${type} py-2 small`;
+        status.textContent = message;
+    }
 
     // 1. Inisialisasi Kanvas Tanda Tangan
     function initSignaturePad() {
@@ -343,7 +381,8 @@
             video.onloadedmetadata = () => {
                 video.play();
                 cameraLoading.classList.add('d-none');
-                btnSnap.disabled = false;
+                cameraReady = true;
+                updateCaptureButton();
             };
         } catch (err) {
             console.error('Kamera gagal diakses:', err);
@@ -433,34 +472,68 @@
         const canvas = document.getElementById('photoCanvas');
         const fotoSelfieInput = document.getElementById('fotoSelfie');
 
-        btnSnap.addEventListener('click', function() {
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
-            const ctx = canvas.getContext('2d');
-            
-            // Mirror snapshot kamera depan
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        btnSnap.addEventListener('click', async function() {
+            if (!faceDetector || !cameraReady) {
+                setFaceCheckStatus('danger', 'Kamera atau pemeriksaan wajah belum siap. Muat ulang halaman dan coba lagi.');
+                return;
+            }
 
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            fotoSelfieInput.value = dataUrl;
+            btnSnap.disabled = true;
+            btnSnap.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memeriksa wajah...';
 
-            imgPreview.src = dataUrl;
-            imgPreview.style.display = 'block';
-            video.style.display = 'none';
+            try {
+                const result = faceDetector.detect(video);
+                const faceFound = result.detections.some((detection) =>
+                    detection.categories?.some((category) => category.score >= 0.6)
+                );
 
-            btnSnap.classList.add('d-none');
-            btnRetake.classList.remove('d-none');
+                if (!faceFound) {
+                    faceDetectedForCurrentPhoto = false;
+                    fotoSelfieInput.value = '';
+                    setFaceCheckStatus('warning', 'Wajah belum terdeteksi. Pastikan wajah terlihat jelas di kamera, lalu coba lagi.');
+                    updateCaptureButton();
+                    return;
+                }
+
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                const ctx = canvas.getContext('2d');
+
+                // Mirror snapshot kamera depan
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                fotoSelfieInput.value = dataUrl;
+                faceDetectedForCurrentPhoto = true;
+
+                imgPreview.src = dataUrl;
+                imgPreview.style.display = 'block';
+                video.style.display = 'none';
+
+                btnSnap.classList.add('d-none');
+                btnRetake.classList.remove('d-none');
+                setFaceCheckStatus('success', 'Wajah terdeteksi. Foto selfie siap digunakan untuk presensi.');
+            } catch (error) {
+                console.error('Pemeriksaan wajah gagal:', error);
+                faceDetectedForCurrentPhoto = false;
+                fotoSelfieInput.value = '';
+                setFaceCheckStatus('danger', 'Foto gagal diperiksa. Coba ambil ulang selfie.');
+                updateCaptureButton();
+            }
         });
 
         btnRetake.addEventListener('click', function() {
             fotoSelfieInput.value = '';
+            faceDetectedForCurrentPhoto = false;
             imgPreview.style.display = 'none';
             video.style.display = 'block';
 
             btnRetake.classList.add('d-none');
             btnSnap.classList.remove('d-none');
+            updateCaptureButton();
+            setFaceCheckStatus('info', 'Ambil foto selfie untuk memeriksa wajah kembali.');
         });
 
         // Tombol Cek NRP
@@ -560,6 +633,10 @@
         }
         if (!foto) {
             showAlert('danger', 'Silakan ambil foto selfie kamera depan terlebih dahulu.');
+            return;
+        }
+        if (!faceDetectedForCurrentPhoto) {
+            showAlert('danger', 'Presensi tidak dapat dikirim sebelum wajah terdeteksi pada foto selfie.');
             return;
         }
         if (signaturePad.isEmpty()) {

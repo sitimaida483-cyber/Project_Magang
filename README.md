@@ -22,6 +22,7 @@ Sistem Presensi Web resmi untuk **Bidang Teknologi Informasi dan Komunikasi (Bid
 - **Pencarian NRP Realtime:** Anggota cukup memasukkan NRP/NIP untuk memuat nama, pangkat/jabatan, dan unit kerja tanpa proses login akun yang rumit.
 - **Validasi Geofencing Spasial (Formula Haversine):** Sistem memeriksa koordinat GPS perangkat secara *realtime*. Presensi hanya dapat dikirim jika anggota berada di dalam radius sah yang ditentukan admin dari titik pusat kantor (misal 100 meter).
 - **Kamera Depan Otomatis (Swafoto / Selfie):** Menggunakan API kamera browser (`facingMode: 'user'`) untuk memverifikasi kehadiran fisik personel di lokasi.
+- **Deteksi Wajah pada Selfie:** Foto diperiksa di browser menggunakan MediaPipe; foto tanpa wajah terdeteksi tidak diterima dan presensi dari formulir tidak dapat dikirim. Pemeriksaan ini hanya mendeteksi keberadaan wajah, bukan mencocokkan wajah dengan identitas anggota atau mencegah pemalsuan. Deteksi dilakukan di perangkat, tetapi foto selfie tetap dikirim ke server untuk disimpan sebagai bukti presensi. Model deteksi diunduh saat halaman digunakan; pemeriksaan ini berada di sisi browser dan bukan validasi anti-manipulasi pada server.
 - **Tanda Tangan Digital:** Personel membubuhkan paraf/tanda tangan elektronik langsung pada kanvas layar sentuh atau kursor mouse menggunakan `signature_pad`.
 - **Web Push Notification:** Otomatis meminta izin notifikasi browser pada presensi pertama untuk menerima pengingat kehadiran terjadwal.
 
