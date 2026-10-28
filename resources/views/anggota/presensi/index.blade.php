@@ -361,50 +361,6 @@
             && mouth.y > nose.y;
     }
 
-    function hasEnoughFacialDetail(imageData) {
-        const { data, width, height } = imageData;
-        const luminance = [];
-        let total = 0;
-        let totalSquared = 0;
-
-        for (let index = 0; index < data.length; index += 4) {
-            const red = data[index];
-            const green = data[index + 1];
-            const blue = data[index + 2];
-            const value = 0.299 * red + 0.587 * green + 0.114 * blue;
-
-            luminance.push(value);
-            total += value;
-            totalSquared += value * value;
-        }
-
-        const mean = total / luminance.length;
-        const standardDeviation = Math.sqrt(Math.max(0, totalSquared / luminance.length - mean * mean));
-        let strongEdges = 0;
-        let edgeCount = 0;
-
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const index = y * width + x;
-                if (x + 1 < width) {
-                    edgeCount++;
-                    if (Math.abs(luminance[index] - luminance[index + 1]) >= 28) {
-                        strongEdges++;
-                    }
-                }
-                if (y + 1 < height) {
-                    edgeCount++;
-                    if (Math.abs(luminance[index] - luminance[index + width]) >= 28) {
-                        strongEdges++;
-                    }
-                }
-            }
-        }
-
-        return standardDeviation >= 10
-            && strongEdges / edgeCount >= 0.02;
-    }
-
     function hasVisibleFacialFeatures(video, detection) {
         const [firstEye, secondEye, nose, mouth] = detection.keypoints || [];
         if (!firstEye || !secondEye || !nose || !mouth) {
@@ -415,10 +371,10 @@
             (firstEye.x - secondEye.x) * video.videoWidth,
             (firstEye.y - secondEye.y) * video.videoHeight
         );
-        const cropSize = Math.max(12, eyeDistance * 0.45);
+        const cropSize = Math.max(12, eyeDistance * 0.3);
         const sampleCanvas = document.createElement('canvas');
-        sampleCanvas.width = 32;
-        sampleCanvas.height = 32;
+        sampleCanvas.width = 24;
+        sampleCanvas.height = 24;
         const context = sampleCanvas.getContext('2d', { willReadFrequently: true });
 
         if (!context || video.videoWidth < cropSize || video.videoHeight < cropSize) {
@@ -431,20 +387,22 @@
             const left = Math.max(0, Math.min(video.videoWidth - cropSize, centerX - cropSize / 2));
             const top = Math.max(0, Math.min(video.videoHeight - cropSize, centerY - cropSize / 2));
 
-            context.clearRect(0, 0, sampleCanvas.width, sampleCanvas.height);
-            context.drawImage(
-                video,
-                left,
-                top,
-                cropSize,
-                cropSize,
-                0,
-                0,
-                sampleCanvas.width,
-                sampleCanvas.height
-            );
+            context.drawImage(video, left, top, cropSize, cropSize, 0, 0, sampleCanvas.width, sampleCanvas.height);
 
-            return hasEnoughFacialDetail(context.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height));
+            const pixels = context.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height).data;
+            let skinTonePixels = 0;
+
+            for (let index = 0; index < pixels.length; index += 4) {
+                const red = pixels[index];
+                const green = pixels[index + 1];
+                const blue = pixels[index + 2];
+
+                if (red > 40 && red - green > 3 && green - blue > 2) {
+                    skinTonePixels++;
+                }
+            }
+
+            return skinTonePixels / (pixels.length / 4) >= 0.02;
         });
     }
 
