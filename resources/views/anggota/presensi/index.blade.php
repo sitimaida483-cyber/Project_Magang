@@ -338,6 +338,116 @@
         status.textContent = message;
     }
 
+    function isFrontFacingFace(detection) {
+        const [firstEye, secondEye, nose, mouth] = detection.keypoints || [];
+        if (!firstEye || !secondEye || !nose || !mouth) {
+            return false;
+        }
+
+        const eyeDistance = Math.hypot(firstEye.x - secondEye.x, firstEye.y - secondEye.y);
+        if (eyeDistance === 0) {
+            return false;
+        }
+
+        const eyeCenterX = (firstEye.x + secondEye.x) / 2;
+        const noseOffset = Math.abs(nose.x - eyeCenterX) / eyeDistance;
+        const mouthOffset = Math.abs(mouth.x - eyeCenterX) / eyeDistance;
+        const eyeTilt = Math.abs(firstEye.y - secondEye.y) / eyeDistance;
+
+        return noseOffset <= 0.3
+            && mouthOffset <= 0.5
+            && eyeTilt <= 0.35
+            && nose.y > Math.max(firstEye.y, secondEye.y)
+            && mouth.y > nose.y;
+    }
+
+    function hasEnoughFacialDetail(imageData) {
+        const { data, width, height } = imageData;
+        const luminance = [];
+        let total = 0;
+        let totalSquared = 0;
+
+        for (let index = 0; index < data.length; index += 4) {
+            const red = data[index];
+            const green = data[index + 1];
+            const blue = data[index + 2];
+            const value = 0.299 * red + 0.587 * green + 0.114 * blue;
+
+            luminance.push(value);
+            total += value;
+            totalSquared += value * value;
+        }
+
+        const mean = total / luminance.length;
+        const standardDeviation = Math.sqrt(Math.max(0, totalSquared / luminance.length - mean * mean));
+        let strongEdges = 0;
+        let edgeCount = 0;
+
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const index = y * width + x;
+                if (x + 1 < width) {
+                    edgeCount++;
+                    if (Math.abs(luminance[index] - luminance[index + 1]) >= 28) {
+                        strongEdges++;
+                    }
+                }
+                if (y + 1 < height) {
+                    edgeCount++;
+                    if (Math.abs(luminance[index] - luminance[index + width]) >= 28) {
+                        strongEdges++;
+                    }
+                }
+            }
+        }
+
+        return standardDeviation >= 10
+            && strongEdges / edgeCount >= 0.02;
+    }
+
+    function hasVisibleFacialFeatures(video, detection) {
+        const [firstEye, secondEye, nose, mouth] = detection.keypoints || [];
+        if (!firstEye || !secondEye || !nose || !mouth) {
+            return false;
+        }
+
+        const eyeDistance = Math.hypot(
+            (firstEye.x - secondEye.x) * video.videoWidth,
+            (firstEye.y - secondEye.y) * video.videoHeight
+        );
+        const cropSize = Math.max(12, eyeDistance * 0.45);
+        const sampleCanvas = document.createElement('canvas');
+        sampleCanvas.width = 32;
+        sampleCanvas.height = 32;
+        const context = sampleCanvas.getContext('2d', { willReadFrequently: true });
+
+        if (!context || video.videoWidth < cropSize || video.videoHeight < cropSize) {
+            return false;
+        }
+
+        return [firstEye, secondEye, nose, mouth].every((point) => {
+            const centerX = point.x * video.videoWidth;
+            const centerY = point.y * video.videoHeight;
+            const left = Math.max(0, Math.min(video.videoWidth - cropSize, centerX - cropSize / 2));
+            const top = Math.max(0, Math.min(video.videoHeight - cropSize, centerY - cropSize / 2));
+
+            context.clearRect(0, 0, sampleCanvas.width, sampleCanvas.height);
+            context.drawImage(
+                video,
+                left,
+                top,
+                cropSize,
+                cropSize,
+                0,
+                0,
+                sampleCanvas.width,
+                sampleCanvas.height
+            );
+
+            return hasEnoughFacialDetail(context.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height));
+        });
+    }
+
     // 1. Inisialisasi Kanvas Tanda Tangan
     function initSignaturePad() {
         const canvas = document.getElementById('signaturePad');
@@ -483,14 +593,16 @@
 
             try {
                 const result = faceDetector.detect(video);
-                const faceFound = result.detections.some((detection) =>
+                const frontFacingFaceFound = result.detections.some((detection) =>
                     detection.categories?.some((category) => category.score >= 0.6)
+                    && isFrontFacingFace(detection)
+                    && hasVisibleFacialFeatures(video, detection)
                 );
 
-                if (!faceFound) {
+                if (!frontFacingFaceFound) {
                     faceDetectedForCurrentPhoto = false;
                     fotoSelfieInput.value = '';
-                    setFaceCheckStatus('warning', 'Wajah belum terdeteksi. Pastikan wajah terlihat jelas di kamera, lalu coba lagi.');
+                    setFaceCheckStatus('warning', 'Wajah harus menghadap kamera dan tidak tertutup. Pastikan kedua mata, hidung, dan mulut terlihat jelas, lalu coba lagi.');
                     updateCaptureButton();
                     return;
                 }
@@ -514,7 +626,7 @@
 
                 btnSnap.classList.add('d-none');
                 btnRetake.classList.remove('d-none');
-                setFaceCheckStatus('success', 'Wajah terdeteksi. Foto selfie siap digunakan untuk presensi.');
+                setFaceCheckStatus('success', 'Wajah menghadap kamera dan terlihat jelas. Foto selfie siap digunakan untuk presensi.');
             } catch (error) {
                 console.error('Pemeriksaan wajah gagal:', error);
                 faceDetectedForCurrentPhoto = false;
