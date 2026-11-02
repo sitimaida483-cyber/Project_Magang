@@ -271,7 +271,7 @@
                         <h6 class="modal-title fw-bold mb-0" id="modalPengajuanSuratLabel">
                             Pengajuan Surat: <span id="modalHeaderTitleKategori" class="text-warning">Izin</span>
                         </h6>
-                        <small class="text-white-50" style="font-size: 0.7rem;">Sistem Presensi Bidtik Polda Kalsel</small>
+                        <small class="text-white-50" style="font-size: 0.7rem;">PresTIK · Presensi Digital Bidtik Polda Kalsel</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>

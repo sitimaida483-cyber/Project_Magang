@@ -160,10 +160,13 @@
     <!-- Sidebar -->
     <nav id="sidebar">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-            <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo Bidtik Polda Kalsel" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
+            <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo PresTIK Polda Kalsel" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
             <div>
-                <div class="fw-bold lh-1 text-white" style="letter-spacing: 0.5px;">BIDTIK POLDA</div>
-                <small class="text-white-50" style="font-size: 0.72rem; letter-spacing: 0.3px;">Kalsel Presensi</small>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-white fs-5 lh-1" style="letter-spacing: 0.5px;">PresTIK</span>
+                    <span class="badge-role">ADMIN</span>
+                </div>
+                <small class="text-white-50 d-block mt-1" style="font-size: 0.68rem; letter-spacing: 0.2px;">Presensi Digital Bidtik</small>
             </div>
         </a>
 
@@ -232,7 +235,7 @@
                 <i class="bi bi-list fs-5"></i>
             </button>
             <div class="fw-semibold text-secondary">
-                Bidang Teknologi Informasi dan Komunikasi (Bidtik) Polda Kalsel
+                PresTIK · Presensi Digital Bidtik Polda Kalsel
             </div>
 
             <div class="dropdown">
@@ -285,7 +288,7 @@
         </main>
 
         <footer class="bg-white border-top text-center py-3 text-muted small">
-            &copy; {{ date('Y') }} Bidtik Polda Kalimantan Selatan - Sistem Presensi Online
+            &copy; {{ date('Y') }} PresTIK (Presensi Digital Bidtik) · Polda Kalimantan Selatan
         </footer>
     </div>
 

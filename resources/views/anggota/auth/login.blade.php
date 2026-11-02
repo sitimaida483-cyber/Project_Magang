@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login Personel - Presensi Bidtik Polda Kalsel</title>
+    <title>Login Personel - PresTIK Polda Kalsel</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}">
     
     <!-- Google Fonts & Bootstrap 5 & Icons -->
@@ -133,9 +133,9 @@
             <div class="mb-3">
                 <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo Bidtik Polda Kalsel" style="width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.6));">
             </div>
-            <span class="gold-badge">Portal Presensi Personel</span>
-            <h4 class="fw-bold mb-1 tracking-wide text-white">BIDTIK POLDA KALSEL</h4>
-            <p class="text-white-50 small mb-0">Silakan masuk menggunakan akun dinas Anda</p>
+            <span class="gold-badge">PresTIK · Presensi Digital</span>
+            <h4 class="fw-bold mb-1 tracking-wide text-white">PresTIK POLDA KALSEL</h4>
+            <p class="text-white-50 small mb-0">Presensi Digital Bidtik Polda Kalimantan Selatan</p>
         </div>
 
         <div class="p-4">
