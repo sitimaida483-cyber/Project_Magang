@@ -70,6 +70,87 @@ class PengajuanSurat extends Model
     }
 
     /**
+     * Metadata visual kartu kategori surat (ikon, warna, deskripsi ringkas).
+     */
+    public static function kategoriMeta(): array
+    {
+        return [
+            'izin' => [
+                'key'       => 'izin',
+                'nama'      => 'Izin',
+                'ikon'      => 'bi-clipboard-check-fill',
+                'warna'     => '#2563eb',
+                'warna_bg'  => '#eff6ff',
+                'border'    => '#bfdbfe',
+                'deskripsi' => 'Keperluan dinas / pribadi penting',
+            ],
+            'sakit' => [
+                'key'       => 'sakit',
+                'nama'      => 'Sakit',
+                'ikon'      => 'bi-heart-pulse-fill',
+                'warna'     => '#dc2626',
+                'warna_bg'  => '#fef2f2',
+                'border'    => '#fecaca',
+                'deskripsi' => 'Surat dokter / keterangan medis',
+            ],
+            'surat_dinas' => [
+                'key'       => 'surat_dinas',
+                'nama'      => 'Surat Dinas',
+                'ikon'      => 'bi-briefcase-fill',
+                'warna'     => '#0e2238',
+                'warna_bg'  => '#f1f5f9',
+                'border'    => '#cbd5e1',
+                'deskripsi' => 'Surat Perintah Tugas (Sprin) dinas',
+            ],
+            'cuti' => [
+                'key'       => 'cuti',
+                'nama'      => 'Cuti',
+                'ikon'      => 'bi-calendar2-check-fill',
+                'warna'     => '#059669',
+                'warna_bg'  => '#ecfdf5',
+                'border'    => '#a7f3d0',
+                'deskripsi' => 'Cuti tahunan / alasan penting',
+            ],
+            'piket' => [
+                'key'       => 'piket',
+                'nama'      => 'Piket',
+                'ikon'      => 'bi-shield-check',
+                'warna'     => '#d97706',
+                'warna_bg'  => '#fffbeb',
+                'border'    => '#fde68a',
+                'deskripsi' => 'Piket penjagaan mako / siaga',
+            ],
+            'lepas_dinas' => [
+                'key'       => 'lepas_dinas',
+                'nama'      => 'Lepas Dinas',
+                'ikon'      => 'bi-person-check-fill',
+                'warna'     => '#7c3aed',
+                'warna_bg'  => '#f5f3ff',
+                'border'    => '#ddd6fe',
+                'deskripsi' => 'Bebas piket dinas regu jaga',
+            ],
+            'wfh' => [
+                'key'       => 'wfh',
+                'nama'      => 'WFH',
+                'ikon'      => 'bi-laptop',
+                'warna'     => '#0891b2',
+                'warna_bg'  => '#ecfeff',
+                'border'    => '#a5f3fc',
+                'deskripsi' => 'Work From Home / tugas daring',
+            ],
+            'pendidikan' => [
+                'key'       => 'pendidikan',
+                'nama'      => 'Pendidikan',
+                'ikon'      => 'bi-mortarboard-fill',
+                'warna'     => '#4f46e5',
+                'warna_bg'  => '#eef2ff',
+                'border'    => '#c7d2fe',
+                'deskripsi' => 'Diklat / kejuruan kepolisian',
+            ],
+        ];
+    }
+
+    /**
      * Dapatkan label jenis keterangan dalam Bahasa Indonesia.
      */
     public function getJenisLabelAttribute(): string

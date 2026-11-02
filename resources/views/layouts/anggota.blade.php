@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/presensi.css') }}?v={{ file_exists(public_path('css/presensi.css')) ? filemtime(public_path('css/presensi.css')) : time() }}">
     @vite('resources/js/app.js')
 
     <style>
@@ -82,7 +83,7 @@
 
     <!-- Header Polri Kalsel -->
     <header class="header-police">
-        <svg class="header-network header-network--left" viewBox="0 0 400 200" aria-hidden="true" focusable="false">
+        <svg class="header-network header-network--left" style="display: none;" viewBox="0 0 400 200" aria-hidden="true" focusable="false">
             <g fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M-12 30 55 68 112 26 172 76 224 34 286 73 350 22 414 61M18 146 76 112 134 164 190 120 248 163 310 116 376 158M55 68 76 112M112 26 134 164M172 76 190 120M224 34 248 163M286 73 310 116M350 22 376 158M18 146 55 68M310 116 350 22" />
                 <circle cx="55" cy="68" r="4" fill="currentColor" />
@@ -99,7 +100,7 @@
                 <circle cx="376" cy="158" r="4" fill="currentColor" />
             </g>
         </svg>
-        <svg class="header-network header-network--right" viewBox="0 0 400 200" aria-hidden="true" focusable="false">
+        <svg class="header-network header-network--right" style="display: none;" viewBox="0 0 400 200" aria-hidden="true" focusable="false">
             <g fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M-12 30 55 68 112 26 172 76 224 34 286 73 350 22 414 61M18 146 76 112 134 164 190 120 248 163 310 116 376 158M55 68 76 112M112 26 134 164M172 76 190 120M224 34 248 163M286 73 310 116M350 22 376 158M18 146 55 68M310 116 350 22" />
                 <circle cx="55" cy="68" r="4" fill="currentColor" />

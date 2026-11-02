@@ -37,22 +37,40 @@ class PengajuanSuratController extends Controller
             $query->where('jenis_keterangan', $request->jenis);
         }
 
-        $daftarSurat = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
-        $daftarJenis = PengajuanSurat::daftarJenisKeterangan();
+        $daftarSurat  = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
+        $daftarJenis  = PengajuanSurat::daftarJenisKeterangan();
+        $kategoriMeta = PengajuanSurat::kategoriMeta();
+        $maxSizeKb    = config('presensi.surat_max_size_kb', 2048);
 
-        return view('anggota.surat.index', compact('daftarSurat', 'daftarJenis', 'anggota'));
+        // Jumlah surat aktif per kategori milik anggota
+        $jumlahPerJenis = PengajuanSurat::where('id_anggota', $anggota->id_anggota)
+            ->selectRaw('jenis_keterangan, count(*) as total')
+            ->groupBy('jenis_keterangan')
+            ->pluck('total', 'jenis_keterangan')
+            ->toArray();
+
+        return view('anggota.surat.index', compact(
+            'daftarSurat', 
+            'daftarJenis', 
+            'kategoriMeta', 
+            'anggota', 
+            'maxSizeKb', 
+            'jumlahPerJenis'
+        ));
     }
 
     /**
      * Tampilkan form pembuatan pengajuan surat keterangan baru.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        $anggota     = auth('anggota')->user();
-        $daftarJenis = PengajuanSurat::daftarJenisKeterangan();
-        $maxSizeKb   = config('presensi.surat_max_size_kb', 2048);
+        $anggota      = auth('anggota')->user();
+        $daftarJenis  = PengajuanSurat::daftarJenisKeterangan();
+        $kategoriMeta = PengajuanSurat::kategoriMeta();
+        $maxSizeKb    = config('presensi.surat_max_size_kb', 2048);
+        $jenisTerpilih = $request->query('jenis', old('jenis_keterangan', 'izin'));
 
-        return view('anggota.surat.create', compact('anggota', 'daftarJenis', 'maxSizeKb'));
+        return view('anggota.surat.create', compact('anggota', 'daftarJenis', 'kategoriMeta', 'maxSizeKb', 'jenisTerpilih'));
     }
 
     /**
