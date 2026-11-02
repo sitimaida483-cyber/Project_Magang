@@ -23,4 +23,17 @@ return [
         'public_key'  => env('VAPID_PUBLIC_KEY', ''),
         'private_key' => env('VAPID_PRIVATE_KEY', ''),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Konfigurasi Pengajuan Surat Keterangan / Izin Dinas
+    |--------------------------------------------------------------------------
+    */
+    // Ukuran maksimal berkas lampiran PDF (dalam Kilobytes, default: 2048 KB = 2 MB)
+    'surat_max_size_kb' => (int) env('SURAT_MAX_SIZE_KB', 2048),
+
+    // Daftar jenis keterangan surat yang TETAP diwajibkan presensi lokasi
+    // Default: kosong (semua surat yang disetujui membebaskan kewajiban presensi lokasi)
+    // Contoh jika nanti diminta pembimbing: ['wfh', 'piket']
+    'jenis_surat_tetap_presensi' => [],
 ];

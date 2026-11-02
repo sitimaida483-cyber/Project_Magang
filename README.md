@@ -18,26 +18,37 @@ Sistem Presensi Web resmi untuk **Bidang Teknologi Informasi dan Komunikasi (Bid
 
 ## Fitur Utama
 
-### 1. Panel Publik Presensi Anggota (`/presensi`)
-- **Pencarian NRP Realtime:** Anggota cukup memasukkan NRP/NIP untuk memuat nama, pangkat/jabatan, dan unit kerja tanpa proses login akun yang rumit.
+### 1. Panel Presensi & Akun Personel (`/presensi` & `/login`)
+- **Autentikasi Mandiri Personel:** Keamanan ditingkatkan dengan autentikasi berbasis email kedinasan dan password terenkripsi bcrypt. Sesi anggota terpisah dari admin menggunakan guard `anggota`.
+- **Identifikasi Personel Otomatis:** Langkah manual pengetikan NRP telah dihapus. Identitas personel (Nama, NRP, Jabatan, Unit Kerja) beserta status presensi hari ini langsung terisi otomatis dari sesi akun yang sedang login.
+- **Pengajuan Surat Keterangan & Lampiran PDF (`/surat`):** Personel dapat mengajukan 8 jenis keterangan kedinasan (*Izin, Sakit, Surat Dinas, Cuti, Piket, Lepas Dinas, WFH, Pendidikan*) dengan melampirkan berkas PDF resmi (maks. 2 MB). Berkas tersimpan di penyimpanan privat dengan nama acak.
+- **Dispensasi Presensi Otomatis:** Personel yang memiliki pengajuan surat berstatus *Disetujui* pada hari bersangkutan dibebaskan dari kewajiban presensi lokasi (tombol presensi otomatis dinonaktifkan dengan pemberitahuan ramah).
 - **Validasi Geofencing Spasial (Formula Haversine):** Sistem memeriksa koordinat GPS perangkat secara *realtime*. Presensi hanya dapat dikirim jika anggota berada di dalam radius sah yang ditentukan admin dari titik pusat kantor (misal 100 meter).
 - **Kamera Depan Otomatis (Swafoto / Selfie):** Menggunakan API kamera browser (`facingMode: 'user'`) untuk memverifikasi kehadiran fisik personel di lokasi.
-- **Deteksi Wajah pada Selfie:** Foto diperiksa di browser menggunakan MediaPipe; foto tanpa wajah terdeteksi tidak diterima dan presensi dari formulir tidak dapat dikirim. Pemeriksaan ini hanya mendeteksi keberadaan wajah, bukan mencocokkan wajah dengan identitas anggota atau mencegah pemalsuan. Deteksi dilakukan di perangkat, tetapi foto selfie tetap dikirim ke server untuk disimpan sebagai bukti presensi. Model deteksi diunduh saat halaman digunakan; pemeriksaan ini berada di sisi browser dan bukan validasi anti-manipulasi pada server.
+- **Deteksi Wajah pada Selfie:** Foto diperiksa di browser menggunakan MediaPipe; foto tanpa wajah terdeteksi tidak diterima dan presensi dari formulir tidak dapat dikirim.
 - **Tanda Tangan Digital:** Personel membubuhkan paraf/tanda tangan elektronik langsung pada kanvas layar sentuh atau kursor mouse menggunakan `signature_pad`.
-- **Web Push Notification:** Otomatis meminta izin notifikasi browser pada presensi pertama untuk menerima pengingat kehadiran terjadwal.
+- **Menu Navigasi Mobile-First:** Dilengkapi navigasi bawah (*bottom navigation*) untuk beralih cepat antara Presensi, Pengajuan Surat, Ubah Password, dan Keluar.
 
 ### 2. Panel Administrasi Terpusat (`/admin`)
-- **Dashboard Ringkasan WITA:** Menampilkan metrik harian (*Presensi Masuk, Presensi Pulang, Personel Terlambat, Total Anggota Terdaftar*) serta tabel aktivitas hari ini dalam waktu Indonesia Tengah (WITA).
+- **Dashboard Ringkasan WITA:** Menampilkan metrik harian (*Presensi Masuk, Presensi Pulang, Personel Terlambat, Pengajuan Surat Menunggu, Anggota Aktif*) serta tabel aktivitas hari ini dalam waktu Indonesia Tengah (WITA).
+- **Verifikasi Pengajuan Surat Keterangan (`/admin/surat`):**
+  - Panel daftar permohonan surat dengan filter status, jenis keterangan, periode tanggal, dan pencarian nama/NRP.
+  - Pratinjau langsung berkas lampiran PDF di browser tanpa perlu mengunduh manual.
+  - Form tindakan: Setujui atau Tolak permohonan dengan kolom catatan admin (wajib saat menolak).
+  - Setiap keputusan verifikasi otomatis dicatat dalam jejak audit Log Aktivitas.
 - **Pengaturan Geofence Kantor & Jam Operasional (`/admin/pengaturan`):**
   - Titik koordinat kantor dapat digeser secara interaktif menggunakan peta Leaflet.js (*drag marker*).
   - Radius kehadiran dapat diubah dinamis dengan pratinjau lingkaran instan.
   - Penentuan jam operasional masuk, batas toleransi keterlambatan, dan jam pulang.
   - Tombol deteksi koordinat GPS otomatis perangkat admin.
 - **Manajemen Data Anggota (`/admin/anggota`):**
-  - Kelola data personel (NRP, Nama, Jabatan, Unit Kerja, No HP, Status Aktif).
+  - Kelola data personel (NRP, Nama, Email Kedinasan, Password, Jabatan, Unit Kerja, No HP, Status Aktif).
+  - Penanda badge *"Belum punya akun login"* untuk mendata anggota yang belum memiliki kredensial.
+  - Aksi *"Reset Password"* personel oleh admin dengan pencatatan audit log.
   - *Integritas Data:* Anggota yang memiliki riwayat presensi tidak dapat dihapus permanen untuk mencegah hilangnya data audit (*disarankan nonaktifkan status*).
-- **Rekapitulasi Absensi & Ekspor Dokumen (`/admin/presensi`):**
-  - Filter multi-kriteria: rentang tanggal, personel, jenis presensi (masuk/pulang), dan status kehadiran (tepat waktu/terlambat).
+- **Rekapitulasi Absensi & Integrasi Surat Izin (`/admin/presensi`):**
+  - Menampilkan rekaman presensi fisik sekaligus baris dispensasi dinas/cuti/izin yang telah disetujui.
+  - Filter multi-kriteria: rentang tanggal, personel, jenis presensi, status kehadiran, dan jenis keterangan surat.
   - Halaman detail kehadiran lengkap dengan foto selfie, tanda tangan digital, dan peta GPS jarak ke kantor.
   - **Cetak Laporan PDF Resmi Dinas:** Dokumen A4 Landscape siap cetak dengan Kop Surat Kepolisian Daerah Kalimantan Selatan Bidang TIK dan kolom tanda tangan pengesahan.
   - **Ekspor Dokumen Excel (.xlsx):** Format spreadsheet dengan pewarnaan status dan pemformatan sel resmi.
@@ -45,9 +56,8 @@ Sistem Presensi Web resmi untuk **Bidang Teknologi Informasi dan Komunikasi (Bid
   - Peta interaktif Leaflet.js yang memplot seluruh lokasi presensi anggota pada tanggal tertentu.
   - Pin dengan penanda warna: 🟢 Hijau (Tepat Waktu), 🔴 Merah (Terlambat), 🔵 Biru (Pulang).
   - Popup interaktif dengan foto personel, identitas, waktu presensi, dan tautan ke detail kehadiran.
-  - Tombol kontrol cepat *"Fokus Titik Kantor"* dan *"Tampilkan Semua Titik"*.
 - **Audit Trail Log Aktivitas (`/admin/log`):**
-  - Mencatat setiap aksi administratif (login, logout, modifikasi pengaturan kantor, manipulasi data personel) lengkap dengan alamat IP, waktu presensi WITA, dan detail keterangan aksi.
+  - Mencatat setiap aksi administratif (login, logout, verifikasi surat, reset password, modifikasi pengaturan kantor, manipulasi data personel) lengkap dengan alamat IP, waktu presensi WITA, dan detail keterangan aksi.
 
 ---
 
@@ -62,15 +72,19 @@ Sistem Presensi Web resmi untuk **Bidang Teknologi Informasi dan Komunikasi (Bid
 
 ## Struktur Database
 
-Sistem dibangun di atas 7 tabel relasional utama:
+Sistem dibangun di atas 8 tabel relasional utama:
 
 1. **`admin`** (PK: `id_admin`): Kredensial dan akun administrator sistem.
-2. **`anggota`** (PK: `id_anggota`): Profil personel kepolisian / PNS Bidtik.
-3. **`presensi`** (PK: `id_presensi`): Catatan riwayat presensi masuk/pulang, titik GPS, foto, dan tanda tangan.
-4. **`pengaturan`** (PK: `id_pengaturan`): Konfigurasi titik koordinat kantor, radius meter, dan jam kerja.
-5. **`perangkat_notifikasi`** (PK: `id_perangkat`): Endpoint langganan Web Push browser perangkat personel.
-6. **`notifikasi`** (PK: `id_notifikasi`): Riwayat pesan notifikasi yang dikirimkan.
-7. **`log_aktivitas`** (PK: `id_log`): Jejak audit keamanan setiap tindakan admin di sistem.
+2. **`anggota`** (PK: `id_anggota`): Profil personel kepolisian / PNS Bidtik, kini dilengkapi kolom `email` dan `password` untuk autentikasi mandiri.
+3. **`pengajuan_surat`** (PK: `id_pengajuan`): Permohonan surat izin, sakit, cuti, surat dinas, piket, dll beserta berkas lampiran PDF dan verifikasi admin.
+4. **`presensi`** (PK: `id_presensi`): Catatan riwayat presensi masuk/pulang, titik GPS, foto, dan tanda tangan.
+5. **`pengaturan`** (PK: `id_pengaturan`): Konfigurasi titik koordinat kantor, radius meter, dan jam kerja.
+6. **`perangkat_notifikasi`** (PK: `id_perangkat`): Endpoint langganan Web Push browser perangkat personel.
+7. **`notifikasi`** (PK: `id_notifikasi`): Riwayat pesan notifikasi yang dikirimkan.
+8. **`log_aktivitas`** (PK: `id_log`): Jejak audit keamanan setiap tindakan admin di sistem.
+
+> **Catatan Pembaruan Database di Hosting / cPanel:**  
+> Untuk memperbarui database pada server hosting tanpa akses SSH, gunakan berkas [`database/sql_manual_revisi_bidtik.sql`](file:///c:/Users/HP/Project_Magang/database/sql_manual_revisi_bidtik.sql). Seluruh skrip SQL bersifat penambahan (*additive*), sehingga data yang sudah ada tidak akan hilang.
 
 ---
 
@@ -137,18 +151,34 @@ Akses aplikasi melalui peramban di: `http://127.0.0.1:8000`
 
 ## Kredensial Default
 
-### Akun Administrator Panel
+### 1. Akun Administrator Panel
 - **URL Login:** `http://127.0.0.1:8000/admin/login`
 - **Username:** `admin`
 - **Password:** `password123`
 
-### Contoh NRP Personel (Halaman Presensi Publik)
-Untuk melakukan uji coba presensi di `http://127.0.0.1:8000/presensi`, gunakan salah satu NRP contoh berikut:
-- `92010450` — Bripka Ahmad Fauzi, S.H. (Subbid Tekinfo)
-- `94080231` — Briptu Siti Nurhaliza (Subbid Tekkom)
-- `88050112` — Aipda Hendra Wijaya (Subbid Tekinfo)
-- `97120344` — Bripda Rian Pratama (Subbid Wabprof)
-- `198504122010011002` — Pembina M. Syarifuddin, S.Kom. (PNS Bidtik)
+### 2. Akun Personel / Anggota (Login Mandiri)
+- **URL Login:** `http://127.0.0.1:8000/login`
+- **Daftar Akun Pengujian (Seeder):**
+  1. **Bripda Ahmad Rizki**
+     - Email: `ahmad.rizki@bidtik.polri.go.id`
+     - Password: `password123`
+     - Status: Aktif
+  2. **Bripda Siti Rahayu**
+     - Email: `siti.rahayu@bidtik.polri.go.id`
+     - Password: `password123`
+     - Status: Aktif
+  3. **Briptu Dedi Kurniawan**
+     - Email: `dedi.kurniawan@bidtik.polri.go.id`
+     - Password: `password123`
+     - Status: Aktif
+  4. **Aipda Hendra Susanto**
+     - Email: `hendra.susanto@bidtik.polri.go.id`
+     - Password: `password123`
+     - Status: Aktif
+  5. **Aiptu Wulandari (Contoh Personel Nonaktif)**
+     - Email: `wulandari@bidtik.polri.go.id`
+     - Password: `password123`
+     - Status: Nonaktif *(Akses login & presensi ditolak)*
 
 ---
 

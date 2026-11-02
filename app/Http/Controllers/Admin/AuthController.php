@@ -66,7 +66,7 @@ class AuthController extends Controller
         }
 
         // Login gagal — tambah hitungan throttle
-        RateLimiter::hit($throttleKey, decay: 60); // 60 detik
+        RateLimiter::hit($throttleKey, 60); // 60 detik
 
         return back()->withErrors([
             'username' => 'Username atau password salah.',

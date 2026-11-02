@@ -22,65 +22,85 @@
 </div>
 
 <!-- Stat Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-stat p-3 bg-white border-start border-4 border-success">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
+    <div class="col">
+        <a href="{{ route('admin.presensi.index', ['tanggal_mulai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'tanggal_selesai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'jenis_presensi' => 'masuk']) }}" 
+           class="card card-stat p-3 bg-white border-start border-4 border-success text-decoration-none h-100">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted small text-uppercase fw-semibold">Presensi Masuk</span>
-                    <h2 class="fw-bold text-success mb-0 mt-1">{{ $total_masuk }}</h2>
-                    <small class="text-muted">Personel hari ini</small>
+                    <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Presensi Masuk</span>
+                    <h3 class="fw-bold text-success mb-0 mt-1">{{ $total_masuk }}</h3>
+                    <small class="text-muted" style="font-size: 0.72rem;">Hari ini <i class="bi bi-arrow-right-short text-success"></i></small>
                 </div>
-                <div class="p-3 bg-success bg-opacity-10 rounded-circle text-success fs-3">
+                <div class="p-2 bg-success bg-opacity-10 rounded-circle text-success fs-4">
                     <i class="bi bi-box-arrow-in-right"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-stat p-3 bg-white border-start border-4 border-primary">
+    <div class="col">
+        <a href="{{ route('admin.presensi.index', ['tanggal_mulai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'tanggal_selesai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'jenis_presensi' => 'pulang']) }}" 
+           class="card card-stat p-3 bg-white border-start border-4 border-primary text-decoration-none h-100">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted small text-uppercase fw-semibold">Presensi Pulang</span>
-                    <h2 class="fw-bold text-primary mb-0 mt-1">{{ $total_pulang }}</h2>
-                    <small class="text-muted">Personel hari ini</small>
+                    <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Presensi Pulang</span>
+                    <h3 class="fw-bold text-primary mb-0 mt-1">{{ $total_pulang }}</h3>
+                    <small class="text-muted" style="font-size: 0.72rem;">Hari ini <i class="bi bi-arrow-right-short text-primary"></i></small>
                 </div>
-                <div class="p-3 bg-primary bg-opacity-10 rounded-circle text-primary fs-3">
+                <div class="p-2 bg-primary bg-opacity-10 rounded-circle text-primary fs-4">
                     <i class="bi bi-box-arrow-right"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-stat p-3 bg-white border-start border-4 border-danger">
+    <div class="col">
+        <a href="{{ route('admin.presensi.index', ['tanggal_mulai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'tanggal_selesai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'status_kehadiran' => 'terlambat']) }}" 
+           class="card card-stat p-3 bg-white border-start border-4 border-danger text-decoration-none h-100">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted small text-uppercase fw-semibold">Terlambat</span>
-                    <h2 class="fw-bold text-danger mb-0 mt-1">{{ $total_terlambat }}</h2>
-                    <small class="text-muted">Lewat jam masuk</small>
+                    <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Terlambat</span>
+                    <h3 class="fw-bold text-danger mb-0 mt-1">{{ $total_terlambat }}</h3>
+                    <small class="text-muted" style="font-size: 0.72rem;">Lewat jam masuk <i class="bi bi-arrow-right-short text-danger"></i></small>
                 </div>
-                <div class="p-3 bg-danger bg-opacity-10 rounded-circle text-danger fs-3">
+                <div class="p-2 bg-danger bg-opacity-10 rounded-circle text-danger fs-4">
                     <i class="bi bi-alarm"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card card-stat p-3 bg-white border-start border-4 border-info">
+    <div class="col">
+        <a href="{{ route('admin.surat.index', ['status' => 'menunggu']) }}" 
+           class="card card-stat p-3 bg-white border-start border-4 border-warning text-decoration-none h-100">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
-                    <span class="text-muted small text-uppercase fw-semibold">Anggota Aktif</span>
-                    <h2 class="fw-bold text-info mb-0 mt-1">{{ $total_anggota_aktif }}</h2>
-                    <small class="text-muted">Total terdaftar</small>
+                    <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Pengajuan Menunggu</span>
+                    <h3 class="fw-bold text-warning mb-0 mt-1">{{ $total_pengajuan_menunggu ?? 0 }}</h3>
+                    <small class="text-muted" style="font-size: 0.72rem;">Surat izin/dinas <i class="bi bi-arrow-right-short text-warning"></i></small>
                 </div>
-                <div class="p-3 bg-info bg-opacity-10 rounded-circle text-info fs-3">
+                <div class="p-2 bg-warning bg-opacity-10 rounded-circle text-warning fs-4">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col">
+        <a href="{{ route('admin.anggota.index', ['status' => 'aktif']) }}" 
+           class="card card-stat p-3 bg-white border-start border-4 border-info text-decoration-none h-100">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small text-uppercase fw-semibold" style="font-size: 0.72rem;">Anggota Aktif</span>
+                    <h3 class="fw-bold text-info mb-0 mt-1">{{ $total_anggota_aktif }}</h3>
+                    <small class="text-muted" style="font-size: 0.72rem;">Total terdaftar <i class="bi bi-arrow-right-short text-info"></i></small>
+                </div>
+                <div class="p-2 bg-info bg-opacity-10 rounded-circle text-info fs-4">
                     <i class="bi bi-people"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 

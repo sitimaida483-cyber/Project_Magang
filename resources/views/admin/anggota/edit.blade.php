@@ -71,6 +71,32 @@
 
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-md-6">
+                            <label for="email" class="form-label fw-semibold text-secondary small">
+                                Email Kedinasan (Login Anggota) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                                       id="email" name="email" value="{{ old('email', $anggota->email) }}" 
+                                       placeholder="Contoh: nama@bidtik.polri.go.id" required>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Digunakan untuk login personel pada sistem presensi.</small>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="password" class="form-label fw-semibold text-secondary small">
+                                Password Baru (Opsional)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted"><i class="bi bi-shield-lock"></i></span>
+                                <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                                       id="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah" minlength="8">
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Kosongkan bila tidak diubah. Minimal 8 karakter jika diisi.</small>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-6">
                             <label for="jabatan" class="form-label fw-semibold text-secondary small">
                                 Pangkat / Jabatan <span class="text-danger">*</span>
                             </label>

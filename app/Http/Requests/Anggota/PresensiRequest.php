@@ -11,14 +11,15 @@ class PresensiRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Halaman publik tanpa login, siapa pun dengan NRP valid boleh mengirim presensi
-        return true;
+        // Pengguna harus terautentikasi sebagai personel aktif
+        $anggota = auth('anggota')->user();
+        return $anggota && $anggota->isAktif();
     }
 
     public function rules(): array
     {
         return [
-            'nrp'            => ['required', 'string', 'max:50'],
+            'nrp'            => ['nullable', 'string', 'max:50'],
             'jenis_presensi' => ['required', 'in:masuk,pulang'],
             'latitude'       => ['required', 'numeric', 'between:-90,90'],
             'longitude'      => ['required', 'numeric', 'between:-180,180'],

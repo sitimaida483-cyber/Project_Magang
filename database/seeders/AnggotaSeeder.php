@@ -19,6 +19,8 @@ class AnggotaSeeder extends Seeder
             [
                 'nrp'        => '80010001',
                 'nama'       => 'Bripda Ahmad Rizki',
+                'email'      => 'ahmad.rizki@bidtik.polri.go.id',
+                'password'   => 'password123',
                 'jabatan'    => 'Bintara',
                 'unit_kerja' => 'Bidtik',
                 'no_telepon' => '081234567801',
@@ -27,6 +29,8 @@ class AnggotaSeeder extends Seeder
             [
                 'nrp'        => '80010002',
                 'nama'       => 'Bripda Siti Rahayu',
+                'email'      => 'siti.rahayu@bidtik.polri.go.id',
+                'password'   => 'password123',
                 'jabatan'    => 'Bintara',
                 'unit_kerja' => 'Bidtik',
                 'no_telepon' => '081234567802',
@@ -35,6 +39,8 @@ class AnggotaSeeder extends Seeder
             [
                 'nrp'        => '80010003',
                 'nama'       => 'Briptu Dedi Kurniawan',
+                'email'      => 'dedi.kurniawan@bidtik.polri.go.id',
+                'password'   => 'password123',
                 'jabatan'    => 'Bintara Tingkat I',
                 'unit_kerja' => 'Bidtik',
                 'no_telepon' => '081234567803',
@@ -43,6 +49,8 @@ class AnggotaSeeder extends Seeder
             [
                 'nrp'        => '80010004',
                 'nama'       => 'Aipda Hendra Susanto',
+                'email'      => 'hendra.susanto@bidtik.polri.go.id',
+                'password'   => 'password123',
                 'jabatan'    => 'Bintara Madya',
                 'unit_kerja' => 'Bidtik',
                 'no_telepon' => '081234567804',
@@ -51,6 +59,8 @@ class AnggotaSeeder extends Seeder
             [
                 'nrp'        => '80010005',
                 'nama'       => 'Aiptu Wulandari',
+                'email'      => 'wulandari@bidtik.polri.go.id',
+                'password'   => 'password123',
                 'jabatan'    => 'Bintara Tingkat I',
                 'unit_kerja' => 'Bidtik',
                 'no_telepon' => '081234567805',

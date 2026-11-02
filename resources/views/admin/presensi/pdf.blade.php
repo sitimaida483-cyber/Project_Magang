@@ -163,14 +163,15 @@
         <thead>
             <tr>
                 <th style="width: 25px;">NO</th>
-                <th style="width: 75px;">TANGGAL</th>
-                <th style="width: 65px;">WAKTU</th>
-                <th style="width: 90px;">NRP / NIP</th>
+                <th style="width: 70px;">TANGGAL</th>
+                <th style="width: 60px;">WAKTU</th>
+                <th style="width: 85px;">NRP / NIP</th>
                 <th>NAMA PERSONEL</th>
-                <th style="width: 110px;">JABATAN</th>
-                <th style="width: 95px;">SUBBID / UNIT</th>
+                <th style="width: 105px;">JABATAN</th>
+                <th style="width: 90px;">SUBBID / UNIT</th>
                 <th style="width: 65px;">JENIS</th>
-                <th style="width: 95px;">STATUS</th>
+                <th style="width: 90px;">STATUS</th>
+                <th style="width: 85px;">KETERANGAN</th>
             </tr>
         </thead>
         <tbody>
@@ -178,25 +179,36 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d/m/Y') }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($p->waktu)->format('H:i:s') }} WITA</td>
+                    <td class="text-center">{{ $p->waktu ? \Carbon\Carbon::parse($p->waktu)->format('H:i:s') . ' WITA' : '-' }}</td>
                     <td class="text-center text-bold">{{ $p->anggota->nrp ?? '-' }}</td>
                     <td>{{ $p->anggota->nama ?? '-' }}</td>
                     <td>{{ $p->anggota->jabatan ?? '-' }}</td>
                     <td>{{ $p->anggota->unit_kerja ?? '-' }}</td>
                     <td class="text-center">
-                        <span class="{{ $p->jenis_presensi === 'masuk' ? 'badge-masuk' : 'badge-pulang' }}">
-                            {{ strtoupper($p->jenis_presensi) }}
-                        </span>
+                        @if($p->is_surat ?? false)
+                            <span style="color: #2563eb; font-weight: bold;">SURAT IZIN</span>
+                        @else
+                            <span class="{{ $p->jenis_presensi === 'masuk' ? 'badge-masuk' : 'badge-pulang' }}">
+                                {{ strtoupper($p->jenis_presensi) }}
+                            </span>
+                        @endif
                     </td>
                     <td class="text-center">
-                        <span class="{{ $p->status_kehadiran === 'tepat_waktu' ? 'badge-tepat' : 'badge-terlambat' }}">
-                            {{ $p->status_kehadiran === 'tepat_waktu' ? 'TEPAT WAKTU' : 'TERLAMBAT' }}
-                        </span>
+                        @if($p->is_surat ?? false)
+                            <span class="badge-tepat">DISETUJUI</span>
+                        @else
+                            <span class="{{ $p->status_kehadiran === 'tepat_waktu' ? 'badge-tepat' : 'badge-terlambat' }}">
+                                {{ $p->status_kehadiran === 'tepat_waktu' ? 'TEPAT WAKTU' : 'TERLAMBAT' }}
+                            </span>
+                        @endif
+                    </td>
+                    <td class="text-center text-bold">
+                        {{ $p->keterangan_surat ?? '-' }}
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="9" class="text-center" style="padding: 20px; color: #64748b;">
+                    <td colspan="10" class="text-center" style="padding: 20px; color: #64748b;">
                         Tidak ada catatan presensi pada periode dan kriteria filter yang dipilih.
                     </td>
                 </tr>

@@ -46,13 +46,29 @@ class PetaController extends Controller
             $query->where('jenis_presensi', $request->jenis_presensi);
         }
 
+        // Filter Status Kehadiran (Tepat Waktu / Terlambat)
+        if ($request->filled('status_kehadiran') && in_array($request->status_kehadiran, ['tepat_waktu', 'terlambat'])) {
+            $query->where('status_kehadiran', $request->status_kehadiran);
+        }
+
         $presensiCollection = $query->orderBy('waktu', 'asc')->get();
 
-        // Hitung statistik titik
-        $totalTitik = $presensiCollection->count();
-        $totalMasuk = $presensiCollection->where('jenis_presensi', 'masuk')->count();
-        $totalPulang = $presensiCollection->where('jenis_presensi', 'pulang')->count();
-        $totalTerlambat = $presensiCollection->where('status_kehadiran', 'terlambat')->count();
+        // Hitung statistik titik terfilter berdasarkan tanggal & anggota
+        $baseQuery = Presensi::query()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude');
+        if ($tanggalAktif) {
+            $baseQuery->whereDate('tanggal', $tanggalAktif);
+        }
+        if ($request->filled('id_anggota')) {
+            $baseQuery->where('id_anggota', $request->id_anggota);
+        }
+        $baseCollection = $baseQuery->get();
+
+        $totalTitik = $baseCollection->count();
+        $totalMasuk = $baseCollection->where('jenis_presensi', 'masuk')->count();
+        $totalPulang = $baseCollection->where('jenis_presensi', 'pulang')->count();
+        $totalTerlambat = $baseCollection->where('status_kehadiran', 'terlambat')->count();
 
         // Format data marker untuk dikirim ke Leaflet.js
         $dataPresensiList = $presensiCollection->map(function ($p) {

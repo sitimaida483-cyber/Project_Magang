@@ -57,4 +57,10 @@ class Admin extends Authenticatable
     {
         return $this->hasMany(LogAktivitas::class, 'id_admin', 'id_admin');
     }
+
+    /** Admin memproses verifikasi banyak pengajuan surat */
+    public function pengajuanSuratDiproses(): HasMany
+    {
+        return $this->hasMany(PengajuanSurat::class, 'id_admin', 'id_admin');
+    }
 }

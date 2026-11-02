@@ -45,10 +45,27 @@ class LogAktivitasController extends Controller
             });
         }
 
+        // 4. Filter Alamat IP Spesifik
+        if ($request->filled('alamat_ip')) {
+            $query->where('alamat_ip', $request->alamat_ip);
+        }
+
         // Statistik
         $totalLog = LogAktivitas::count();
         $logHariIni = LogAktivitas::whereDate('waktu_aktivitas', Carbon::today())->count();
         $ipUnik = LogAktivitas::distinct('alamat_ip')->count('alamat_ip');
+
+        // Daftar IP Unik dengan detail jumlah aktivitas & waktu terakhir
+        $daftarIpUnik = LogAktivitas::select(
+                'alamat_ip',
+                \Illuminate\Support\Facades\DB::raw('count(*) as total_aktivitas'),
+                \Illuminate\Support\Facades\DB::raw('max(waktu_aktivitas) as waktu_terakhir')
+            )
+            ->whereNotNull('alamat_ip')
+            ->where('alamat_ip', '!=', '')
+            ->groupBy('alamat_ip')
+            ->orderByDesc('total_aktivitas')
+            ->get();
 
         // Ambil data dengan paginasi 20 per halaman
         $logs = $query->orderByDesc('waktu_aktivitas')
@@ -66,6 +83,7 @@ class LogAktivitasController extends Controller
             'totalLog',
             'logHariIni',
             'ipUnik',
+            'daftarIpUnik',
             'daftarTabel'
         ));
     }

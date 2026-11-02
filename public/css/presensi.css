@@ -1,0 +1,284 @@
+:root {
+    --presensi-navy: #0f2747;
+    --presensi-blue: #1d6fe8;
+    --presensi-green: #167a4a;
+    --presensi-gold: #f5b83d;
+}
+
+.presensi-page {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    color: #1b2a41;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    position: relative;
+    background-color: #0b1a2e;
+}
+
+.presensi-page::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background: 
+        linear-gradient(180deg, rgba(8, 20, 36, 0.68) 0%, rgba(11, 26, 46, 0.35) 240px, rgba(11, 26, 46, 0.65) 100%),
+        url('../images/bg-polda-kalsel.jpg') no-repeat center top;
+    background-size: cover;
+    background-attachment: fixed;
+    pointer-events: none;
+}
+
+.presensi-page .header-police {
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    padding: 2.25rem 1rem 0.85rem;
+    color: #ffffff;
+    background: radial-gradient(ellipse 90% 85% at 50% 40%, rgba(8, 20, 36, 0.72) 0%, rgba(8, 20, 36, 0.4) 60%, transparent 100%);
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.presensi-page .mobile-container {
+    width: 92%;
+    max-width: 508px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.presensi-page .header-content {
+    position: relative;
+    z-index: 1;
+}
+
+.presensi-page .header-network {
+    display: none;
+}
+
+.presensi-page .header-network--left {
+    left: -90px;
+}
+
+.presensi-page .header-network--right {
+    right: -90px;
+    transform: scaleX(-1);
+}
+
+.presensi-page .badge-gold {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 999px;
+    color: #0b1a2e;
+    background: #f5b83d;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.presensi-page .header-title {
+    margin-top: 0.4rem;
+    font-size: clamp(1.65rem, 7.5vw, 2.15rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: 0.025em;
+    color: #ffffff;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.95), 0 1px 4px #000000;
+}
+
+.presensi-page .header-subtitle {
+    margin-top: 0.35rem;
+    margin-bottom: 0.75rem;
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.015em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95), 0 1px 4px #000000;
+}
+
+.presensi-page .clock-capsule {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(8, 20, 36, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.presensi-page .clock-icon {
+    color: #f5b83d;
+}
+
+.presensi-page .main-card-wrapper {
+    position: relative;
+    flex: 1 0 auto;
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.presensi-page .watermark-shield {
+    position: absolute;
+    z-index: 0;
+    top: 42px;
+    left: 50%;
+    width: min(640px, 170vw);
+    height: auto;
+    opacity: 0.07;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.presensi-page .card-custom {
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.presensi-page .presensi-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+}
+
+.presensi-page .presensi-check-button,
+.presensi-page .presensi-submit-button {
+    border-color: #0f2747;
+    background-color: #0f2747;
+}
+
+.presensi-page .presensi-check-button:hover,
+.presensi-page .presensi-submit-button:hover {
+    border-color: #1c4074;
+    background-color: #1c4074;
+}
+
+.presensi-page .presensi-type-button {
+    min-height: 64px;
+    border-width: 1.5px;
+    font-weight: 700;
+}
+
+.presensi-page .presensi-type-button--masuk {
+    border-color: #167a4a;
+    color: #167a4a;
+}
+
+.presensi-page .btn-check:checked + .presensi-type-button--masuk {
+    border-color: #167a4a;
+    color: #ffffff;
+    background-color: #167a4a;
+}
+
+.presensi-page .presensi-type-button--pulang {
+    border-color: #1d6fe8;
+    color: #1d6fe8;
+}
+
+.presensi-page .btn-check:checked + .presensi-type-button--pulang {
+    border-color: #1d6fe8;
+    color: #ffffff;
+    background-color: #1d6fe8;
+}
+
+.presensi-page #radiusBadge.bg-danger {
+    color: #ffffff;
+    background-color: #c62f3e !important;
+}
+
+.presensi-page #radiusBadge {
+    max-width: 58%;
+    white-space: normal;
+    text-align: center;
+}
+
+.presensi-page .camera-container {
+    position: relative;
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    background-color: #000000;
+}
+
+.presensi-page #cameraStream {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+}
+
+.presensi-page #photoPreview {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.presensi-page .signature-container {
+    position: relative;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    background-color: #ffffff;
+    touch-action: none;
+}
+
+.presensi-page #signaturePad {
+    display: block;
+    width: 100%;
+    height: 180px;
+    border-radius: 10px;
+}
+
+.presensi-page .step-badge {
+    display: inline-flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #ffffff;
+    background: #0f2747;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.presensi-page .presensi-footer {
+    position: relative;
+    z-index: 1;
+    padding: 1rem 1rem 1.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 12.5px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+}
+
+.presensi-page .presensi-footer a {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+.presensi-page .presensi-footer a:hover {
+    color: #f5b83d !important;
+}
+
+@media (max-width: 400px) {
+    .presensi-page .header-police {
+        padding-top: 1.5rem;
+    }
+
+    .presensi-page .header-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .presensi-page .presensi-card {
+        padding: 1.25rem !important;
+    }
+}

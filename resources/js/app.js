@@ -15,7 +15,7 @@ window.createFaceDetector = function () {
                     delegate: 'CPU',
                 },
                 runningMode: 'IMAGE',
-                minDetectionConfidence: 0.6,
+                minDetectionConfidence: 0.5,
             });
         })();
     }

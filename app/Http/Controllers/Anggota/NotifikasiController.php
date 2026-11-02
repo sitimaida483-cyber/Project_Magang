@@ -21,13 +21,14 @@ class NotifikasiController extends Controller
     public function subscribe(Request $request): JsonResponse
     {
         $request->validate([
-            'id_anggota'      => 'required|exists:anggota,id_anggota',
-            'subscription'    => 'required|array',
+            'id_anggota'            => 'nullable|exists:anggota,id_anggota',
+            'subscription'          => 'required|array',
             'subscription.endpoint' => 'required|string',
-            'jenis_perangkat' => 'nullable|string|max:100',
+            'jenis_perangkat'       => 'nullable|string|max:100',
         ]);
 
-        $anggota = Anggota::findOrFail($request->id_anggota);
+        $idAnggota = $request->id_anggota ?? auth('anggota')->id();
+        $anggota = Anggota::findOrFail($idAnggota);
         $endpoint = $request->subscription['endpoint'];
         $tokenJson = json_encode($request->subscription);
 

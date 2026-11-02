@@ -84,35 +84,71 @@
     </div>
 </div>
 
-<!-- Kartu Statistik Titik -->
+<!-- Kartu Statistik Titik (Bisa Diklik untuk Filter Peta) -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-dark">
-            <small class="text-muted text-uppercase fw-semibold">Titik Terdeteksi</small>
-            <h3 class="fw-bold text-dark mb-0 mt-1">{{ $totalTitik }}</h3>
-            <small class="text-muted">Koordinat di peta</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['jenis_presensi' => null, 'status_kehadiran' => null]) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-dark text-decoration-none {{ (!request('jenis_presensi') && !request('status_kehadiran')) ? 'active-filter' : '' }}"
+           title="Klik untuk melihat semua titik koordinat">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Titik Terdeteksi</small>
+                    <h3 class="fw-bold text-dark mb-0 mt-1">{{ $totalTitik }}</h3>
+                    <small class="text-muted">Semua titik <i class="bi bi-arrow-right-short text-dark"></i></small>
+                </div>
+                <div class="p-2 bg-dark bg-opacity-10 rounded-circle text-dark fs-4">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-success">
-            <small class="text-muted text-uppercase fw-semibold">Masuk Tepat Waktu</small>
-            <h3 class="fw-bold text-success mb-0 mt-1">{{ $totalMasuk - $totalTerlambat > 0 ? $totalMasuk - $totalTerlambat : 0 }}</h3>
-            <small class="text-muted">Titik hijau</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['status_kehadiran' => 'tepat_waktu', 'jenis_presensi' => 'masuk']) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-success text-decoration-none {{ (request('status_kehadiran') === 'tepat_waktu') ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya titik masuk tepat waktu">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Masuk Tepat Waktu</small>
+                    <h3 class="fw-bold text-success mb-0 mt-1">{{ $totalMasuk - $totalTerlambat > 0 ? $totalMasuk - $totalTerlambat : 0 }}</h3>
+                    <small class="text-muted">Titik hijau <i class="bi bi-arrow-right-short text-success"></i></small>
+                </div>
+                <div class="p-2 bg-success bg-opacity-10 rounded-circle text-success fs-4">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-danger">
-            <small class="text-muted text-uppercase fw-semibold">Terlambat</small>
-            <h3 class="fw-bold text-danger mb-0 mt-1">{{ $totalTerlambat }}</h3>
-            <small class="text-muted">Titik merah</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['status_kehadiran' => 'terlambat', 'jenis_presensi' => 'masuk']) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-danger text-decoration-none {{ (request('status_kehadiran') === 'terlambat') ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya titik terlambat">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Terlambat</small>
+                    <h3 class="fw-bold text-danger mb-0 mt-1">{{ $totalTerlambat }}</h3>
+                    <small class="text-muted">Titik merah <i class="bi bi-arrow-right-short text-danger"></i></small>
+                </div>
+                <div class="p-2 bg-danger bg-opacity-10 rounded-circle text-danger fs-4">
+                    <i class="bi bi-alarm"></i>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-primary">
-            <small class="text-muted text-uppercase fw-semibold">Presensi Pulang</small>
-            <h3 class="fw-bold text-primary mb-0 mt-1">{{ $totalPulang }}</h3>
-            <small class="text-muted">Titik biru</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['jenis_presensi' => 'pulang', 'status_kehadiran' => null]) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-primary text-decoration-none {{ (request('jenis_presensi') === 'pulang') ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya titik presensi pulang">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Presensi Pulang</small>
+                    <h3 class="fw-bold text-primary mb-0 mt-1">{{ $totalPulang }}</h3>
+                    <small class="text-muted">Titik biru <i class="bi bi-arrow-right-short text-primary"></i></small>
+                </div>
+                <div class="p-2 bg-primary bg-opacity-10 rounded-circle text-primary fs-4">
+                    <i class="bi bi-box-arrow-right"></i>
+                </div>
+            </div>
+        </a>
     </div>
 </div>
 

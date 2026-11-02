@@ -12,49 +12,61 @@
     </div>
 </div>
 
-<!-- Kartu Ringkasan Log -->
+<!-- Kartu Ringkasan Log (Bisa Diklik untuk Filter Cepat) -->
 <div class="row g-3 mb-4">
     <div class="col-12 col-sm-4">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-dark">
+        <a href="{{ route('admin.log.index') }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-dark text-decoration-none {{ (!request('tanggal_mulai') && !request('tanggal_selesai')) ? 'active-filter' : '' }}"
+           title="Klik untuk melihat semua log aktivitas">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <small class="text-muted text-uppercase fw-semibold">Total Log Tercatat</small>
                     <h3 class="fw-bold text-dark mb-0 mt-1">{{ number_format($totalLog) }}</h3>
-                    <small class="text-muted">Seluruh riwayat aksi</small>
+                    <small class="text-muted">Semua riwayat <i class="bi bi-arrow-right-short text-dark"></i></small>
                 </div>
                 <div class="p-3 bg-dark bg-opacity-10 rounded-circle text-dark fs-4">
                     <i class="bi bi-journal-text"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-12 col-sm-4">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-primary">
+        <a href="{{ route('admin.log.index', ['tanggal_mulai' => date('Y-m-d'), 'tanggal_selesai' => date('Y-m-d')]) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-primary text-decoration-none {{ (request('tanggal_mulai') === date('Y-m-d') && request('tanggal_selesai') === date('Y-m-d')) ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya aktivitas hari ini">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <small class="text-muted text-uppercase fw-semibold">Aktivitas Hari Ini</small>
                     <h3 class="fw-bold text-primary mb-0 mt-1">{{ number_format($logHariIni) }}</h3>
-                    <small class="text-muted">Aksi hari ini (WITA)</small>
+                    <small class="text-muted">Aksi hari ini (WITA) <i class="bi bi-arrow-right-short text-primary"></i></small>
                 </div>
                 <div class="p-3 bg-primary bg-opacity-10 rounded-circle text-primary fs-4">
                     <i class="bi bi-clock-history"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-12 col-sm-4">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-info">
+        <a href="#modalIpUnik" data-bs-toggle="modal" role="button"
+           class="card card-stat bg-white p-3 border-start border-4 border-info text-decoration-none {{ request('alamat_ip') ? 'active-filter' : '' }}"
+           title="Klik untuk melihat daftar seluruh alamat IP unik">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <small class="text-muted text-uppercase fw-semibold">Alamat IP Unik</small>
                     <h3 class="fw-bold text-info mb-0 mt-1">{{ number_format($ipUnik) }}</h3>
-                    <small class="text-muted">Sumber perangkat akses</small>
+                    <small class="text-muted">
+                        @if(request('alamat_ip'))
+                            Filter: <strong>{{ request('alamat_ip') }}</strong>
+                        @else
+                            Klik untuk rincian IP <i class="bi bi-box-arrow-up-right text-info"></i>
+                        @endif
+                    </small>
                 </div>
                 <div class="p-3 bg-info bg-opacity-10 rounded-circle text-info fs-4">
                     <i class="bi bi-hdd-network"></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
@@ -115,6 +127,16 @@
                     <i class="bi bi-arrow-counterclockwise"></i>
                 </a>
             </div>
+
+            @if(request('alamat_ip'))
+                <input type="hidden" name="alamat_ip" value="{{ request('alamat_ip') }}">
+                <div class="col-12 mt-2">
+                    <span class="badge bg-info text-dark p-2">
+                        <i class="bi bi-hdd-network me-1"></i> Memfilter IP: <strong>{{ request('alamat_ip') }}</strong>
+                        <a href="{{ request()->fullUrlWithQuery(['alamat_ip' => null]) }}" class="text-dark fw-bold ms-2 text-decoration-none" title="Hapus filter IP">&times; Hapus Filter IP</a>
+                    </span>
+                </div>
+            @endif
         </form>
     </div>
 </div>
@@ -239,5 +261,80 @@
             </div>
         </div>
     @endif
+</div>
+
+<!-- Modal Daftar Alamat IP Unik -->
+<div class="modal fade" id="modalIpUnik" tabindex="-1" aria-labelledby="modalIpUnikLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: #0e2238;">
+                <h5 class="modal-title fw-bold" id="modalIpUnikLabel">
+                    <i class="bi bi-hdd-network me-2 text-info"></i> Rincian Seluruh Alamat IP Unik ({{ count($daftarIpUnik) }} IP)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="p-3 bg-light border-bottom">
+                    <p class="small text-muted mb-0">
+                        Berikut adalah daftar alamat IP yang terdeteksi mengakses atau melakukan tindakan di sistem presensi. Klik tombol <strong>"Lihat Log IP Ini"</strong> untuk memfilter riwayat aktivitas dari IP tersebut.
+                    </p>
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th class="ps-3 py-2">#</th>
+                                <th class="py-2">Alamat IP</th>
+                                <th class="py-2 text-center">Total Aktivitas</th>
+                                <th class="py-2">Waktu Terakhir Aktif</th>
+                                <th class="py-2 text-end pe-3">Aksi Filter</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($daftarIpUnik as $idx => $ipItem)
+                                <tr class="{{ request('alamat_ip') === $ipItem->alamat_ip ? 'table-info' : '' }}">
+                                    <td class="ps-3 text-muted">{{ $idx + 1 }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary-subtle text-secondary font-monospace px-2 py-1 fs-6">
+                                            {{ $ipItem->alamat_ip }}
+                                        </span>
+                                        @if(in_array($ipItem->alamat_ip, ['127.0.0.1', '::1']))
+                                            <span class="badge bg-light text-muted border ms-1">Localhost</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary rounded-pill px-3 py-1">
+                                            {{ number_format($ipItem->total_aktivitas) }} aksi
+                                        </span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        {{ \Carbon\Carbon::parse($ipItem->waktu_terakhir)->translatedFormat('d M Y, H:i') }} WITA
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a href="{{ route('admin.log.index', ['alamat_ip' => $ipItem->alamat_ip]) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-funnel me-1"></i> Lihat Log IP Ini
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        Belum ada riwayat alamat IP unik yang tercatat.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-2">
+                <a href="{{ route('admin.log.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Tampilkan Semua Log (Reset)
+                </a>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

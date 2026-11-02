@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Anggota\PresensiRequest;
 use App\Models\Anggota;
 use App\Models\Pengaturan;
+use App\Models\PengajuanSurat;
 use App\Models\Presensi;
 use App\Services\HaversineService;
 use Illuminate\Http\JsonResponse;
@@ -15,8 +16,8 @@ use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
- * PresensiController (Publik)
- * Menangani alur presensi anggota personel tanpa login via HP/browser.
+ * PresensiController (Anggota)
+ * Menangani alur presensi anggota personel terautentikasi via HP/browser.
  */
 class PresensiController extends Controller
 {
@@ -25,30 +26,58 @@ class PresensiController extends Controller
      */
     public function index(): View
     {
+        $anggota    = auth('anggota')->user();
         $pengaturan = Pengaturan::first();
+        $hariIni    = Carbon::today()->toDateString();
 
-        return view('anggota.presensi.index', compact('pengaturan'));
+        // Ambil status presensi hari ini milik anggota yang sedang login
+        $presensiMasuk = Presensi::where('id_anggota', $anggota->id_anggota)
+            ->whereDate('tanggal', $hariIni)
+            ->where('jenis_presensi', 'masuk')
+            ->first();
+
+        $presensiPulang = Presensi::where('id_anggota', $anggota->id_anggota)
+            ->whereDate('tanggal', $hariIni)
+            ->where('jenis_presensi', 'pulang')
+            ->first();
+
+        // Cek pengajuan surat keterangan disetujui yang mencakup hari ini
+        $suratHariIni = PengajuanSurat::where('id_anggota', $anggota->id_anggota)
+            ->where('status_pengajuan', 'disetujui')
+            ->whereDate('tanggal_mulai', '<=', $hariIni)
+            ->whereDate('tanggal_selesai', '>=', $hariIni)
+            ->first();
+
+        $jenisTetapPresensi = config('presensi.jenis_surat_tetap_presensi', []);
+        $bebasPresensi = false;
+        if ($suratHariIni && ! in_array($suratHariIni->jenis_keterangan, $jenisTetapPresensi)) {
+            $bebasPresensi = true;
+        }
+
+        return view('anggota.presensi.index', compact(
+            'anggota',
+            'pengaturan',
+            'presensiMasuk',
+            'presensiPulang',
+            'suratHariIni',
+            'bebasPresensi'
+        ));
     }
 
     /**
-     * Endpoint AJAX: Cek validitas NRP dan status presensi hari ini.
+     * Endpoint AJAX: Cek validitas status presensi hari ini untuk anggota yang login.
      */
     public function cekNrp(Request $request): JsonResponse
     {
-        $request->validate([
-            'nrp' => 'required|string',
-        ]);
-
-        $anggota = Anggota::where('nrp', $request->nrp)->first();
-
+        $anggota = auth('anggota')->user();
         if (! $anggota) {
             return response()->json([
                 'sukses' => false,
-                'pesan'  => 'NRP tidak terdaftar dalam sistem. Pastikan NRP Anda benar atau hubungi admin.',
-            ], 404);
+                'pesan'  => 'Sesi login tidak valid. Silakan masuk kembali.',
+            ], 401);
         }
 
-        if ($anggota->status !== 'aktif') {
+        if (! $anggota->isAktif()) {
             return response()->json([
                 'sukses' => false,
                 'pesan'  => 'Status keanggotaan Anda Nonaktif. Anda tidak dapat melakukan presensi.',
@@ -67,6 +96,18 @@ class PresensiController extends Controller
             ->whereDate('tanggal', $hariIni)
             ->where('jenis_presensi', 'pulang')
             ->first();
+
+        // Cek surat hari ini
+        $suratHariIni = PengajuanSurat::where('id_anggota', $anggota->id_anggota)
+            ->where('status_pengajuan', 'disetujui')
+            ->whereDate('tanggal_mulai', '<=', $hariIni)
+            ->whereDate('tanggal_selesai', '>=', $hariIni)
+            ->first();
+
+        $bebasPresensi = false;
+        if ($suratHariIni && ! in_array($suratHariIni->jenis_keterangan, config('presensi.jenis_surat_tetap_presensi', []))) {
+            $bebasPresensi = true;
+        }
 
         // Tentukan rekomendasi aksi presensi
         $rekomendasi = 'masuk';
@@ -89,6 +130,12 @@ class PresensiController extends Controller
                 'sudah_pulang'    => (bool) $presensiPulang,
                 'waktu_pulang'    => $presensiPulang ? Carbon::parse($presensiPulang->waktu)->format('H:i') : null,
                 'rekomendasi'     => $rekomendasi,
+                'surat_hari_ini'  => $suratHariIni ? [
+                    'jenis'          => $suratHariIni->label_jenis,
+                    'mulai'          => Carbon::parse($suratHariIni->tanggal_mulai)->translatedFormat('d M Y'),
+                    'selesai'        => Carbon::parse($suratHariIni->tanggal_selesai)->translatedFormat('d M Y'),
+                    'bebas_presensi' => $bebasPresensi,
+                ] : null,
             ],
         ]);
     }
@@ -98,13 +145,31 @@ class PresensiController extends Controller
      */
     public function store(PresensiRequest $request): JsonResponse
     {
-        // 1. Identifikasi Anggota
-        $anggota = Anggota::where('nrp', $request->nrp)->first();
+        // 1. Identifikasi Anggota dari auth guard 'anggota'
+        $anggota = auth('anggota')->user();
 
-        if (! $anggota || $anggota->status !== 'aktif') {
+        if (! $anggota || ! $anggota->isAktif()) {
             return response()->json([
                 'sukses' => false,
-                'pesan'  => 'Personel tidak ditemukan atau berstatus nonaktif.',
+                'pesan'  => 'Personel tidak ditemukan, nonaktif, atau sesi telah berakhir. Silakan login ulang.',
+            ], 403);
+        }
+
+        $sekarang       = Carbon::now();
+        $tanggalHariIni = $sekarang->toDateString();
+        $waktuSekarang  = $sekarang->format('H:i:s');
+
+        // Cek apakah ada pengajuan surat keterangan disetujui yang membebaskan presensi lokasi
+        $suratHariIni = PengajuanSurat::where('id_anggota', $anggota->id_anggota)
+            ->where('status_pengajuan', 'disetujui')
+            ->whereDate('tanggal_mulai', '<=', $tanggalHariIni)
+            ->whereDate('tanggal_selesai', '>=', $tanggalHariIni)
+            ->first();
+
+        if ($suratHariIni && ! in_array($suratHariIni->jenis_keterangan, config('presensi.jenis_surat_tetap_presensi', []))) {
+            return response()->json([
+                'sukses' => false,
+                'pesan'  => "Presensi lokasi tidak diwajibkan karena Anda memiliki surat keterangan {$suratHariIni->label_jenis} yang telah disetujui hari ini.",
             ], 422);
         }
 
@@ -232,6 +297,8 @@ class PresensiController extends Controller
             'id_anggota'            => $anggota->id_anggota,
             'data'                  => [
                 'id_presensi'      => $presensi->id_presensi,
+                'nama'             => $anggota->nama,
+                'nrp'              => $anggota->nrp,
                 'jenis_presensi'   => $presensi->jenis_presensi,
                 'waktu'            => $waktuSekarang,
                 'status_kehadiran' => $statusKehadiran,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Anggota;
+use App\Models\PengajuanSurat;
 use App\Models\Presensi;
 use Illuminate\Support\Carbon;
 
@@ -32,6 +33,9 @@ class DashboardController extends Controller
 
         $total_anggota_aktif = Anggota::where('status', 'aktif')->count();
 
+        // Total pengajuan surat yang menunggu verifikasi admin (Revisi 2)
+        $total_pengajuan_menunggu = PengajuanSurat::where('status_pengajuan', 'menunggu')->count();
+
         // Presensi terbaru hari ini (10 terakhir)
         $presensi_terbaru = Presensi::with('anggota')
             ->whereDate('tanggal', $hari_ini)
@@ -44,6 +48,7 @@ class DashboardController extends Controller
             'total_pulang',
             'total_terlambat',
             'total_anggota_aktif',
+            'total_pengajuan_menunggu',
             'presensi_terbaru',
             'hari_ini'
         ));

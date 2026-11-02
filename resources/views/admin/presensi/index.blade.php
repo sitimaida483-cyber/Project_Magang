@@ -21,35 +21,71 @@
     </div>
 </div>
 
-<!-- Kartu Ringkasan Terfilter -->
+<!-- Kartu Ringkasan Terfilter (Bisa Diklik untuk Filter Cepat) -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-dark">
-            <small class="text-muted text-uppercase fw-semibold">Total Rekap</small>
-            <h3 class="fw-bold text-dark mb-0 mt-1">{{ $totalPresensi }}</h3>
-            <small class="text-muted">Data terfilter</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['jenis_presensi' => null, 'status_kehadiran' => null, 'page' => null]) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-dark text-decoration-none {{ (!request('jenis_presensi') && !request('status_kehadiran')) ? 'active-filter' : '' }}"
+           title="Klik untuk melihat semua data rekap">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Total Rekap</small>
+                    <h3 class="fw-bold text-dark mb-0 mt-1">{{ $totalPresensi }}</h3>
+                    <small class="text-muted">Semua data <i class="bi bi-arrow-right-short text-dark"></i></small>
+                </div>
+                <div class="p-2 bg-dark bg-opacity-10 rounded-circle text-dark fs-4">
+                    <i class="bi bi-collection"></i>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-success">
-            <small class="text-muted text-uppercase fw-semibold">Presensi Masuk</small>
-            <h3 class="fw-bold text-success mb-0 mt-1">{{ $totalMasuk }}</h3>
-            <small class="text-muted">Total kehadiran</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['jenis_presensi' => 'masuk', 'status_kehadiran' => null, 'page' => null]) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-success text-decoration-none {{ request('jenis_presensi') === 'masuk' ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya presensi masuk">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Presensi Masuk</small>
+                    <h3 class="fw-bold text-success mb-0 mt-1">{{ $totalMasuk }}</h3>
+                    <small class="text-muted">Filter masuk <i class="bi bi-arrow-right-short text-success"></i></small>
+                </div>
+                <div class="p-2 bg-success bg-opacity-10 rounded-circle text-success fs-4">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-primary">
-            <small class="text-muted text-uppercase fw-semibold">Presensi Pulang</small>
-            <h3 class="fw-bold text-primary mb-0 mt-1">{{ $totalPulang }}</h3>
-            <small class="text-muted">Total kepulangan</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['jenis_presensi' => 'pulang', 'status_kehadiran' => null, 'page' => null]) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-primary text-decoration-none {{ request('jenis_presensi') === 'pulang' ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya presensi pulang">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Presensi Pulang</small>
+                    <h3 class="fw-bold text-primary mb-0 mt-1">{{ $totalPulang }}</h3>
+                    <small class="text-muted">Filter pulang <i class="bi bi-arrow-right-short text-primary"></i></small>
+                </div>
+                <div class="p-2 bg-primary bg-opacity-10 rounded-circle text-primary fs-4">
+                    <i class="bi bi-box-arrow-right"></i>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="col-6 col-md-3">
-        <div class="card card-stat bg-white p-3 border-start border-4 border-danger">
-            <small class="text-muted text-uppercase fw-semibold">Terlambat</small>
-            <h3 class="fw-bold text-danger mb-0 mt-1">{{ $totalTerlambat }}</h3>
-            <small class="text-muted">Lewat jam masuk</small>
-        </div>
+        <a href="{{ request()->fullUrlWithQuery(['status_kehadiran' => 'terlambat', 'jenis_presensi' => null, 'page' => null]) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-danger text-decoration-none {{ request('status_kehadiran') === 'terlambat' ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya personel terlambat">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Terlambat</small>
+                    <h3 class="fw-bold text-danger mb-0 mt-1">{{ $totalTerlambat }}</h3>
+                    <small class="text-muted">Filter terlambat <i class="bi bi-arrow-right-short text-danger"></i></small>
+                </div>
+                <div class="p-2 bg-danger bg-opacity-10 rounded-circle text-danger fs-4">
+                    <i class="bi bi-alarm"></i>
+                </div>
+            </div>
+        </a>
     </div>
 </div>
 
@@ -62,11 +98,11 @@
     </div>
     <div class="card-body p-3">
         <form action="{{ route('admin.presensi.index') }}" method="GET" class="row g-2">
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-6 col-lg-2">
                 <label class="form-label small text-muted mb-1">Tanggal Mulai</label>
                 <input type="date" name="tanggal_mulai" class="form-control form-control-sm" value="{{ request('tanggal_mulai') }}">
             </div>
-            <div class="col-12 col-sm-6 col-lg-3">
+            <div class="col-12 col-sm-6 col-lg-2">
                 <label class="form-label small text-muted mb-1">Tanggal Selesai</label>
                 <input type="date" name="tanggal_selesai" class="form-control form-control-sm" value="{{ request('tanggal_selesai') }}">
             </div>
@@ -97,8 +133,17 @@
                     <option value="terlambat" {{ request('status_kehadiran') === 'terlambat' ? 'selected' : '' }}>Terlambat</option>
                 </select>
             </div>
+            <div class="col-12 col-sm-6 col-lg-2">
+                <label class="form-label small text-muted mb-1">Keterangan / Izin</label>
+                <select name="jenis_keterangan" class="form-select form-select-sm">
+                    <option value="">Semua Keterangan</option>
+                    @foreach($daftarJenisKeterangan as $k => $lbl)
+                        <option value="{{ $k }}" {{ request('jenis_keterangan') === $k ? 'selected' : '' }}>{{ $lbl }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-12 d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
-                @if(request()->hasAny(['tanggal_mulai', 'tanggal_selesai', 'id_anggota', 'jenis_presensi', 'status_kehadiran']))
+                @if(request()->hasAny(['tanggal_mulai', 'tanggal_selesai', 'id_anggota', 'jenis_presensi', 'status_kehadiran', 'jenis_keterangan']))
                     <a href="{{ route('admin.presensi.index') }}" class="btn btn-outline-secondary btn-sm px-3">
                         Reset Filter
                     </a>
@@ -124,6 +169,7 @@
                         <th>Jabatan & Satuan</th>
                         <th class="text-center">Jenis</th>
                         <th class="text-center">Status</th>
+                        <th>Keterangan / Izin</th>
                         <th class="text-center" style="width: 100px;">Aksi</th>
                     </tr>
                 </thead>
@@ -135,7 +181,11 @@
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}</div>
-                                <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ \Carbon\Carbon::parse($p->waktu)->format('H:i:s') }} WITA</small>
+                                @if($p->waktu)
+                                    <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ \Carbon\Carbon::parse($p->waktu)->format('H:i:s') }} WITA</small>
+                                @else
+                                    <small class="text-primary"><i class="bi bi-file-earmark-check me-1"></i>Dispensasi Dinas</small>
+                                @endif
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">{{ $p->anggota->nama ?? '-' }}</div>
@@ -146,7 +196,11 @@
                                 <small class="text-muted">{{ $p->anggota->unit_kerja ?? '-' }}</small>
                             </td>
                             <td class="text-center">
-                                @if($p->jenis_presensi === 'masuk')
+                                @if($p->is_surat ?? false)
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1">
+                                        <i class="bi bi-file-earmark-text me-1"></i> Surat Izin
+                                    </span>
+                                @elseif($p->jenis_presensi === 'masuk')
                                     <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
                                         <i class="bi bi-box-arrow-in-right me-1"></i> Masuk
                                     </span>
@@ -157,21 +211,38 @@
                                 @endif
                             </td>
                             <td class="text-center">
-                                @if($p->status_kehadiran === 'tepat_waktu')
+                                @if($p->is_surat ?? false)
+                                    <span class="badge bg-primary text-white">Disetujui</span>
+                                @elseif($p->status_kehadiran === 'tepat_waktu')
                                     <span class="badge bg-success text-white">Tepat Waktu</span>
                                 @else
                                     <span class="badge bg-danger text-white">Terlambat</span>
                                 @endif
                             </td>
+                            <td>
+                                @if(!empty($p->keterangan_surat))
+                                    <span class="badge bg-warning-subtle text-dark border border-warning px-2 py-1">
+                                        <i class="bi bi-file-earmark-check me-1 text-warning-emphasis"></i> {{ $p->keterangan_surat }}
+                                    </span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             <td class="text-center">
-                                <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-outline-info btn-sm" title="Lihat Detail Foto, TTD, & GPS">
-                                    <i class="bi bi-eye-fill me-1"></i> Detail
-                                </a>
+                                @if($p->is_surat ?? false)
+                                    <a href="{{ route('admin.surat.show', $p->id_pengajuan) }}" class="btn btn-outline-primary btn-sm" title="Lihat Detail Surat PDF">
+                                        <i class="bi bi-file-earmark-pdf me-1"></i> Surat
+                                    </a>
+                                @else
+                                    <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-outline-info btn-sm" title="Lihat Detail Foto, TTD, & GPS">
+                                        <i class="bi bi-eye-fill me-1"></i> Detail
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
+                            <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
                                 Tidak ada data presensi yang sesuai dengan kriteria filter.
                             </td>

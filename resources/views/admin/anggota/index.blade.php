@@ -17,6 +17,58 @@
     </div>
 </div>
 
+<!-- Kartu Ringkasan Anggota (Bisa Diklik untuk Filter Cepat) -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-4">
+        <a href="{{ route('admin.anggota.index') }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-dark text-decoration-none {{ !request('status') ? 'active-filter' : '' }}"
+           title="Klik untuk melihat semua anggota">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Total Personel</small>
+                    <h3 class="fw-bold text-dark mb-0 mt-1">{{ $totalSemua }}</h3>
+                    <small class="text-muted">Semua status <i class="bi bi-arrow-right-short text-dark"></i></small>
+                </div>
+                <div class="p-3 bg-dark bg-opacity-10 rounded-circle text-dark fs-4">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-4">
+        <a href="{{ route('admin.anggota.index', ['status' => 'aktif']) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-success text-decoration-none {{ request('status') === 'aktif' ? 'active-filter' : '' }}"
+           title="Klik untuk filter hanya anggota aktif">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Anggota Aktif</small>
+                    <h3 class="fw-bold text-success mb-0 mt-1">{{ $totalAktif }}</h3>
+                    <small class="text-muted">Dapat presensi <i class="bi bi-arrow-right-short text-success"></i></small>
+                </div>
+                <div class="p-3 bg-success bg-opacity-10 rounded-circle text-success fs-4">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-4">
+        <a href="{{ route('admin.anggota.index', ['status' => 'nonaktif']) }}" 
+           class="card card-stat bg-white p-3 border-start border-4 border-secondary text-decoration-none {{ request('status') === 'nonaktif' ? 'active-filter' : '' }}"
+           title="Klik untuk filter anggota nonaktif">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Nonaktif</small>
+                    <h3 class="fw-bold text-secondary mb-0 mt-1">{{ $totalNonaktif }}</h3>
+                    <small class="text-muted">Dinonaktifkan <i class="bi bi-arrow-right-short text-secondary"></i></small>
+                </div>
+                <div class="p-3 bg-secondary bg-opacity-10 rounded-circle text-secondary fs-4">
+                    <i class="bi bi-person-x-fill"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
 <!-- Card Filter & Pencarian -->
 <div class="card border-0 shadow-sm rounded-3 mb-4">
     <div class="card-body p-3">
@@ -74,7 +126,18 @@
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">{{ $anggota->nama }}</div>
-                                <span class="badge bg-light text-secondary border font-monospace">NRP: {{ $anggota->nrp }}</span>
+                                <div class="d-flex align-items-center gap-1 flex-wrap mt-1">
+                                    <span class="badge bg-light text-secondary border font-monospace">NRP: {{ $anggota->nrp }}</span>
+                                    @if($anggota->hasAkunLogin())
+                                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" title="Email: {{ $anggota->email }}">
+                                            <i class="bi bi-envelope-check me-1"></i>{{ $anggota->email }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                            <i class="bi bi-exclamation-triangle-fill me-1"></i>Belum punya akun login
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td>
                                 <div class="fw-semibold text-secondary">{{ $anggota->jabatan }}</div>
@@ -117,12 +180,61 @@
                                        class="btn btn-outline-warning" title="Edit Data">
                                         <i class="bi bi-pencil"></i>
                                     </a>
+                                    <button type="button" class="btn btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#resetPasswordModal{{ $anggota->id_anggota }}" 
+                                            title="Reset Password Akun">
+                                        <i class="bi bi-key"></i>
+                                    </button>
                                     <button type="button" class="btn btn-outline-danger" 
                                             data-bs-toggle="modal" 
                                             data-bs-target="#deleteModal{{ $anggota->id_anggota }}" 
                                             title="Hapus Anggota">
                                         <i class="bi bi-trash"></i>
                                     </button>
+                                </div>
+
+                                <!-- Modal Reset Password -->
+                                <div class="modal fade" id="resetPasswordModal{{ $anggota->id_anggota }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow">
+                                            <form action="{{ route('admin.anggota.reset_password', $anggota->id_anggota) }}" method="POST">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-header bg-primary text-white" style="background-color: #0e2238 !important;">
+                                                    <h5 class="modal-title fs-6">
+                                                        <i class="bi bi-key-fill me-1 text-warning"></i> Reset Password Personel
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-start p-4">
+                                                    <p class="mb-2">Masukkan password baru untuk akun personel berikut:</p>
+                                                    <div class="p-3 bg-light rounded border mb-3">
+                                                        <div class="fw-bold">{{ $anggota->nama }}</div>
+                                                        <small class="text-muted">NRP: {{ $anggota->nrp }} | Email: {{ $anggota->email ?? 'Belum ada email' }}</small>
+                                                    </div>
+
+                                                    @if(! $anggota->email)
+                                                        <div class="alert alert-warning py-2 px-3 small mb-3">
+                                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                                            Anggota ini belum memiliki email. Silakan edit data anggota terlebih dahulu untuk menambahkan email sebelum login.
+                                                        </div>
+                                                    @endif
+
+                                                    <div class="mb-2">
+                                                        <label class="form-label small fw-semibold text-dark">Password Baru (Min. 8 karakter) <span class="text-danger">*</span></label>
+                                                        <input type="password" name="password" class="form-control" placeholder="Contoh: password123" required minlength="8">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer bg-light py-2">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                                    <button type="submit" class="btn btn-primary btn-sm" style="background-color: #0e2238; border-color: #0e2238;">
+                                                        <i class="bi bi-check-circle me-1"></i> Simpan Password Baru
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Modal Konfirmasi Hapus -->

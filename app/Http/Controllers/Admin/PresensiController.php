@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Anggota;
 use App\Models\Pengaturan;
+use App\Models\PengajuanSurat;
 use App\Models\Presensi;
 use App\Services\HaversineService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -21,64 +24,50 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * PresensiController (Admin Panel)
- * Mengelola rekap kehadiran personel, filter periode/anggota,
+ * Mengelola rekap kehadiran personel, filter periode/anggota/keterangan surat,
  * melihat detail berkas foto & tanda tangan, serta ekspor PDF dan Excel.
  */
 class PresensiController extends Controller
 {
     /**
-     * Tampilkan rekap daftar presensi personel dengan filter lengkap.
+     * Tampilkan rekap daftar presensi personel dengan integrasi surat keterangan disetujui.
      */
     public function index(Request $request): View
     {
-        $query = Presensi::with('anggota');
+        $semuaData = $this->getRekapData($request);
 
-        // 1. Filter Tanggal
-        if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('tanggal', '>=', $request->tanggal_mulai);
-        }
-        if ($request->filled('tanggal_selesai')) {
-            $query->whereDate('tanggal', '<=', $request->tanggal_selesai);
-        }
+        $totalPresensi   = $semuaData->count();
+        $totalMasuk      = $semuaData->where('jenis_presensi', 'masuk')->count();
+        $totalPulang     = $semuaData->where('jenis_presensi', 'pulang')->count();
+        $totalTerlambat  = $semuaData->where('status_kehadiran', 'terlambat')->count();
+        $totalKeterangan = $semuaData->where('is_surat', true)->count();
 
-        // 2. Filter Anggota
-        if ($request->filled('id_anggota')) {
-            $query->where('id_anggota', $request->id_anggota);
-        }
+        // Paginasi manual untuk gabungan Collection presensi & surat
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 15;
+        $itemsForCurrentPage = $semuaData->slice(($page - 1) * $perPage, $perPage)->values();
 
-        // 3. Filter Jenis Presensi (Masuk / Pulang)
-        if ($request->filled('jenis_presensi') && in_array($request->jenis_presensi, ['masuk', 'pulang'])) {
-            $query->where('jenis_presensi', $request->jenis_presensi);
-        }
+        $presensiList = new LengthAwarePaginator(
+            $itemsForCurrentPage,
+            $totalPresensi,
+            $perPage,
+            $page,
+            ['path' => LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
+        );
 
-        // 4. Filter Status Kehadiran (Tepat Waktu / Terlambat)
-        if ($request->filled('status_kehadiran') && in_array($request->status_kehadiran, ['tepat_waktu', 'terlambat'])) {
-            $query->where('status_kehadiran', $request->status_kehadiran);
-        }
-
-        // Hitung ringkasan data terfilter
-        $cloneQuery = clone $query;
-        $totalPresensi = $cloneQuery->count();
-        $totalMasuk = (clone $query)->where('jenis_presensi', 'masuk')->count();
-        $totalPulang = (clone $query)->where('jenis_presensi', 'pulang')->count();
-        $totalTerlambat = (clone $query)->where('status_kehadiran', 'terlambat')->count();
-
-        // Data presensi dengan paginasi 15 data
-        $presensiList = $query->orderByDesc('tanggal')
-            ->orderByDesc('waktu')
-            ->paginate(15)
-            ->withQueryString();
-
-        // Daftar anggota untuk dropdown filter
-        $anggotaList = Anggota::orderBy('nama')->get();
+        // Daftar dropdown filter
+        $anggotaList = Anggota::orderBy('nama')->get(['id_anggota', 'nama', 'nrp']);
+        $daftarJenisKeterangan = PengajuanSurat::daftarJenisKeterangan();
 
         return view('admin.presensi.index', compact(
             'presensiList',
             'anggotaList',
+            'daftarJenisKeterangan',
             'totalPresensi',
             'totalMasuk',
             'totalPulang',
-            'totalTerlambat'
+            'totalTerlambat',
+            'totalKeterangan'
         ));
     }
 
@@ -108,7 +97,7 @@ class PresensiController extends Controller
      */
     public function eksporPdf(Request $request): Response
     {
-        $dataPresensi = $this->getQueryTerfilter($request)->get();
+        $dataPresensi = $this->getRekapData($request);
         $pengaturan   = Pengaturan::first();
 
         $periodeTeks = 'Semua Periode';
@@ -141,7 +130,7 @@ class PresensiController extends Controller
      */
     public function eksporExcel(Request $request): StreamedResponse
     {
-        $dataPresensi = $this->getQueryTerfilter($request)->get();
+        $dataPresensi = $this->getRekapData($request);
         $pengaturan   = Pengaturan::first();
 
         $spreadsheet = new Spreadsheet();
@@ -159,10 +148,10 @@ class PresensiController extends Controller
         }
         $sheet->setCellValue('A4', 'Periode: ' . $periodeTeks . ' | Dicetak: ' . Carbon::now()->format('d/m/Y H:i') . ' WITA');
 
-        $sheet->mergeCells('A1:I1');
-        $sheet->mergeCells('A2:I2');
-        $sheet->mergeCells('A3:I3');
-        $sheet->mergeCells('A4:I4');
+        $sheet->mergeCells('A1:J1');
+        $sheet->mergeCells('A2:J2');
+        $sheet->mergeCells('A3:J3');
+        $sheet->mergeCells('A4:J4');
 
         $sheet->getStyle('A1:A3')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A1:A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -178,6 +167,7 @@ class PresensiController extends Controller
             'G6' => 'UNIT KERJA',
             'H6' => 'JENIS PRESENSI',
             'I6' => 'STATUS KEHADIRAN',
+            'J6' => 'KETERANGAN / IZIN',
         ];
 
         foreach ($headers as $cell => $text) {
@@ -199,7 +189,7 @@ class PresensiController extends Controller
                 'allBorders' => ['borderStyle' => Border::BORDER_THIN],
             ],
         ];
-        $sheet->getStyle('A6:I6')->applyFromArray($headerStyle);
+        $sheet->getStyle('A6:J6')->applyFromArray($headerStyle);
         $sheet->getRowDimension(6)->setRowHeight(26);
 
         // Pengisian Data Baris
@@ -207,13 +197,28 @@ class PresensiController extends Controller
         foreach ($dataPresensi as $index => $p) {
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, Carbon::parse($p->tanggal)->format('d/m/Y'));
-            $sheet->setCellValue('C' . $row, Carbon::parse($p->waktu)->format('H:i:s'));
+            $sheet->setCellValue('C' . $row, $p->waktu ? Carbon::parse($p->waktu)->format('H:i:s') : '-');
             $sheet->setCellValueExplicit('D' . $row, $p->anggota->nrp ?? '-', \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
             $sheet->setCellValue('E' . $row, $p->anggota->nama ?? '-');
             $sheet->setCellValue('F' . $row, $p->anggota->jabatan ?? '-');
             $sheet->setCellValue('G' . $row, $p->anggota->unit_kerja ?? '-');
-            $sheet->setCellValue('H' . $row, strtoupper($p->jenis_presensi));
-            $sheet->setCellValue('I' . $row, $p->status_kehadiran === 'tepat_waktu' ? 'TEPAT WAKTU' : 'TERLAMBAT');
+
+            if ($p->is_surat ?? false) {
+                $sheet->setCellValue('H' . $row, 'SURAT KETERANGAN');
+                $sheet->setCellValue('I' . $row, 'DISPENSASI DINAS');
+                $sheet->setCellValue('J' . $row, $p->keterangan_surat ?? '-');
+                $sheet->getStyle('I' . $row)->getFont()->getColor()->setRGB('2563EB'); // Biru
+            } else {
+                $sheet->setCellValue('H' . $row, strtoupper($p->jenis_presensi));
+                $sheet->setCellValue('I' . $row, $p->status_kehadiran === 'tepat_waktu' ? 'TEPAT WAKTU' : 'TERLAMBAT');
+                $sheet->setCellValue('J' . $row, $p->keterangan_surat ?? '-');
+
+                if ($p->status_kehadiran === 'terlambat') {
+                    $sheet->getStyle('I' . $row)->getFont()->getColor()->setRGB('DC2626'); // Merah
+                } else {
+                    $sheet->getStyle('I' . $row)->getFont()->getColor()->setRGB('16A34A'); // Hijau
+                }
+            }
 
             // Alignment center untuk kolom No, Tanggal, Waktu, NRP, Jenis, Status
             $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -222,23 +227,17 @@ class PresensiController extends Controller
             $sheet->getStyle('D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('H' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('I' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-            // Beri warna teks status kehadiran
-            if ($p->status_kehadiran === 'terlambat') {
-                $sheet->getStyle('I' . $row)->getFont()->getColor()->setRGB('DC2626'); // Merah
-            } else {
-                $sheet->getStyle('I' . $row)->getFont()->getColor()->setRGB('16A34A'); // Hijau
-            }
+            $sheet->getStyle('J' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             $row++;
         }
 
         // Border seluruh tabel data
         $lastRow = max(7, $row - 1);
-        $sheet->getStyle('A7:I' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A7:J' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         // Auto-width kolom
-        foreach (range('A', 'I') as $col) {
+        foreach (range('A', 'J') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -255,28 +254,144 @@ class PresensiController extends Controller
     }
 
     /**
-     * Helper query builder terfilter.
+     * Helper: Ambil gabungan rekaman presensi fisik dan tanggal izin/cuti/dinas yang telah disetujui.
      */
-    private function getQueryTerfilter(Request $request)
+    private function getRekapData(Request $request): Collection
     {
-        $query = Presensi::with('anggota');
+        // 1. Query Rekaman Presensi Fisik
+        $presensiQuery = Presensi::with('anggota');
 
         if ($request->filled('tanggal_mulai')) {
-            $query->whereDate('tanggal', '>=', $request->tanggal_mulai);
+            $presensiQuery->whereDate('tanggal', '>=', $request->tanggal_mulai);
         }
         if ($request->filled('tanggal_selesai')) {
-            $query->whereDate('tanggal', '<=', $request->tanggal_selesai);
+            $presensiQuery->whereDate('tanggal', '<=', $request->tanggal_selesai);
         }
         if ($request->filled('id_anggota')) {
-            $query->where('id_anggota', $request->id_anggota);
+            $presensiQuery->where('id_anggota', $request->id_anggota);
         }
         if ($request->filled('jenis_presensi') && in_array($request->jenis_presensi, ['masuk', 'pulang'])) {
-            $query->where('jenis_presensi', $request->jenis_presensi);
+            $presensiQuery->where('jenis_presensi', $request->jenis_presensi);
         }
         if ($request->filled('status_kehadiran') && in_array($request->status_kehadiran, ['tepat_waktu', 'terlambat'])) {
-            $query->where('status_kehadiran', $request->status_kehadiran);
+            $presensiQuery->where('status_kehadiran', $request->status_kehadiran);
         }
 
-        return $query->orderBy('tanggal', 'asc')->orderBy('waktu', 'asc');
+        $presensiRecords = $presensiQuery->get();
+
+        // 2. Query Pengajuan Surat yang DISETUJUI
+        $suratQuery = PengajuanSurat::with('anggota')
+            ->where('status_pengajuan', 'disetujui');
+
+        if ($request->filled('id_anggota')) {
+            $suratQuery->where('id_anggota', $request->id_anggota);
+        }
+        if ($request->filled('jenis_keterangan')) {
+            $suratQuery->where('jenis_keterangan', $request->jenis_keterangan);
+        }
+        if ($request->filled('tanggal_mulai')) {
+            $suratQuery->whereDate('tanggal_selesai', '>=', $request->tanggal_mulai);
+        }
+        if ($request->filled('tanggal_selesai')) {
+            $suratQuery->whereDate('tanggal_mulai', '<=', $request->tanggal_selesai);
+        }
+
+        $daftarSuratDisetujui = $suratQuery->get();
+
+        // Peta presensi yang sudah ada: ["{id_anggota}_{tanggal}"] => true
+        $petaPresensiAda = [];
+        foreach ($presensiRecords as $p) {
+            $tglStr = Carbon::parse($p->tanggal)->toDateString();
+            $petaPresensiAda["{$p->id_anggota}_{$tglStr}"] = true;
+        }
+
+        // Peta surat disetujui: ["{id_anggota}_{tanggal}"] => PengajuanSurat
+        $petaSurat = [];
+        foreach ($daftarSuratDisetujui as $s) {
+            $tMulai   = Carbon::parse($s->tanggal_mulai);
+            $tSelesai = Carbon::parse($s->tanggal_selesai);
+
+            $curr = $tMulai->copy();
+            while ($curr->lte($tSelesai)) {
+                $tglKey = "{$s->id_anggota}_{$curr->toDateString()}";
+                $petaSurat[$tglKey] = $s;
+                $curr->addDay();
+            }
+        }
+
+        // Sematkan keterangan_surat pada presensi fisik jika ada
+        foreach ($presensiRecords as $p) {
+            $tglStr = Carbon::parse($p->tanggal)->toDateString();
+            $tglKey = "{$p->id_anggota}_{$tglStr}";
+            $p->is_surat = false;
+            $p->keterangan_surat = isset($petaSurat[$tglKey]) ? $petaSurat[$tglKey]->label_jenis : null;
+        }
+
+        // 3. Tambahkan baris keterangan untuk tanggal tercakup surat disetujui yang BELUM ada presensi
+        $barisSurat = collect();
+
+        // Hanya tambahkan baris surat jika filter jenis_presensi bukan masuk/pulang
+        if (! $request->filled('jenis_presensi') || $request->jenis_presensi === 'keterangan') {
+            $batasMulai   = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : null;
+            $batasSelesai = $request->filled('tanggal_selesai') ? Carbon::parse($request->tanggal_selesai) : null;
+
+            foreach ($daftarSuratDisetujui as $surat) {
+                $tMulai   = Carbon::parse($surat->tanggal_mulai);
+                $tSelesai = Carbon::parse($surat->tanggal_selesai);
+
+                if ($batasMulai && $tMulai->lt($batasMulai)) {
+                    $tMulai = $batasMulai->copy();
+                }
+                if ($batasSelesai && $tSelesai->gt($batasSelesai)) {
+                    $tSelesai = $batasSelesai->copy();
+                }
+
+                $curr = $tMulai->copy();
+                while ($curr->lte($tSelesai)) {
+                    $tglStr = $curr->toDateString();
+                    $tglKey = "{$surat->id_anggota}_{$tglStr}";
+
+                    // Hanya jika BELUM ada presensi fisik pada tanggal ini
+                    if (! isset($petaPresensiAda[$tglKey])) {
+                        if (! $request->filled('status_kehadiran') || $request->status_kehadiran === 'keterangan') {
+                            $barisSurat->push((object) [
+                                'id_presensi'      => null,
+                                'is_surat'         => true,
+                                'id_pengajuan'     => $surat->id_pengajuan,
+                                'id_anggota'       => $surat->id_anggota,
+                                'anggota'          => $surat->anggota,
+                                'tanggal'          => $tglStr,
+                                'waktu'            => null,
+                                'jenis_presensi'   => 'keterangan',
+                                'status_kehadiran' => 'keterangan',
+                                'keterangan_surat' => $surat->label_jenis,
+                                'file_surat'       => $surat->file_surat,
+                                'latitude'         => null,
+                                'longitude'        => null,
+                                'created_at'       => $surat->created_at,
+                            ]);
+                        }
+                    }
+                    $curr->addDay();
+                }
+            }
+        }
+
+        // 4. Jika difilter berdasarkan jenis_keterangan:
+        if ($request->filled('jenis_keterangan')) {
+            $jenisTarget = PengajuanSurat::daftarJenisKeterangan()[$request->jenis_keterangan] ?? $request->jenis_keterangan;
+            $presensiRecords = $presensiRecords->filter(function ($p) use ($jenisTarget) {
+                return $p->keterangan_surat === $jenisTarget;
+            });
+            $barisSurat = $barisSurat->filter(function ($s) use ($jenisTarget) {
+                return $s->keterangan_surat === $jenisTarget;
+            });
+        }
+
+        // Gabungkan dan urutkan berdasarkan tanggal DESC, waktu DESC
+        return $presensiRecords->concat($barisSurat)->sortByDesc(function ($item) {
+            return $item->tanggal . ' ' . ($item->waktu ?? '00:00:00');
+        })->values();
     }
 }
+

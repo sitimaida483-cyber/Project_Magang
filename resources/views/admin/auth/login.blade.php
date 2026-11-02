@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - Presensi Bidtik Polda Kalsel</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -75,6 +76,9 @@
 
     <div class="login-card">
         <div class="card-header-custom">
+            <div class="mb-3">
+                <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo Bidtik Polda Kalsel" style="width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
+            </div>
             <span class="gold-badge">SISTEM PRESENSI</span>
             <h4 class="fw-bold mb-1">BIDTIK POLDA KALSEL</h4>
             <p class="text-white-50 mb-0 small">Panel Masuk Khusus Administrator</p>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel') - Presensi Bidtik Polda Kalsel</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}">
     
     <!-- Google Fonts & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,10 +122,23 @@
             border: none;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            transition: transform 0.2s;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
         }
         .card-stat:hover {
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.1);
+            color: inherit;
+        }
+        .card-stat:active {
+            transform: translateY(-1px);
+        }
+        .card-stat.active-filter {
+            outline: 2px solid #0e2238;
+            box-shadow: 0 8px 24px rgba(14, 34, 56, 0.16);
         }
 
         @media (max-width: 991.98px) {
@@ -146,12 +160,10 @@
     <!-- Sidebar -->
     <nav id="sidebar">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-            <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-shield-lock-fill text-dark fs-5"></i>
-            </div>
+            <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo Bidtik Polda Kalsel" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
             <div>
-                <div class="fw-bold lh-1 text-white">BIDTIK POLDA</div>
-                <small class="text-white-50" style="font-size: 0.75rem;">Kalsel Presensi</small>
+                <div class="fw-bold lh-1 text-white" style="letter-spacing: 0.5px;">BIDTIK POLDA</div>
+                <small class="text-white-50" style="font-size: 0.72rem; letter-spacing: 0.3px;">Kalsel Presensi</small>
             </div>
         </a>
 
@@ -167,6 +179,17 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}" href="{{ url('/admin/presensi') }}">
                     <i class="bi bi-calendar-check-fill"></i> Rekap Absensi
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.surat.*') ? 'active' : '' }}" href="{{ route('admin.surat.index') }}">
+                    <i class="bi bi-file-earmark-text-fill"></i> Pengajuan Surat
+                    @php
+                        $badgeMenunggu = \App\Models\PengajuanSurat::where('status_pengajuan', 'menunggu')->count();
+                    @endphp
+                    @if($badgeMenunggu > 0)
+                        <span class="badge bg-warning text-dark ms-auto fw-bold" style="font-size: 0.72rem;">{{ $badgeMenunggu }}</span>
+                    @endif
                 </a>
             </li>
             <li class="nav-item">

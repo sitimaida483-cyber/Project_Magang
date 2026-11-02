@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PengaturanController;
 use App\Http\Controllers\Admin\AnggotaController;
@@ -9,7 +9,10 @@ use App\Http\Controllers\Admin\PetaController;
 use App\Http\Controllers\Admin\LogAktivitasController;
 use App\Http\Controllers\Admin\PresensiFileController;
 use App\Http\Controllers\Admin\PresensiController as AdminPresensiController;
+use App\Http\Controllers\Admin\PengajuanSuratController as AdminPengajuanSuratController;
+use App\Http\Controllers\Anggota\AuthController as AnggotaAuthController;
 use App\Http\Controllers\Anggota\PresensiController as AnggotaPresensiController;
+use App\Http\Controllers\Anggota\PengajuanSuratController as AnggotaPengajuanSuratController;
 use App\Http\Controllers\Anggota\NotifikasiController;
 
 /*
@@ -18,31 +21,57 @@ use App\Http\Controllers\Anggota\NotifikasiController;
 |--------------------------------------------------------------------------
 */
 
-// Halaman utama otomatis mengarahkan ke halaman presensi anggota atau dashboard jika admin
+// Halaman utama otomatis mengarahkan ke dashboard (jika admin), presensi (jika anggota), atau login anggota
 Route::get('/', function () {
     if (auth('admin')->check()) {
         return redirect()->route('admin.dashboard');
     }
-    return redirect()->route('presensi.index');
+    if (auth('anggota')->check()) {
+        return redirect()->route('presensi.index');
+    }
+    return redirect()->route('login');
 });
 
 // ==========================================
-// RUTE HALAMAN PUBLIK PRESENSI ANGGOTA (HP)
+// RUTE AUTENTIKASI ANGGOTA (PERSONEL)
 // ==========================================
-Route::prefix('presensi')->name('presensi.')->group(function () {
-    Route::get('/', [AnggotaPresensiController::class, 'index'])->name('index');
-    Route::post('/cek-nrp', [AnggotaPresensiController::class, 'cekNrp'])->name('cek_nrp');
-    Route::post('/simpan', [AnggotaPresensiController::class, 'store'])->name('store');
-    Route::post('/simpan-perangkat', [NotifikasiController::class, 'subscribe'])->name('subscribe');
+Route::get('/login', [AnggotaAuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AnggotaAuthController::class, 'login'])->name('login.proses');
+Route::post('/logout', [AnggotaAuthController::class, 'logout'])->name('logout');
+
+// ==========================================
+// RUTE PANEL ANGGOTA (TERLINDUNGI GUARD 'anggota')
+// ==========================================
+Route::middleware('anggota.auth')->group(function () {
+    // Presensi Kehadiran Anggota
+    Route::prefix('presensi')->name('presensi.')->group(function () {
+        Route::get('/', [AnggotaPresensiController::class, 'index'])->name('index');
+        Route::post('/cek-nrp', [AnggotaPresensiController::class, 'cekNrp'])->name('cek_nrp'); // Cadangan endpoint AJAX
+        Route::post('/simpan', [AnggotaPresensiController::class, 'store'])->name('store');
+        Route::post('/simpan-perangkat', [NotifikasiController::class, 'subscribe'])->name('subscribe');
+    });
+
+    // Pengajuan Surat Keterangan Personel (Revisi 2)
+    Route::prefix('surat')->name('anggota.surat.')->group(function () {
+        Route::get('/', [AnggotaPengajuanSuratController::class, 'index'])->name('index');
+        Route::get('/buat', [AnggotaPengajuanSuratController::class, 'create'])->name('create');
+        Route::post('/', [AnggotaPengajuanSuratController::class, 'store'])->name('store');
+        Route::post('/{id}/batal', [AnggotaPengajuanSuratController::class, 'cancel'])->name('cancel');
+        Route::get('/{id}/file', [AnggotaPengajuanSuratController::class, 'file'])->name('file');
+    });
+
+    // Ubah Password Mandiri Anggota
+    Route::get('/ubah-password', [AnggotaAuthController::class, 'showUbahPassword'])->name('anggota.password');
+    Route::put('/ubah-password', [AnggotaAuthController::class, 'ubahPassword'])->name('anggota.password.update');
 });
 
 // ========================
 // RUTE AUTENTIKASI ADMIN
 // ========================
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.proses');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.proses');
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
     // ========================
     // PANEL ADMIN (TERLINDUNGI)
@@ -59,10 +88,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/presensi/ekspor-excel', [AdminPresensiController::class, 'eksporExcel'])->name('presensi.ekspor_excel');
         Route::get('/presensi/{id}', [AdminPresensiController::class, 'show'])->name('presensi.show');
         
+        // Modul Pengajuan Surat Keterangan (Revisi 2)
+        Route::get('/surat', [AdminPengajuanSuratController::class, 'index'])->name('surat.index');
+        Route::get('/surat/{id}', [AdminPengajuanSuratController::class, 'show'])->name('surat.show');
+        Route::post('/surat/{id}/proses', [AdminPengajuanSuratController::class, 'proses'])->name('surat.proses');
+        Route::get('/surat/{id}/file', [AdminPengajuanSuratController::class, 'file'])->name('surat.file');
+
         // Modul Peta Lokasi (Tahap 8)
         Route::get('/peta', [PetaController::class, 'index'])->name('peta.index');
 
         // Modul Kelola Anggota (Tahap 4)
+        Route::put('/anggota/{id}/reset-password', [AnggotaController::class, 'resetPassword'])->name('anggota.reset_password');
         Route::resource('/anggota', AnggotaController::class);
 
         // Modul Pengaturan Kantor (Tahap 3)

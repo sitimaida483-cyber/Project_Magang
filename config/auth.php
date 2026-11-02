@@ -32,6 +32,12 @@ return [
             'driver'   => 'session',
             'provider' => 'admins',
         ],
+
+        // Guard khusus untuk anggota/personel presensi
+        'anggota' => [
+            'driver'   => 'session',
+            'provider' => 'anggotas',
+        ],
     ],
 
     /*
@@ -50,6 +56,12 @@ return [
         'admins' => [
             'driver' => 'eloquent',
             'model'  => App\Models\Admin::class,
+        ],
+
+        // Provider untuk model Anggota (tabel 'anggota')
+        'anggotas' => [
+            'driver' => 'eloquent',
+            'model'  => App\Models\Anggota::class,
         ],
     ],
 

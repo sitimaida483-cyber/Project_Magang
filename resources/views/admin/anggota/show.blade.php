@@ -50,6 +50,22 @@
 
                 <div class="list-group list-group-flush border-top border-bottom small">
                     <div class="list-group-item d-flex justify-content-between py-2 px-0">
+                        <span class="text-muted">Email Kedinasan (Akun)</span>
+                        <span class="fw-semibold text-dark font-monospace">{{ $anggota->email ?? '-' }}</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between py-2 px-0 align-items-center">
+                        <span class="text-muted">Status Akun Login</span>
+                        @if($anggota->hasAkunLogin())
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-shield-check me-1"></i> Aktif
+                            </span>
+                        @else
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Belum punya akun login
+                            </span>
+                        @endif
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between py-2 px-0">
                         <span class="text-muted">Pangkat / Jabatan</span>
                         <span class="fw-semibold text-dark">{{ $anggota->jabatan }}</span>
                     </div>

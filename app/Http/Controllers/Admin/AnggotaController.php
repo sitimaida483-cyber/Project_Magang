@@ -41,7 +41,12 @@ class AnggotaController extends Controller
 
         $anggotaList = $query->orderByDesc('id_anggota')->paginate(10)->withQueryString();
 
-        return view('admin.anggota.index', compact('anggotaList'));
+        // Statistik Anggota
+        $totalSemua = Anggota::count();
+        $totalAktif = Anggota::where('status', 'aktif')->count();
+        $totalNonaktif = Anggota::where('status', 'nonaktif')->count();
+
+        return view('admin.anggota.index', compact('anggotaList', 'totalSemua', 'totalAktif', 'totalNonaktif'));
     }
 
     /**
@@ -63,6 +68,8 @@ class AnggotaController extends Controller
             'id_admin'   => $admin->id_admin,
             'nrp'        => $request->nrp,
             'nama'       => $request->nama,
+            'email'      => $request->email,
+            'password'   => $request->password, // Otomatis di-hash oleh cast 'hashed'
             'jabatan'    => $request->jabatan,
             'unit_kerja' => $request->unit_kerja,
             'no_telepon' => $request->no_telepon,
@@ -74,11 +81,11 @@ class AnggotaController extends Controller
             idAdmin: $admin->id_admin,
             aktivitas: 'Tambah Anggota',
             tabelTerkait: 'anggota',
-            keterangan: "Menambahkan anggota baru: {$anggota->nama} (NRP: {$anggota->nrp}, Jabatan: {$anggota->jabatan})"
+            keterangan: "Menambahkan anggota baru: {$anggota->nama} (NRP: {$anggota->nrp}, Email: {$anggota->email}, Jabatan: {$anggota->jabatan})"
         );
 
         return redirect()->route('admin.anggota.index')
-            ->with('sukses', "Anggota '{$anggota->nama}' berhasil didaftarkan.");
+            ->with('sukses', "Anggota '{$anggota->nama}' berhasil didaftarkan beserta akun login.");
     }
 
     /**
@@ -128,25 +135,63 @@ class AnggotaController extends Controller
         $anggota = Anggota::findOrFail($id);
         $admin   = auth('admin')->user();
 
-        $anggota->update([
+        $dataUpdate = [
             'nrp'        => $request->nrp,
             'nama'       => $request->nama,
+            'email'      => $request->email,
             'jabatan'    => $request->jabatan,
             'unit_kerja' => $request->unit_kerja,
             'no_telepon' => $request->no_telepon,
             'status'     => $request->status,
-        ]);
+        ];
+
+        // Jika password diisi pada form edit, perbarui password
+        if ($request->filled('password')) {
+            $dataUpdate['password'] = $request->password;
+        }
+
+        $anggota->update($dataUpdate);
 
         // Catat aksi pengubahan data anggota ke log aktivitas
         LogAktivitasService::catat(
             idAdmin: $admin->id_admin,
             aktivitas: 'Ubah Anggota',
             tabelTerkait: 'anggota',
-            keterangan: "Mengubah data anggota: {$anggota->nama} (NRP: {$anggota->nrp}, Status: {$anggota->status})"
+            keterangan: "Mengubah data anggota: {$anggota->nama} (NRP: {$anggota->nrp}, Email: {$anggota->email}, Status: {$anggota->status})"
         );
 
         return redirect()->route('admin.anggota.index')
             ->with('sukses', "Data anggota '{$anggota->nama}' berhasil diperbarui.");
+    }
+
+    /**
+     * Aksi Reset Password anggota oleh Admin.
+     */
+    public function resetPassword(Request $request, int $id): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min'      => 'Password baru minimal 8 karakter.',
+        ]);
+
+        $anggota = Anggota::findOrFail($id);
+        $admin   = auth('admin')->user();
+
+        $anggota->update([
+            'password' => $request->password, // Otomatis di-hash oleh model
+        ]);
+
+        // Catat ke audit log
+        LogAktivitasService::catat(
+            idAdmin: $admin->id_admin,
+            aktivitas: 'Reset Password Anggota',
+            tabelTerkait: 'anggota',
+            keterangan: "Mereset password untuk anggota: {$anggota->nama} (NRP: {$anggota->nrp}, Email: {$anggota->email})"
+        );
+
+        return back()->with('sukses', "Password untuk anggota '{$anggota->nama}' (NRP: {$anggota->nrp}) berhasil direset.");
     }
 
     /**
