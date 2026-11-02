@@ -3,7 +3,7 @@
 @section('title', 'Form Pengajuan Surat Personel')
 
 @section('content')
-<div class="card card-custom p-4 presensi-card">
+<div class="card border-0 shadow-sm p-4 rounded-3 bg-white mb-4">
     <!-- Header Halaman -->
     <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
         <div>

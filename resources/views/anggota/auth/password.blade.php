@@ -3,7 +3,9 @@
 @section('title', 'Ubah Password Akun')
 
 @section('content')
-<div class="card card-custom p-4 presensi-card">
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm p-4 rounded-3 bg-white mb-4">
     <div class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4">
         <div>
             <h5 class="fw-bold text-dark mb-0">
@@ -100,6 +102,8 @@
             <i class="bi bi-save me-1"></i> Simpan Password Baru
         </button>
     </form>
+        </div>
+    </div>
 </div>
 @endsection
 

@@ -7,7 +7,9 @@
 @endpush
 
 @section('content')
-<div class="card card-custom p-4 presensi-card">
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+        <div class="card card-custom p-4 presensi-card border-0 shadow-sm rounded-4 bg-white">
     <!-- Tanggal & Informasi Hari Ini -->
     <div class="text-center pb-3 border-bottom mb-4">
         <h6 class="fw-bold text-dark mb-1">
@@ -217,6 +219,8 @@
             </button>
         @endif
     </form>
+        </div>
+    </div>
 </div>
 @endsection
 

@@ -37,6 +37,14 @@ class PengajuanSuratController extends Controller
             $query->where('jenis_keterangan', $request->jenis);
         }
 
+        // Filter periode tanggal
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('tanggal_mulai', '>=', $request->tanggal_mulai);
+        }
+        if ($request->filled('tanggal_selesai')) {
+            $query->whereDate('tanggal_selesai', '<=', $request->tanggal_selesai);
+        }
+
         $daftarSurat  = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
         $daftarJenis  = PengajuanSurat::daftarJenisKeterangan();
         $kategoriMeta = PengajuanSurat::kategoriMeta();

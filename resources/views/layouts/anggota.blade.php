@@ -2,9 +2,9 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Presensi Online') - Bidtik Polda Kalsel</title>
+    <title>@yield('title', 'Portal Personel') - Presensi Bidtik Polda Kalsel</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}">
 
     <!-- Google Fonts & Bootstrap 5 & Icons -->
@@ -17,7 +17,144 @@
     @vite('resources/js/app.js')
 
     <style>
-        /* Mobile Bottom Navigation Bar */
+        :root {
+            --police-navy: #0e2238;
+            --police-dark: #091624;
+            --police-gold: #e5a93c;
+            --police-gold-hover: #cf9327;
+            --sidebar-width: 260px;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f4f6f9;
+            color: #334155;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styling (Sama Persis seperti Admin) */
+        #sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--police-navy) 0%, var(--police-dark) 100%);
+            color: #e2e8f0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+        }
+        .sidebar-brand {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            text-decoration: none;
+            color: #ffffff;
+        }
+        .sidebar-brand .badge-role {
+            background-color: var(--police-gold);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.65rem;
+            padding: 3px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-menu {
+            padding: 1rem 0.75rem;
+            list-style: none;
+            margin: 0;
+        }
+        .menu-header {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            padding: 0.75rem 0.75rem 0.25rem;
+        }
+        .sidebar-menu .nav-link {
+            color: #94a3b8;
+            padding: 0.7rem 0.85rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            margin-bottom: 2px;
+            text-decoration: none;
+        }
+        .sidebar-menu .nav-link:hover {
+            color: #ffffff;
+            background-color: rgba(255,255,255,0.06);
+        }
+        .sidebar-menu .nav-link.active {
+            color: #ffffff;
+            background-color: #1e3a8a;
+            font-weight: 600;
+        }
+        .sidebar-menu .nav-link.active i {
+            color: var(--police-gold);
+        }
+
+        /* Content Area */
+        #main-content {
+            margin-left: var(--sidebar-width);
+            transition: all 0.3s;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .topbar {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        /* Stat Cards (Sama Persis seperti Admin Dashboard) */
+        .card-stat {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+        .card-stat:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.1);
+            color: inherit;
+        }
+        .card-stat:active {
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 991.98px) {
+            #sidebar {
+                margin-left: calc(-1 * var(--sidebar-width));
+            }
+            #sidebar.active {
+                margin-left: 0;
+            }
+            #main-content {
+                margin-left: 0;
+                padding-bottom: 74px; /* Space for bottom nav on mobile */
+            }
+        }
+
+        /* Mobile Bottom Nav */
         .anggota-bottom-nav {
             position: fixed;
             bottom: 0;
@@ -41,139 +178,155 @@
             text-decoration: none;
             font-size: 0.72rem;
             font-weight: 600;
-            transition: all 0.2s ease;
             padding: 4px 10px;
             border-radius: 8px;
             background: none;
             border: none;
-            cursor: pointer;
         }
         .anggota-nav-item i {
             font-size: 1.25rem;
             margin-bottom: 2px;
-            transition: transform 0.2s ease;
         }
         .anggota-nav-item:hover, .anggota-nav-item.active {
             color: #f5b83d;
         }
-        .anggota-nav-item:hover i, .anggota-nav-item.active i {
-            transform: translateY(-2px);
-            color: #f5b83d;
-        }
-        .has-bottom-nav {
-            padding-bottom: 84px !important;
-        }
-        .user-pill-bar {
-            background: rgba(14, 34, 56, 0.75);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(229, 169, 60, 0.35);
-            border-radius: 30px;
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 14px;
-            margin-top: 6px;
-            color: #ffffff;
-            font-size: 0.8rem;
+        @media (min-width: 992px) {
+            .anggota-bottom-nav {
+                display: none !important;
+            }
         }
     </style>
-
     @stack('styles')
 </head>
-<body class="presensi-page {{ auth('anggota')->check() ? 'has-bottom-nav' : '' }}">
+<body>
 
-    <!-- Header Polri Kalsel -->
-    <header class="header-police">
-        <svg class="header-network header-network--left" style="display: none;" viewBox="0 0 400 200" aria-hidden="true" focusable="false">
-            <g fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M-12 30 55 68 112 26 172 76 224 34 286 73 350 22 414 61M18 146 76 112 134 164 190 120 248 163 310 116 376 158M55 68 76 112M112 26 134 164M172 76 190 120M224 34 248 163M286 73 310 116M350 22 376 158M18 146 55 68M310 116 350 22" />
-                <circle cx="55" cy="68" r="4" fill="currentColor" />
-                <circle cx="112" cy="26" r="4" fill="currentColor" />
-                <circle cx="172" cy="76" r="4" fill="currentColor" />
-                <circle cx="224" cy="34" r="4" fill="currentColor" />
-                <circle cx="286" cy="73" r="4" fill="currentColor" />
-                <circle cx="350" cy="22" r="4" fill="currentColor" />
-                <circle cx="76" cy="112" r="4" fill="currentColor" />
-                <circle cx="134" cy="164" r="4" fill="currentColor" />
-                <circle cx="190" cy="120" r="4" fill="currentColor" />
-                <circle cx="248" cy="163" r="4" fill="currentColor" />
-                <circle cx="310" cy="116" r="4" fill="currentColor" />
-                <circle cx="376" cy="158" r="4" fill="currentColor" />
-            </g>
-        </svg>
-        <svg class="header-network header-network--right" style="display: none;" viewBox="0 0 400 200" aria-hidden="true" focusable="false">
-            <g fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M-12 30 55 68 112 26 172 76 224 34 286 73 350 22 414 61M18 146 76 112 134 164 190 120 248 163 310 116 376 158M55 68 76 112M112 26 134 164M172 76 190 120M224 34 248 163M286 73 310 116M350 22 376 158M18 146 55 68M310 116 350 22" />
-                <circle cx="55" cy="68" r="4" fill="currentColor" />
-                <circle cx="112" cy="26" r="4" fill="currentColor" />
-                <circle cx="172" cy="76" r="4" fill="currentColor" />
-                <circle cx="224" cy="34" r="4" fill="currentColor" />
-                <circle cx="286" cy="73" r="4" fill="currentColor" />
-                <circle cx="350" cy="22" r="4" fill="currentColor" />
-                <circle cx="76" cy="112" r="4" fill="currentColor" />
-                <circle cx="134" cy="164" r="4" fill="currentColor" />
-                <circle cx="190" cy="120" r="4" fill="currentColor" />
-                <circle cx="248" cy="163" r="4" fill="currentColor" />
-                <circle cx="310" cy="116" r="4" fill="currentColor" />
-                <circle cx="376" cy="158" r="4" fill="currentColor" />
-            </g>
-        </svg>
-        <div class="mobile-container text-center header-content">
-            <div class="mb-2">
-                <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo Bidtik Polda Kalsel" style="width: 58px; height: 58px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.65));">
-            </div>
-            <span class="badge-gold text-uppercase mb-1">Presensi Personel</span>
-            <h1 class="fw-bold mb-0 text-white tracking-wide header-title">BIDTIK POLDA KALSEL</h1>
-            <p class="text-white-50 small mb-2 header-subtitle">Bidang Teknologi Informasi dan Komunikasi</p>
-            
-            <!-- Jam Digital Real-Time WITA -->
-            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill small clock-capsule">
-                <i class="bi bi-clock-fill clock-icon"></i>
-                <span id="digitalClock" class="fw-semibold text-white font-monospace">--:--:-- WITA</span>
-            </div>
-
-            @if(auth('anggota')->check())
-                <div class="d-block mt-2">
-                    <div class="user-pill-bar">
-                        <i class="bi bi-person-check-fill text-warning me-1"></i>
-                        <span class="fw-semibold me-1">{{ auth('anggota')->user()->nama }}</span>
-                        <span class="text-white-50">({{ auth('anggota')->user()->nrp }})</span>
-                    </div>
+    <!-- Sidebar Anggota -->
+    <nav id="sidebar">
+        <a href="{{ route('presensi.index') }}" class="sidebar-brand">
+            <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo Bidtik Polda Kalsel" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
+            <div>
+                <div class="fw-bold lh-1 text-white" style="letter-spacing: 0.5px;">BIDTIK POLDA</div>
+                <div class="d-flex align-items-center gap-1 mt-1">
+                    <small class="text-white-50" style="font-size: 0.72rem;">Portal Personel</small>
+                    <span class="badge-role">PERSONEL</span>
                 </div>
-            @endif
-        </div>
-    </header>
+            </div>
+        </a>
 
-    <!-- Konten Presensi Mobile -->
-    <main class="mobile-container main-card-wrapper">
-        <img src="{{ asset('images/watermark-shield.svg') }}" class="watermark-shield" alt="" aria-hidden="true">
-        @yield('content')
-    </main>
+        <ul class="sidebar-menu">
+            <li class="menu-header">Menu Utama</li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('presensi.*') ? 'active' : '' }}" href="{{ route('presensi.index') }}">
+                    <i class="bi bi-geo-alt-fill"></i> Presensi Kehadiran
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('anggota.surat.*') ? 'active' : '' }}" href="{{ route('anggota.surat.index') }}">
+                    <i class="bi bi-file-earmark-text-fill"></i> Pengajuan Surat
+                </a>
+            </li>
 
-    <footer class="presensi-footer text-center">
-        <div>Sistem Presensi Personel · Bidtik Polda Kalsel</div>
-        <div class="mt-1">
-            <a href="{{ route('admin.login') }}" class="text-decoration-none text-secondary" style="font-size: 0.75rem;">
-                <i class="bi bi-shield-lock me-1"></i> Panel Masuk Admin
-            </a>
-        </div>
-    </footer>
+            <li class="menu-header">Pengaturan Akun</li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('anggota.password*') ? 'active' : '' }}" href="{{ route('anggota.password') }}">
+                    <i class="bi bi-key-fill"></i> Ubah Password
+                </a>
+            </li>
+
+            <li class="menu-header">Sesi Login</li>
+            <li class="nav-item">
+                <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari sistem?');">
+                    @csrf
+                    <button type="submit" class="nav-link text-danger border-0 w-100 text-start bg-transparent">
+                        <i class="bi bi-box-arrow-right"></i> Keluar / Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <!-- Topbar -->
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <div class="fw-semibold text-secondary small d-none d-md-block">
+                    Bidang Teknologi Informasi dan Komunikasi (Bidtik) Polda Kalsel
+                </div>
+            </div>
+
+            <!-- Jam WITA & User Dropdown -->
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-none d-sm-inline-flex align-items-center gap-1 text-muted small bg-light px-3 py-1 rounded-pill border">
+                    <i class="bi bi-clock-fill text-warning"></i>
+                    <span id="digitalClock" class="font-monospace fw-semibold">--:--:-- WITA</span>
+                </div>
+
+                @if(auth('anggota')->check())
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 border py-1 px-2" type="button" data-bs-toggle="dropdown">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; background-color: #0e2238 !important;">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="text-start d-none d-sm-block">
+                                <span class="fw-semibold text-dark d-block lh-1 small">{{ auth('anggota')->user()->nama }}</span>
+                                <small class="text-muted" style="font-size: 0.7rem;">NRP: {{ auth('anggota')->user()->nrp }}</small>
+                            </div>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="border-radius: 10px;">
+                            <li class="px-3 py-2 border-bottom">
+                                <small class="text-muted d-block">Personel Terdaftar</small>
+                                <strong class="d-block text-dark">{{ auth('anggota')->user()->nama }}</strong>
+                                <span class="text-secondary small">NRP: {{ auth('anggota')->user()->nrp }} ({{ auth('anggota')->user()->jabatan ?? 'Bidtik' }})</span>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('anggota.password') }}">
+                                    <i class="bi bi-key me-2 text-warning"></i> Ganti Password
+                                </a>
+                            </li>
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin keluar?');">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger py-2">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Keluar
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                @endif
+            </div>
+        </header>
+
+        <!-- Page Body Content -->
+        <main class="p-3 p-md-4 flex-grow-1">
+            @yield('content')
+        </main>
+
+        <footer class="bg-white border-top text-center py-3 text-muted small">
+            &copy; {{ date('Y') }} Bidtik Polda Kalimantan Selatan · Sistem Presensi Online
+        </footer>
+    </div>
 
     @if(auth('anggota')->check())
-        <!-- Mobile Bottom Navigation Bar -->
+        <!-- Mobile Bottom Nav -->
         <nav class="anggota-bottom-nav">
             <a href="{{ route('presensi.index') }}" class="anggota-nav-item {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
                 <i class="bi bi-geo-alt-fill"></i>
                 <span>Presensi</span>
             </a>
-            <a href="{{ \Illuminate\Support\Facades\Route::has('anggota.surat.index') ? route('anggota.surat.index') : '#' }}" class="anggota-nav-item {{ request()->routeIs('anggota.surat.*') ? 'active' : '' }}">
+            <a href="{{ route('anggota.surat.index') }}" class="anggota-nav-item {{ request()->routeIs('anggota.surat.*') ? 'active' : '' }}">
                 <i class="bi bi-file-earmark-text-fill"></i>
-                <span>Pengajuan Surat</span>
+                <span>Pengajuan</span>
             </a>
             <a href="{{ route('anggota.password') }}" class="anggota-nav-item {{ request()->routeIs('anggota.password*') ? 'active' : '' }}">
                 <i class="bi bi-key-fill"></i>
                 <span>Password</span>
             </a>
-            <form action="{{ route('logout') }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin keluar dari sistem presensi?');">
+            <form action="{{ route('logout') }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin keluar?');">
                 @csrf
                 <button type="submit" class="anggota-nav-item">
                     <i class="bi bi-box-arrow-right"></i>
@@ -183,11 +336,13 @@
         </nav>
     @endif
 
-    @stack('modals')
-
-    <!-- Bootstrap 5 JS -->
+    <!-- Bootstrap 5 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
         // Jam digital real-time WITA
         function updateClock() {
             const now = new Date();
