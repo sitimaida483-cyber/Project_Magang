@@ -24,7 +24,7 @@ class PresensiRequest extends FormRequest
             'latitude'       => ['required', 'numeric', 'between:-90,90'],
             'longitude'      => ['required', 'numeric', 'between:-180,180'],
             'foto_selfie'    => ['required', 'string'],
-            'tanda_tangan'   => ['required', 'string'],
+            'tanda_tangan'   => ['nullable', 'string'],
         ];
     }
 
@@ -37,7 +37,6 @@ class PresensiRequest extends FormRequest
             'latitude.required'       => 'Koordinat GPS latitude belum terdeteksi. Pastikan GPS aktif.',
             'longitude.required'      => 'Koordinat GPS longitude belum terdeteksi. Pastikan GPS aktif.',
             'foto_selfie.required'    => 'Foto selfie kamera depan wajib diambil sebelum mengirim presensi.',
-            'tanda_tangan.required'   => 'Tanda tangan digital wajib dibubuhkan pada kanvas.',
         ];
     }
 }

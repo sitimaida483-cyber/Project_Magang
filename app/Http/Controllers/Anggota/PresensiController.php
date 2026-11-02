@@ -254,14 +254,16 @@ class PresensiController extends Controller
             }
         }
 
-        // 6. Simpan File Foto Selfie & Tanda Tangan Digital secara Aman
+        // 6. Simpan File Foto Selfie secara Aman (Tanda Tangan Opsional)
         $pathFoto = $this->simpanBase64KeFile($request->foto_selfie, 'foto_selfie', $anggota->nrp, 'jpg');
-        $pathTtd  = $this->simpanBase64KeFile($request->tanda_tangan, 'tanda_tangan', $anggota->nrp, 'png');
+        $pathTtd  = $request->filled('tanda_tangan')
+            ? ($this->simpanBase64KeFile($request->tanda_tangan, 'tanda_tangan', $anggota->nrp, 'png') ?: '')
+            : '';
 
-        if (! $pathFoto || ! $pathTtd) {
+        if (! $pathFoto) {
             return response()->json([
                 'sukses' => false,
-                'pesan'  => 'Gagal memproses berkas foto selfie atau tanda tangan digital.',
+                'pesan'  => 'Gagal memproses berkas foto selfie kamera depan.',
             ], 500);
         }
 

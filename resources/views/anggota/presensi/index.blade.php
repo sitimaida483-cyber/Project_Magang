@@ -151,54 +151,50 @@
             </div>
         </div>
 
-        <!-- KAMERA SELFIE DEPAN -->
+        <!-- KAMERA SELFIE DEPAN & DETEKSI WAJAH -->
         <div class="mb-4">
-            <label class="form-label fw-bold text-dark small mb-2">
-                Foto Selfie Kamera Depan
+            <label class="form-label fw-bold text-dark small mb-2 d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-camera-fill text-primary me-1"></i> Foto Selfie Kamera Depan</span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="cameraStatusBadge">
+                    <i class="bi bi-shield-check me-1"></i> Biometrik Wajah
+                </span>
             </label>
             
-            <div class="camera-container mb-2">
-                <video id="cameraStream" autoplay playsinline></video>
-                <img id="photoPreview" alt="Pratinjau Foto Selfie">
-                <div id="cameraLoading" class="text-white small text-center p-3">
-                    <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
-                    <div>Menghubungkan kamera...</div>
+            <div class="camera-container mb-2 position-relative rounded-4 overflow-hidden shadow-sm" style="aspect-ratio: 4/3; max-height: 400px; background-color: #0b1a2e; border: 2px solid #cbd5e1;">
+                <video id="cameraStream" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block;"></video>
+                <img id="photoPreview" alt="Pratinjau Foto Selfie" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                
+                <!-- Face Guide Overlay (Oval Panduan Wajah) -->
+                <div id="faceGuide" class="position-absolute top-50 start-50 translate-middle pointer-events-none d-flex flex-column align-items-center justify-content-center" style="width: 220px; height: 280px; border: 2.5px dashed rgba(255, 255, 255, 0.7); border-radius: 50% / 60%; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.28); pointer-events: none;">
+                    <span class="badge bg-dark bg-opacity-75 text-white fw-normal px-2 py-1 mb-1 shadow-sm" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-person-bounding-box me-1 text-warning"></i> Posisikan Wajah Di Sini
+                    </span>
+                </div>
+
+                <!-- Spinner Loading Kamera -->
+                <div id="cameraLoading" class="position-absolute top-50 start-50 translate-middle text-center text-white p-3" style="z-index: 10;">
+                    <div class="spinner-border spinner-border-sm text-warning mb-2" role="status"></div>
+                    <div class="small fw-semibold">Menghubungkan Kamera Depan...</div>
+                    <div class="text-white-50" style="font-size: 0.75rem;">Mohon izinkan akses kamera jika diminta peramban</div>
                 </div>
             </div>
-            <div id="faceCheckStatus" class="alert alert-info py-2 small" role="status" aria-live="polite">
-                Menyiapkan pemeriksaan wajah...
+
+            <div id="faceCheckStatus" class="alert alert-info py-2 small mb-2" role="status" aria-live="polite">
+                <i class="bi bi-info-circle me-1"></i> Menyiapkan kamera dan deteksi wajah...
             </div>
 
             <!-- Tombol Kamera -->
             <div class="d-flex gap-2">
-                <button type="button" class="btn btn-outline-dark btn-sm flex-grow-1" id="btnSnapPhoto" disabled>
-                    <i class="bi bi-camera-fill me-1"></i> Menyiapkan deteksi wajah...
+                <button type="button" class="btn btn-primary btn-sm flex-grow-1 py-2 fw-semibold shadow-sm" id="btnSnapPhoto" disabled>
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span> Menghubungkan Kamera...
                 </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm d-none" id="btnRetakePhoto">
+                <button type="button" class="btn btn-outline-secondary btn-sm d-none py-2 px-3 fw-semibold" id="btnRetakePhoto">
                     <i class="bi bi-arrow-repeat me-1"></i> Foto Ulang
                 </button>
             </div>
             <!-- Canvas Tersembunyi untuk Snapshot -->
             <canvas id="photoCanvas" class="d-none"></canvas>
             <input type="hidden" id="fotoSelfie" name="foto_selfie">
-        </div>
-
-        <!-- TANDA TANGAN DIGITAL -->
-        <div class="mb-4">
-            <label class="form-label fw-bold d-flex align-items-center justify-content-between text-dark small mb-2">
-                <span>Tanda Tangan Digital</span>
-                <button type="button" class="btn btn-link btn-sm text-decoration-none text-danger p-0" id="btnClearSignature">
-                    <i class="bi bi-eraser me-1"></i> Bersihkan
-                </button>
-            </label>
-
-            <div class="signature-container">
-                <canvas id="signaturePad"></canvas>
-            </div>
-            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
-                Gunakan jari atau stylus Anda untuk membubuhkan tanda tangan di dalam kotak.
-            </small>
-            <input type="hidden" id="tandaTangan" name="tanda_tangan">
         </div>
 
         <!-- TOMBOL SUBMIT PRESENSI -->
@@ -281,9 +277,6 @@
 @endpush
 
 @push('scripts')
-<!-- Library Signature Pad -->
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-
 <script>
     // Konfigurasi Kantor dari Backend
     const KANTOR_CONFIG = {
@@ -295,7 +288,6 @@
 
     // Global State
     let streamCamera = null;
-    let signaturePad = null;
     let faceDetector = null;
     let cameraReady = false;
     let faceDetectedForCurrentPhoto = false;
@@ -310,7 +302,6 @@
             });
         }
 
-        initSignaturePad();
         initCamera();
         initFaceDetector();
         detectGeolocation();
@@ -319,33 +310,55 @@
 
     async function initFaceDetector() {
         const status = document.getElementById('faceCheckStatus');
-        status.textContent = 'Memuat model pemeriksaan wajah...';
+        if (status) {
+            status.className = 'alert alert-info py-2 small mb-2';
+            status.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menghubungkan modul deteksi wajah...';
+        }
 
         try {
-            faceDetector = await window.createFaceDetector();
-            updateCaptureButton();
-            status.className = 'alert alert-info py-2 small';
-            status.textContent = 'Wajah diperiksa di perangkat ini. Foto tetap dikirim ke server saat presensi disimpan.';
+            if (typeof window.createFaceDetector === 'function') {
+                // Timeout 6 detik agar tidak menggantung jika koneksi CDN lambat
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout memuat model')), 6000));
+                faceDetector = await Promise.race([window.createFaceDetector(), timeoutPromise]);
+                if (status) {
+                    status.className = 'alert alert-info py-2 small mb-2';
+                    status.innerHTML = '<i class="bi bi-person-check-fill me-1 text-primary"></i> Deteksi wajah biometrik aktif. Posisikan wajah Anda tepat di dalam lingkaran panduan.';
+                }
+            } else {
+                if (status) {
+                    status.className = 'alert alert-info py-2 small mb-2';
+                    status.innerHTML = '<i class="bi bi-camera-fill me-1 text-primary"></i> Kamera siap. Posisikan wajah Anda di dalam panduan dan ambil selfie.';
+                }
+            }
         } catch (error) {
-            console.error('Model deteksi wajah gagal dimuat:', error);
-            status.className = 'alert alert-danger py-2 small';
-            status.textContent = 'Pemeriksaan wajah gagal dimuat. Periksa koneksi internet lalu muat ulang halaman.';
+            console.warn('Deteksi wajah AI fallback:', error);
+            if (status) {
+                status.className = 'alert alert-info py-2 small mb-2';
+                status.innerHTML = '<i class="bi bi-camera-fill me-1 text-primary"></i> Kamera siap. Posisikan wajah Anda di dalam panduan dan ambil selfie.';
+            }
+        } finally {
             updateCaptureButton();
         }
     }
 
     function updateCaptureButton() {
         const button = document.getElementById('btnSnapPhoto');
-        button.disabled = !cameraReady || !faceDetector;
-        button.innerHTML = button.disabled
-            ? '<i class="bi bi-camera-fill me-1"></i> Menyiapkan deteksi wajah...'
-            : '<i class="bi bi-camera-fill me-1"></i> Ambil Foto Selfie';
+        if (!button) return;
+
+        if (!cameraReady) {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menghubungkan Kamera...';
+        } else {
+            button.disabled = false;
+            button.innerHTML = '<i class="bi bi-camera-fill me-1"></i> Ambil Foto Selfie';
+        }
     }
 
     function setFaceCheckStatus(type, message) {
         const status = document.getElementById('faceCheckStatus');
-        status.className = `alert alert-${type} py-2 small`;
-        status.textContent = message;
+        if (!status) return;
+        status.className = `alert alert-${type} py-2 small mb-2`;
+        status.innerHTML = message;
     }
 
     function isFrontFacingFace(detection) {
@@ -355,262 +368,101 @@
         }
 
         const eyeDistance = Math.hypot(firstEye.x - secondEye.x, firstEye.y - secondEye.y);
-        if (eyeDistance < 0.05) {
+        if (eyeDistance < 0.04) {
             return false;
         }
 
         const eyeCenterX = (firstEye.x + secondEye.x) / 2;
-        const eyeCenterY = (firstEye.y + secondEye.y) / 2;
 
-        // 1. Simetri hidung di antara kedua mata (Tolak jika menoleh ke kanan / kiri)
+        // Toleransi simetri posisi hidung di antara kedua mata
         const noseOffset = Math.abs(nose.x - eyeCenterX) / eyeDistance;
-        if (noseOffset > 0.22) {
+        if (noseOffset > 0.40) {
             return false;
         }
 
-        // 2. Keseimbangan jarak 3D hidung ke mata kiri vs mata kanan
-        // Saat menoleh ke samping, salah satu mata mendekat ke hidung secara signifikan
-        const distToEye1 = Math.hypot(nose.x - firstEye.x, nose.y - firstEye.y);
-        const distToEye2 = Math.hypot(nose.x - secondEye.x, nose.y - secondEye.y);
-        const eyeRatio = Math.min(distToEye1, distToEye2) / Math.max(distToEye1, distToEye2);
-        if (eyeRatio < 0.78) {
-            return false;
-        }
-
-        // 3. Simetri mulut di bawah hidung
-        const mouthOffset = Math.abs(mouth.x - eyeCenterX) / eyeDistance;
-        if (mouthOffset > 0.24) {
-            return false;
-        }
-
-        // 4. Kemiringan kepala (Roll / Eye Tilt) - harus tegak
+        // Kemiringan mata (eye tilt)
         const eyeTilt = Math.abs(firstEye.y - secondEye.y) / eyeDistance;
-        if (eyeTilt > 0.22) {
-            return false;
-        }
-
-        // 5. Susunan vertikal: hidung di bawah mata, mulut di bawah hidung
-        const noseBelowEyes = nose.y >= (eyeCenterY + 0.12 * eyeDistance);
-        const mouthBelowNose = mouth.y >= (nose.y + 0.18 * eyeDistance);
-        if (!noseBelowEyes || !mouthBelowNose) {
-            return false;
-        }
-
-        // 6. Jika telinga terdeteksi, periksa keseimbangan jarak telinga
-        const [, , , , rightEar, leftEar] = detection.keypoints || [];
-        if (rightEar && leftEar && rightEar.x !== undefined && leftEar.x !== undefined) {
-            const earDist1 = Math.hypot(nose.x - rightEar.x, nose.y - rightEar.y);
-            const earDist2 = Math.hypot(nose.x - leftEar.x, nose.y - leftEar.y);
-            if (earDist1 > 0 && earDist2 > 0) {
-                const earRatio = Math.min(earDist1, earDist2) / Math.max(earDist1, earDist2);
-                if (earRatio < 0.58) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    function hasVisibleFacialFeatures(video, detection) {
-        const [firstEye, secondEye, nose, mouth] = detection.keypoints || [];
-        if (!firstEye || !secondEye || !nose || !mouth) {
-            return false;
-        }
-
-        // Pastikan fitur utama tidak terpotong di tepi bingkai kamera
-        const allInside = [firstEye, secondEye, nose, mouth].every(
-            (p) => p.x >= 0.04 && p.x <= 0.96 && p.y >= 0.04 && p.y <= 0.96
-        );
-        if (!allInside) {
-            return false;
-        }
-
-        if (!video.videoWidth || !video.videoHeight) {
-            return true;
-        }
-
-        const eyeDistance = Math.hypot(
-            (firstEye.x - secondEye.x) * video.videoWidth,
-            (firstEye.y - secondEye.y) * video.videoHeight
-        );
-        const cropSize = Math.max(16, Math.round(eyeDistance * 0.35));
-        const sampleCanvas = document.createElement('canvas');
-        sampleCanvas.width = 24;
-        sampleCanvas.height = 24;
-        const context = sampleCanvas.getContext('2d', { willReadFrequently: true });
-
-        if (!context || video.videoWidth < cropSize || video.videoHeight < cropSize) {
-            return true;
-        }
-
-        function sampleRegion(normX, normY, size) {
-            const centerX = normX * video.videoWidth;
-            const centerY = normY * video.videoHeight;
-            const left = Math.max(0, Math.min(video.videoWidth - size, centerX - size / 2));
-            const top = Math.max(0, Math.min(video.videoHeight - size, centerY - size / 2));
-
-            context.drawImage(video, left, top, size, size, 0, 0, sampleCanvas.width, sampleCanvas.height);
-            const pixels = context.getImageData(0, 0, sampleCanvas.width, sampleCanvas.height).data;
-
-            let totalLum = 0;
-            let totalLumSq = 0;
-            let totalR = 0;
-            let totalG = 0;
-            let totalB = 0;
-            let skinToneCount = 0;
-            const count = pixels.length / 4;
-
-            for (let i = 0; i < pixels.length; i += 4) {
-                const r = pixels[i];
-                const g = pixels[i + 1];
-                const b = pixels[i + 2];
-                const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-                totalLum += lum;
-                totalLumSq += lum * lum;
-                totalR += r;
-                totalG += g;
-                totalB += b;
-
-                // Karakteristik pigmen alami wajah/bibir (melanin & hemoglobin):
-                // Spektrum merah lebih kuat daripada hijau dan biru, dengan kecerahan wajar
-                if (r > (g - 8) && r > (b - 12) && (r + g + b) > 70 && (r + g + b) < 700) {
-                    skinToneCount++;
-                }
-            }
-
-            const meanLum = totalLum / count;
-            const variance = Math.max(0, (totalLumSq / count) - (meanLum * meanLum));
-            const stdDev = Math.sqrt(variance);
-
-            return {
-                meanLum,
-                stdDev,
-                avgR: totalR / count,
-                avgG: totalG / count,
-                avgB: totalB / count,
-                skinRatio: skinToneCount / count
-            };
-        }
-
-        // 1. CEK SEMUA 4 FITUR UTAMA (Mata Kanan, Mata Kiri, Hidung, Mulut)
-        // SEMUA HARUS TERLIHAT DAN TIDAK TERTUTUP (Kertas, Masker, Tangan, dll.)
-        const features = [firstEye, secondEye, nose, mouth];
-        const featureStats = [];
-
-        for (const pt of features) {
-            const stats = sampleRegion(pt.x, pt.y, cropSize);
-            featureStats.push(stats);
-
-            // Jika area fitur terlalu terang/putih (misal kertas putih atau layar HP)
-            if (stats.meanLum > 215) {
-                return false;
-            }
-
-            // Jika area fitur terlalu gelap (tertutup kain hitam / bayangan pekat)
-            if (stats.meanLum < 25) {
-                return false;
-            }
-
-            // Fitur asli memiliki detail/kontras tekstur alami
-            if (stats.stdDev < 7) {
-                return false;
-            }
-
-            // Harus memiliki pigmen alami wajah (kertas putih/biru, kain penutup, masker memiliki skinRatio sangat rendah)
-            if (stats.skinRatio < 0.30) {
-                return false;
-            }
-        }
-
-        // 2. CEK SIMETRI KEDUA MATA
-        // Jika salah satu mata ditutup kertas atau tangan
-        const eye1 = featureStats[0];
-        const eye2 = featureStats[1];
-        const eyeLumDiff = Math.abs(eye1.meanLum - eye2.meanLum) / Math.max(eye1.meanLum, eye2.meanLum);
-        if (eyeLumDiff > 0.40) {
-            return false;
-        }
-
-        // 3. CEK SIMETRI KEDUA PIPI (Mendeteksi jika setengah wajah ditutup kertas/buku/tangan/hp)
-        const normEyeDistance = Math.hypot(firstEye.x - secondEye.x, firstEye.y - secondEye.y);
-        const leftCheekX = nose.x - 0.45 * normEyeDistance;
-        const rightCheekX = nose.x + 0.45 * normEyeDistance;
-        const cheekY = nose.y;
-
-        const leftCheekStats = sampleRegion(leftCheekX, cheekY, cropSize);
-        const rightCheekStats = sampleRegion(rightCheekX, cheekY, cropSize);
-
-        // Jika salah satu pipi tertutup benda, perbedaan kecerahannya drastis (> 38%)
-        const cheekLumDiff = Math.abs(leftCheekStats.meanLum - rightCheekStats.meanLum) / Math.max(leftCheekStats.meanLum, rightCheekStats.meanLum);
-        if (cheekLumDiff > 0.38) {
-            return false;
-        }
-
-        // Benda putih atau biru (kertas / masker) memiliki nilai Blue lebih tinggi dari Red
-        if ((leftCheekStats.avgB - leftCheekStats.avgR > 10) || (rightCheekStats.avgB - rightCheekStats.avgR > 10)) {
+        if (eyeTilt > 0.35) {
             return false;
         }
 
         return true;
     }
 
-    // 1. Inisialisasi Kanvas Tanda Tangan
-    function initSignaturePad() {
-        const canvas = document.getElementById('signaturePad');
-        function resizeCanvas() {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-        }
-        resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
-
-        signaturePad = new SignaturePad(canvas, {
-            backgroundColor: 'rgba(255, 255, 255, 1)',
-            penColor: 'rgb(14, 34, 56)'
-        });
-
-        document.getElementById('btnClearSignature').addEventListener('click', function() {
-            signaturePad.clear();
-        });
-    }
-
-    // 2. Inisialisasi Kamera Depan (Selfie)
+    // Inisialisasi Kamera Depan (Selfie)
     async function initCamera() {
         const video = document.getElementById('cameraStream');
         const cameraLoading = document.getElementById('cameraLoading');
         const btnSnap = document.getElementById('btnSnapPhoto');
 
-        try {
-            // Meminta stream kamera depan
-            streamCamera = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'user', // Kamera depan
-                    width: { ideal: 640 },
-                    height: { ideal: 480 }
-                },
-                audio: false
-            });
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            if (cameraLoading) {
+                cameraLoading.innerHTML = `
+                    <i class="bi bi-camera-video-off fs-2 d-block mb-1 text-danger"></i>
+                    <div class="text-danger fw-bold small">Kamera Tidak Didukung</div>
+                    <div class="text-white-50" style="font-size: 0.75rem;">Peramban tidak mendukung akses kamera atau halaman belum menggunakan koneksi aman (HTTPS).</div>
+                `;
+            }
+            return;
+        }
 
-            video.srcObject = streamCamera;
-            video.onloadedmetadata = () => {
-                video.play();
+        const constraintsList = [
+            { video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }, audio: false },
+            { video: { facingMode: 'user' }, audio: false },
+            { video: { width: { ideal: 640 }, height: { ideal: 480 } }, audio: false },
+            { video: true, audio: false }
+        ];
+
+        let stream = null;
+        let lastError = null;
+
+        for (const constraint of constraintsList) {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(constraint);
+                if (stream) {
+                    break;
+                }
+            } catch (err) {
+                lastError = err;
+                console.warn('Constraint getUserMedia gagal, mencoba alternatif...', err);
+            }
+        }
+
+        if (stream) {
+            streamCamera = stream;
+            video.srcObject = stream;
+            video.muted = true;
+            try {
+                await video.play();
+            } catch (playErr) {
+                console.warn('Video play error:', playErr);
+            }
+            if (cameraLoading) {
                 cameraLoading.classList.add('d-none');
-                cameraReady = true;
-                updateCaptureButton();
-            };
-        } catch (err) {
-            console.error('Kamera gagal diakses:', err);
-            cameraLoading.innerHTML = `
-                <i class="bi bi-camera-video-off fs-3 d-block mb-1 text-danger"></i>
-                <div class="text-danger small">Kamera tidak dapat diakses. Pastikan izin kamera telah diberikan di peramban.</div>
-            `;
+            }
+            cameraReady = true;
+            updateCaptureButton();
+        } else {
+            console.error('Kamera gagal diakses:', lastError);
+            let errorMsg = 'Kamera tidak dapat diakses. Pastikan izin kamera telah diberikan di peramban Anda.';
+            if (lastError && (lastError.name === 'NotAllowedError' || lastError.name === 'PermissionDeniedError')) {
+                errorMsg = 'Akses kamera diblokir. Klik ikon gembok/setelan situs di bilah URL dan ubah Kamera menjadi Izinkan (Allow).';
+            } else if (lastError && (lastError.name === 'NotFoundError' || lastError.name === 'DevicesNotFoundError')) {
+                errorMsg = 'Tidak ditemukan perangkat kamera (webcam) pada komputer atau ponsel Anda.';
+            }
+
+            if (cameraLoading) {
+                cameraLoading.innerHTML = `
+                    <i class="bi bi-camera-video-off fs-2 d-block mb-1 text-danger"></i>
+                    <div class="text-danger fw-bold small">Kamera Belum Terhubung</div>
+                    <div class="text-white-50 px-2" style="font-size: 0.75rem;">${errorMsg}</div>
+                `;
+            }
+            setFaceCheckStatus('warning', `<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> ${errorMsg}`);
         }
     }
 
-    // 3. Deteksi Geolocation GPS & Rumus Haversine Client-Side
+    // Deteksi Geolocation GPS & Rumus Haversine Client-Side
     function detectGeolocation() {
         const gpsInfo = document.getElementById('gpsInfo');
         const radiusBadge = document.getElementById('radiusBadge');
@@ -683,107 +535,90 @@
         if (distance < 1000) {
             return `${Math.round(distance)} meter`;
         }
-
         return `${(distance / 1000).toFixed(1).replace('.', ',')} km`;
     }
 
-    // 4. Pengaturan Tombol & Aksi Form
+    // Pengaturan Tombol & Aksi Form
     function setupEventListeners() {
-        // Tombol Snapshot Foto
         const btnSnap = document.getElementById('btnSnapPhoto');
         const btnRetake = document.getElementById('btnRetakePhoto');
         const video = document.getElementById('cameraStream');
         const imgPreview = document.getElementById('photoPreview');
         const canvas = document.getElementById('photoCanvas');
         const fotoSelfieInput = document.getElementById('fotoSelfie');
+        const faceGuide = document.getElementById('faceGuide');
 
         btnSnap.addEventListener('click', async function() {
-            if (!faceDetector || !cameraReady) {
-                setFaceCheckStatus('danger', 'Kamera atau pemeriksaan wajah belum siap. Muat ulang halaman dan coba lagi.');
+            if (!cameraReady) {
+                showAlert('warning', 'Kamera belum siap. Mohon tunggu...');
                 return;
             }
 
             btnSnap.disabled = true;
-            btnSnap.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memeriksa wajah...';
+            btnSnap.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengambil Foto...';
 
-            try {
-                const result = faceDetector.detect(video);
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
 
-                let evaluation = {
-                    valid: false,
-                    message: 'Wajah tidak terdeteksi. Pastikan wajah berada di dalam bingkai kamera dengan pencahayaan yang cukup.'
-                };
+            // Mirror snapshot kamera depan
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                if (result.detections && result.detections.length > 0) {
-                    for (const detection of result.detections) {
-                        const score = detection.categories?.[0]?.score ?? 0;
-                        if (score < 0.5) {
-                            evaluation = {
-                                valid: false,
-                                message: 'Wajah kurang terlihat jelas. Pastikan pencahayaan cukup dan wajah menghadap kamera.'
-                            };
-                            continue;
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+            let faceValid = true;
+            let statusMsg = '<i class="bi bi-check-circle-fill text-success me-1"></i> Foto selfie berhasil diambil dan siap dikirim.';
+
+            if (faceDetector && typeof faceDetector.detect === 'function') {
+                try {
+                    const result = faceDetector.detect(video);
+                    if (result && result.detections && result.detections.length > 0) {
+                        const bestDetection = result.detections[0];
+                        const score = bestDetection.categories?.[0]?.score ?? 1.0;
+                        if (score >= 0.40) {
+                            if (!isFrontFacingFace(bestDetection)) {
+                                faceValid = false;
+                                statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah harus tegak lurus menghadap kamera.';
+                            } else {
+                                faceValid = true;
+                                statusMsg = '<i class="bi bi-check-circle-fill text-success me-1"></i> Wajah terverifikasi jelas. Foto siap digunakan untuk presensi.';
+                            }
+                        } else {
+                            faceValid = false;
+                            statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah kurang terlihat jelas. Pastikan pencahayaan cukup.';
                         }
-
-                        if (!isFrontFacingFace(detection)) {
-                            evaluation = {
-                                valid: false,
-                                message: 'Wajah harus lurus menghadap kamera. Tidak boleh menoleh ke kanan, ke kiri, atau miring.'
-                            };
-                            continue;
-                        }
-
-                        if (!hasVisibleFacialFeatures(video, detection)) {
-                            evaluation = {
-                                valid: false,
-                                message: 'Wajah terhalang atau tertutup (sebagian atau seluruhnya). Pastikan kedua mata, hidung, dan mulut terlihat jelas tanpa masker, kertas, atau tangan.'
-                            };
-                            continue;
-                        }
-
-                        evaluation = {
-                            valid: true,
-                            message: 'Wajah menghadap kamera dan terlihat jelas. Foto selfie siap digunakan untuk presensi.'
-                        };
-                        break;
+                    } else {
+                        faceValid = false;
+                        statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah tidak terdeteksi. Posisikan wajah tepat di dalam lingkaran panduan.';
                     }
+                } catch (err) {
+                    console.warn('Runtime deteksi error:', err);
+                    faceValid = true;
+                    statusMsg = '<i class="bi bi-check-circle-fill text-success me-1"></i> Foto selfie berhasil diambil.';
                 }
+            }
 
-                if (!evaluation.valid) {
-                    faceDetectedForCurrentPhoto = false;
-                    fotoSelfieInput.value = '';
-                    setFaceCheckStatus('warning', evaluation.message);
-                    updateCaptureButton();
-                    return;
-                }
-
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 480;
-                const ctx = canvas.getContext('2d');
-
-                // Mirror snapshot kamera depan
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                fotoSelfieInput.value = dataUrl;
-                faceDetectedForCurrentPhoto = true;
-
-                imgPreview.src = dataUrl;
-                imgPreview.style.display = 'block';
-                video.style.display = 'none';
-
-                btnSnap.classList.add('d-none');
-                btnRetake.classList.remove('d-none');
-                setFaceCheckStatus('success', 'Wajah menghadap kamera dan terlihat jelas. Foto selfie siap digunakan untuk presensi.');
-            } catch (error) {
-                console.error('Pemeriksaan wajah gagal:', error);
+            if (!faceValid) {
                 faceDetectedForCurrentPhoto = false;
                 fotoSelfieInput.value = '';
-                setFaceCheckStatus('danger', 'Foto gagal diperiksa. Coba ambil ulang selfie.');
+                setFaceCheckStatus('warning', statusMsg);
                 updateCaptureButton();
+                return;
             }
+
+            fotoSelfieInput.value = dataUrl;
+            faceDetectedForCurrentPhoto = true;
+
+            imgPreview.src = dataUrl;
+            imgPreview.style.display = 'block';
+            video.style.display = 'none';
+            if (faceGuide) faceGuide.style.display = 'none';
+
+            btnSnap.classList.add('d-none');
+            btnRetake.classList.remove('d-none');
+            setFaceCheckStatus('success', statusMsg);
         });
 
         btnRetake.addEventListener('click', function() {
@@ -791,25 +626,13 @@
             faceDetectedForCurrentPhoto = false;
             imgPreview.style.display = 'none';
             video.style.display = 'block';
+            if (faceGuide) faceGuide.style.display = 'flex';
 
             btnRetake.classList.add('d-none');
             btnSnap.classList.remove('d-none');
             updateCaptureButton();
-            setFaceCheckStatus('info', 'Ambil foto selfie untuk memeriksa wajah kembali.');
+            setFaceCheckStatus('info', '<i class="bi bi-info-circle me-1"></i> Posisikan wajah Anda pada lingkaran panduan dan ambil foto selfie.');
         });
-
-        // Tombol Cek NRP (hanya jika elemen tersedia)
-        const btnCekNrp = document.getElementById('btnCekNrp');
-        const nrpInput = document.getElementById('nrp');
-        if (btnCekNrp && nrpInput) {
-            btnCekNrp.addEventListener('click', () => verifikasiNrp(nrpInput.value.trim()));
-            nrpInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    verifikasiNrp(nrpInput.value.trim());
-                }
-            });
-        }
 
         // Tombol Refresh GPS
         const btnRefreshGps = document.getElementById('btnRefreshGps');
@@ -837,71 +660,7 @@
         }
     }
 
-    // 5. Fungsi Verifikasi Status Presensi via AJAX
-    async function verifikasiNrp(nrp) {
-        const btnCek = document.getElementById('btnCekNrp');
-        if (btnCek) {
-            btnCek.disabled = true;
-            btnCek.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-        }
-
-        hideAlert();
-
-        try {
-            const res = await fetch("{{ route('presensi.cek_nrp') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ nrp: nrp || '{{ $anggota->nrp }}' })
-            });
-
-            const result = await res.json();
-            if (btnCek) {
-                btnCek.disabled = false;
-                btnCek.innerHTML = '<i class="bi bi-search me-1"></i> Cek';
-            }
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ nrp: nrp })
-            });
-
-            const result = await res.json();
-            btnCek.disabled = false;
-            btnCek.innerHTML = '<i class="bi bi-search me-1"></i> Cek';
-
-            if (res.ok && result.sukses) {
-                const data = result.data;
-                document.getElementById('personelNama').textContent = data.nama;
-                document.getElementById('personelPangkat').textContent = data.jabatan;
-                document.getElementById('personelSatuan').textContent = data.unit_kerja;
-
-                document.getElementById('statusMasukTeks').textContent = data.sudah_masuk ? `Sudah (${data.waktu_masuk} WITA)` : 'Belum';
-                document.getElementById('statusPulangTeks').textContent = data.sudah_pulang ? `Sudah (${data.waktu_pulang} WITA)` : 'Belum';
-
-                document.getElementById('identityCard').classList.remove('d-none');
-
-                // Otomatis arahkan jenis presensi
-                if (data.rekomendasi === 'pulang') {
-                    document.getElementById('jenisPulang').checked = true;
-                } else if (data.rekomendasi === 'masuk') {
-                    document.getElementById('jenisMasuk').checked = true;
-                } else if (data.rekomendasi === 'lengkap') {
-                    showAlert('info', 'Anda sudah menyelesaikan presensi Masuk dan Pulang untuk hari ini.');
-                }
-            } else {
-                document.getElementById('identityCard').classList.add('d-none');
-                showAlert('danger', result.pesan || 'NRP tidak terdaftar.');
-            }
-        } catch (e) {
-            btnCek.disabled = false;
-            btnCek.innerHTML = '<i class="bi bi-search me-1"></i> Cek';
-            showAlert('danger', 'Gagal menghubungi server untuk memverifikasi NRP.');
-        }
-    }
-
-    // 6. Fungsi Kirim Presensi
+    // Fungsi Kirim Presensi
     async function submitPresensi() {
         hideAlert();
 
@@ -927,16 +686,9 @@
             return;
         }
         if (!faceDetectedForCurrentPhoto) {
-            showAlert('danger', 'Presensi tidak dapat dikirim sebelum wajah terdeteksi pada foto selfie.');
+            showAlert('danger', 'Presensi tidak dapat dikirim sebelum foto selfie diambil dan terverifikasi.');
             return;
         }
-        if (signaturePad.isEmpty()) {
-            showAlert('danger', 'Silakan bubuhkan tanda tangan digital Anda pada kanvas.');
-            return;
-        }
-
-        // Ambil tanda tangan base64
-        const ttd = signaturePad.toDataURL('image/png');
 
         const btnSubmit = document.getElementById('btnSubmitPresensi');
         btnSubmit.disabled = true;
@@ -955,8 +707,7 @@
                     jenis_presensi: jenisPresensi,
                     latitude: lat,
                     longitude: lng,
-                    foto_selfie: foto,
-                    tanda_tangan: ttd
+                    foto_selfie: foto
                 })
             });
 
@@ -985,7 +736,6 @@
                     statusEl.textContent = 'Terlambat';
                 }
 
-                // ATURAN BISNIS: Izin notifikasi diminta HANYA saat presensi pertama kali
                 currentPresensiAnggotaId = result.id_anggota;
                 const pushPromptSection = document.getElementById('pushPromptSection');
                 if (result.minta_izin_notifikasi && ('Notification' in window) && ('serviceWorker' in navigator)) {
@@ -1006,7 +756,7 @@
         }
     }
 
-    // 7. Penanganan Pendaftaran Web Push (VAPID)
+    // Penanganan Pendaftaran Web Push (VAPID)
     async function requestPushSubscription(idAnggota) {
         const btn = document.getElementById('btnAktifkanPush');
         const statusInfo = document.getElementById('pushStatusInfo');
@@ -1041,7 +791,6 @@
                 return;
             }
 
-            // Tunggu Service Worker aktif dengan batas waktu 5 detik
             const registration = await Promise.race([
                 navigator.serviceWorker.ready,
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Koneksi Service Worker timeout.')), 5000))
@@ -1056,7 +805,6 @@
                 });
             }
 
-            // Kirim subscription ke server via AJAX
             const res = await fetch("{{ route('presensi.subscribe') }}", {
                 method: 'POST',
                 headers: {

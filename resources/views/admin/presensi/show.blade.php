@@ -80,22 +80,30 @@
             </div>
         </div>
 
-        <!-- Tanda Tangan Digital -->
+        <!-- Tanda Tangan Digital / Verifikasi Wajah -->
         <div class="card border-0 shadow-sm rounded-3">
             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="fw-bold text-dark mb-0">
                     <i class="bi bi-pen-fill me-1 text-primary"></i> Tanda Tangan Digital
                 </h6>
-                <span class="badge bg-light text-secondary border">Signature Pad</span>
+                <span class="badge bg-light text-secondary border">Verifikasi</span>
             </div>
             <div class="card-body p-3 text-center">
-                <div class="signature-preview mb-2">
-                    <img src="{{ route('admin.presensi.file', ['type' => 'tanda_tangan', 'filename' => basename($presensi->tanda_tangan)]) }}" 
-                         alt="Tanda Tangan {{ $presensi->anggota->nama ?? '-' }}">
-                </div>
-                <small class="text-muted">
-                    <i class="bi bi-check-circle text-success me-1"></i> Dibubuhkan langsung oleh personel
-                </small>
+                @if($presensi->tanda_tangan && trim($presensi->tanda_tangan) !== '')
+                    <div class="signature-preview mb-2">
+                        <img src="{{ route('admin.presensi.file', ['type' => 'tanda_tangan', 'filename' => basename($presensi->tanda_tangan)]) }}" 
+                             alt="Tanda Tangan {{ $presensi->anggota->nama ?? '-' }}">
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-check-circle text-success me-1"></i> Dibubuhkan langsung oleh personel
+                    </small>
+                @else
+                    <div class="py-4 px-2 text-center text-muted bg-light rounded-3">
+                        <i class="bi bi-person-bounding-box fs-1 text-primary d-block mb-2"></i>
+                        <div class="small fw-semibold text-dark">Presensi Biometrik Wajah</div>
+                        <div class="small text-secondary" style="font-size: 0.8rem;">Personel melakukan presensi mandiri dengan foto selfie kamera depan tanpa tanda tangan digital.</div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

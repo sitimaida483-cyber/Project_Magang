@@ -199,6 +199,7 @@
     text-align: center;
 }
 
+.camera-container,
 .presensi-page .camera-container {
     position: relative;
     display: flex;
@@ -211,6 +212,7 @@
     background-color: #000000;
 }
 
+#cameraStream,
 .presensi-page #cameraStream {
     width: 100%;
     height: 100%;
@@ -218,6 +220,7 @@
     transform: scaleX(-1);
 }
 
+#photoPreview,
 .presensi-page #photoPreview {
     display: none;
     width: 100%;
