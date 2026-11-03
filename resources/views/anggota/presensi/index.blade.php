@@ -163,13 +163,6 @@
             <div class="camera-container mb-2 position-relative rounded-4 overflow-hidden shadow-sm" style="aspect-ratio: 4/3; max-height: 400px; background-color: #0b1a2e; border: 2px solid #cbd5e1;">
                 <video id="cameraStream" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block;"></video>
                 <img id="photoPreview" alt="Pratinjau Foto Selfie" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                
-                <!-- Face Guide Overlay (Oval Panduan Wajah) -->
-                <div id="faceGuide" class="position-absolute top-50 start-50 translate-middle pointer-events-none d-flex flex-column align-items-center justify-content-center" style="width: 220px; height: 280px; border: 2.5px dashed rgba(255, 255, 255, 0.7); border-radius: 50% / 60%; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.28); pointer-events: none;">
-                    <span class="badge bg-dark bg-opacity-75 text-white fw-normal px-2 py-1 mb-1 shadow-sm" style="font-size: 0.72rem; letter-spacing: 0.5px;">
-                        <i class="bi bi-person-bounding-box me-1 text-warning"></i> Posisikan Wajah Di Sini
-                    </span>
-                </div>
 
                 <!-- Spinner Loading Kamera -->
                 <div id="cameraLoading" class="position-absolute top-50 start-50 translate-middle text-center text-white p-3" style="z-index: 10;">
@@ -322,19 +315,19 @@
                 faceDetector = await Promise.race([window.createFaceDetector(), timeoutPromise]);
                 if (status) {
                     status.className = 'alert alert-info py-2 small mb-2';
-                    status.innerHTML = '<i class="bi bi-person-check-fill me-1 text-primary"></i> Deteksi wajah biometrik aktif. Posisikan wajah Anda tepat di dalam lingkaran panduan.';
+                    status.innerHTML = '<i class="bi bi-person-check-fill me-1 text-primary"></i> Deteksi wajah biometrik aktif. Posisikan wajah Anda tegak lurus menghadap kamera.';
                 }
             } else {
                 if (status) {
                     status.className = 'alert alert-info py-2 small mb-2';
-                    status.innerHTML = '<i class="bi bi-camera-fill me-1 text-primary"></i> Kamera siap. Posisikan wajah Anda di dalam panduan dan ambil selfie.';
+                    status.innerHTML = '<i class="bi bi-camera-fill me-1 text-primary"></i> Kamera siap. Posisikan wajah Anda tegak lurus menghadap kamera dan ambil selfie.';
                 }
             }
         } catch (error) {
             console.warn('Deteksi wajah AI fallback:', error);
             if (status) {
                 status.className = 'alert alert-info py-2 small mb-2';
-                status.innerHTML = '<i class="bi bi-camera-fill me-1 text-primary"></i> Kamera siap. Posisikan wajah Anda di dalam panduan dan ambil selfie.';
+                status.innerHTML = '<i class="bi bi-camera-fill me-1 text-primary"></i> Kamera siap. Posisikan wajah Anda tegak lurus menghadap kamera dan ambil selfie.';
             }
         } finally {
             updateCaptureButton();
@@ -361,32 +354,255 @@
         status.innerHTML = message;
     }
 
-    function isFrontFacingFace(detection) {
-        const [firstEye, secondEye, nose, mouth] = detection.keypoints || [];
-        if (!firstEye || !secondEye || !nose || !mouth) {
-            return false;
+    // Pemeriksaan Kualitas Wajah (Pose Lurus & Tidak Tertutup)
+    function checkFaceQuality(ctx, canvas, detection) {
+        const keypoints = detection.keypoints;
+        if (!keypoints || keypoints.length < 4) {
+            return {
+                valid: false,
+                message: 'Fitur wajah tidak terdeteksi lengkap. Pastikan seluruh wajah menghadap kamera.'
+            };
         }
 
-        const eyeDistance = Math.hypot(firstEye.x - secondEye.x, firstEye.y - secondEye.y);
-        if (eyeDistance < 0.04) {
-            return false;
+        const eyeA = keypoints[0];
+        const eyeB = keypoints[1];
+        const eyeLeft = (eyeA.x < eyeB.x) ? eyeA : eyeB;
+        const eyeRight = (eyeA.x < eyeB.x) ? eyeB : eyeA;
+        const nose = keypoints[2];
+        const mouth = keypoints[3];
+
+        if (!eyeLeft || !eyeRight || !nose || !mouth) {
+            return {
+                valid: false,
+                message: 'Mata, hidung, dan mulut harus terlihat jelas di kamera.'
+            };
         }
 
-        const eyeCenterX = (firstEye.x + secondEye.x) / 2;
+        const eyeNormDist = Math.hypot(eyeRight.x - eyeLeft.x, eyeRight.y - eyeLeft.y);
+        const eyePixelDist = eyeNormDist * canvas.width;
 
-        // Toleransi simetri posisi hidung di antara kedua mata
-        const noseOffset = Math.abs(nose.x - eyeCenterX) / eyeDistance;
-        if (noseOffset > 0.40) {
-            return false;
+        if (eyeNormDist < 0.06) {
+            return {
+                valid: false,
+                message: 'Wajah terlalu jauh dari kamera. Harap dekatkan posisi wajah Anda.'
+            };
         }
 
-        // Kemiringan mata (eye tilt)
-        const eyeTilt = Math.abs(firstEye.y - secondEye.y) / eyeDistance;
-        if (eyeTilt > 0.35) {
-            return false;
+        // 1. CEK MENOLEH KE KIRI / KANAN (Yaw)
+        const eyeMidX = (eyeLeft.x + eyeRight.x) / 2;
+        const noseOffsetX = Math.abs(nose.x - eyeMidX) / Math.max(eyeNormDist, 0.01);
+        if (noseOffsetX > 0.13) {
+            return {
+                valid: false,
+                message: 'Wajah harus lurus menghadap kamera. Dilarang menoleh ke kiri atau kanan.'
+            };
         }
 
-        return true;
+        const distLeft = Math.hypot(nose.x - eyeLeft.x, nose.y - eyeLeft.y);
+        const distRight = Math.hypot(nose.x - eyeRight.x, nose.y - eyeRight.y);
+        const eyeRatio = Math.min(distLeft, distRight) / Math.max(distLeft, distRight, 0.001);
+        if (eyeRatio < 0.72) {
+            return {
+                valid: false,
+                message: 'Wajah terdeteksi menoleh ke samping. Pandang lurus ke lensa kamera.'
+            };
+        }
+
+        // 2. CEK KEPALA MIRING (Roll)
+        const eyeTilt = Math.abs(eyeRight.y - eyeLeft.y) / Math.max(eyeNormDist, 0.01);
+        if (eyeTilt > 0.16) {
+            return {
+                valid: false,
+                message: 'Posisi kepala miring. Harap tegakkan kepala lurus menghadap kamera.'
+            };
+        }
+
+        // 3. CEK SUSUNAN VERTIKAL (Pitch / Menunduk / Mendongak)
+        const eyeMidY = (eyeLeft.y + eyeRight.y) / 2;
+        if (nose.y <= eyeMidY + 0.03 * eyeNormDist) {
+            return {
+                valid: false,
+                message: 'Wajah mendongak ke atas. Pandang lurus ke arah kamera.'
+            };
+        }
+        if (mouth.y <= nose.y + 0.06 * eyeNormDist) {
+            return {
+                valid: false,
+                message: 'Wajah menunduk ke bawah. Tegakkan wajah lurus menghadap kamera.'
+            };
+        }
+
+        // 4. CEK APAKAH WAJAH TERTUTUP (Kertas, Buku, Tangan, Masker, HP, dll.)
+        const sampleSize = Math.max(16, Math.min(50, Math.round(eyePixelDist * 0.32)));
+
+        function getRegionStats(normX, normY, size) {
+            const cx = normX * canvas.width;
+            const cy = normY * canvas.height;
+            const x0 = Math.max(0, Math.min(canvas.width - size, Math.round(cx - size / 2)));
+            const y0 = Math.max(0, Math.min(canvas.height - size, Math.round(cy - size / 2)));
+
+            const imgData = ctx.getImageData(x0, y0, size, size);
+            const data = imgData.data;
+            let sumLum = 0;
+            let sumLumSq = 0;
+            let sumR = 0, sumG = 0, sumB = 0;
+            let skinCount = 0;
+            const total = data.length / 4;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+                sumLum += lum;
+                sumLumSq += lum * lum;
+                sumR += r;
+                sumG += g;
+                sumB += b;
+
+                // Karakteristik spektrum alami kulit wajah
+                if (r > g - 8 && r > b && (r + g + b) > 55 && (r + g + b) < 700) {
+                    skinCount++;
+                }
+            }
+
+            const avgLum = sumLum / total;
+            const variance = Math.max(0, (sumLumSq / total) - (avgLum * avgLum));
+            const stdDev = Math.sqrt(variance);
+
+            return {
+                avgLum,
+                stdDev,
+                avgR: sumR / total,
+                avgG: sumG / total,
+                avgB: sumB / total,
+                skinRatio: skinCount / total
+            };
+        }
+
+        const eyeLeftStats  = getRegionStats(eyeLeft.x, eyeLeft.y, sampleSize);
+        const eyeRightStats = getRegionStats(eyeRight.x, eyeRight.y, sampleSize);
+        const noseStats     = getRegionStats(nose.x, nose.y, sampleSize);
+        const mouthStats    = getRegionStats(mouth.x, mouth.y, sampleSize);
+
+        // Sampel pipi kiri dan pipi kanan
+        const cheekLeftStats  = getRegionStats(nose.x - eyeNormDist * 0.45, nose.y, sampleSize);
+        const cheekRightStats = getRegionStats(nose.x + eyeNormDist * 0.45, nose.y, sampleSize);
+
+        // A. Cek penutup putih terang (seperti buku/kertas/masker putih)
+        if (eyeLeftStats.avgLum > 185 || eyeRightStats.avgLum > 185 ||
+            cheekLeftStats.avgLum > 185 || cheekRightStats.avgLum > 185 ||
+            mouthStats.avgLum > 185) {
+            return {
+                valid: false,
+                message: 'Wajah terhalang atau tertutup benda (kertas/buku/penutup). Pastikan seluruh wajah terlihat jelas tanpa penghalang.'
+            };
+        }
+
+        // B. Cek penutup gelap (HP/buku gelap/penutup hitam)
+        if (eyeLeftStats.avgLum < 20 || eyeRightStats.avgLum < 20 ||
+            noseStats.avgLum < 20 || mouthStats.avgLum < 20 ||
+            cheekLeftStats.avgLum < 20 || cheekRightStats.avgLum < 20) {
+            return {
+                valid: false,
+                message: 'Wajah terhalang atau terlalu gelap. Pastikan tidak ada benda menutupi wajah dan pencahayaan cukup.'
+            };
+        }
+
+        // C. Cek asimetri drastis pipi (misal satu sisi muka tertutup buku seperti pada foto)
+        const cheekDiff = Math.abs(cheekLeftStats.avgLum - cheekRightStats.avgLum);
+        const cheekMax  = Math.max(cheekLeftStats.avgLum, cheekRightStats.avgLum, 1);
+        if (cheekDiff > 35 && (cheekDiff / cheekMax) > 0.28) {
+            return {
+                valid: false,
+                message: 'Sebagian wajah tertutup di salah satu sisi. Seluruh wajah harus terlihat jelas tanpa penghalang.'
+            };
+        }
+
+        // D. Cek asimetri drastis kedua mata
+        const eyeDiff = Math.abs(eyeLeftStats.avgLum - eyeRightStats.avgLum);
+        const eyeMax  = Math.max(eyeLeftStats.avgLum, eyeRightStats.avgLum, 1);
+        if (eyeDiff > 35 && (eyeDiff / eyeMax) > 0.28) {
+            return {
+                valid: false,
+                message: 'Salah satu mata terhalang atau tertutup benda. Kedua mata harus terlihat jelas.'
+            };
+        }
+
+        // E. Cek tekstur mata: mata asli memiliki pupil dan kornea
+        if (eyeLeftStats.stdDev < 6 || eyeRightStats.stdDev < 6) {
+            return {
+                valid: false,
+                message: 'Mata tidak terlihat jelas atau tertutup penutup. Pastikan kedua mata terbuka dan jelas.'
+            };
+        }
+
+        // F. Cek area mulut (masker atau tangan menutup mulut)
+        if (mouthStats.stdDev < 5 || mouthStats.avgLum > 185 || mouthStats.skinRatio < 0.15) {
+            return {
+                valid: false,
+                message: 'Mulut atau bagian bawah wajah tertutup (misal masker atau tangan). Buka penutup sebelum presensi.'
+            };
+        }
+
+        // G. Cek pigmen kulit pipi
+        if (cheekLeftStats.skinRatio < 0.22 || cheekRightStats.skinRatio < 0.22) {
+            return {
+                valid: false,
+                message: 'Wajah terhalang atau tertutup benda asing. Wajah harus terbuka dan terlihat jelas.'
+            };
+        }
+
+        // H. Cek tangan menutupi mulut/hidung (tangan/lengan melintang dari tepi layar ke arah wajah)
+        const armY0 = Math.max(0, Math.round((nose.y - eyeNormDist * 0.15) * canvas.height));
+        const armY1 = Math.min(canvas.height, Math.round((mouth.y + eyeNormDist * 0.45) * canvas.height));
+        const armH  = Math.max(10, armY1 - armY0);
+
+        // Cek sisi kiri (apakah ada lengan/tangan masuk dari sisi kiri menutupi wajah)
+        const leftLimitX = Math.round(Math.max(15, (nose.x - eyeNormDist * 0.55) * canvas.width));
+        if (leftLimitX > 25) {
+            const leftData = ctx.getImageData(0, armY0, leftLimitX, armH).data;
+            let leftSkin = 0;
+            const totalLeft = leftData.length / 4;
+            for (let i = 0; i < leftData.length; i += 4) {
+                const r = leftData[i], g = leftData[i + 1], b = leftData[i + 2];
+                if (r > g - 5 && r > b + 10 && (r + g + b) > 70 && (r + g + b) < 680) {
+                    leftSkin++;
+                }
+            }
+            if ((leftSkin / totalLeft) > 0.38) {
+                return {
+                    valid: false,
+                    message: 'Terdeteksi tangan menutupi wajah. Jauhkan tangan dari wajah saat melakukan presensi.'
+                };
+            }
+        }
+
+        // Cek sisi kanan (apakah ada lengan/tangan masuk dari sisi kanan menutupi wajah)
+        const rightStartX = Math.round(Math.min(canvas.width - 25, (nose.x + eyeNormDist * 0.55) * canvas.width));
+        const rightW = canvas.width - rightStartX;
+        if (rightW > 25) {
+            const rightData = ctx.getImageData(rightStartX, armY0, rightW, armH).data;
+            let rightSkin = 0;
+            const totalRight = rightData.length / 4;
+            for (let i = 0; i < rightData.length; i += 4) {
+                const r = rightData[i], g = rightData[i + 1], b = rightData[i + 2];
+                if (r > g - 5 && r > b + 10 && (r + g + b) > 70 && (r + g + b) < 680) {
+                    rightSkin++;
+                }
+            }
+            if ((rightSkin / totalRight) > 0.38) {
+                return {
+                    valid: false,
+                    message: 'Terdeteksi tangan menutupi wajah. Jauhkan tangan dari wajah saat melakukan presensi.'
+                };
+            }
+        }
+
+        return {
+            valid: true,
+            message: 'Wajah terverifikasi jelas, tegak lurus, dan tidak terhalang.'
+        };
     }
 
     // Inisialisasi Kamera Depan (Selfie)
@@ -546,7 +762,6 @@
         const imgPreview = document.getElementById('photoPreview');
         const canvas = document.getElementById('photoCanvas');
         const fotoSelfieInput = document.getElementById('fotoSelfie');
-        const faceGuide = document.getElementById('faceGuide');
 
         btnSnap.addEventListener('click', async function() {
             if (!cameraReady) {
@@ -555,16 +770,18 @@
             }
 
             btnSnap.disabled = true;
-            btnSnap.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengambil Foto...';
+            btnSnap.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memeriksa wajah...';
 
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-            // Mirror snapshot kamera depan
+            // Mirror snapshot kamera depan agar sesuai dengan pratinjau
+            ctx.save();
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
 
             const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
 
@@ -573,25 +790,28 @@
 
             if (faceDetector && typeof faceDetector.detect === 'function') {
                 try {
-                    const result = faceDetector.detect(video);
+                    // Deteksi wajah langsung pada frame kanvas snapshot
+                    const result = faceDetector.detect(canvas);
                     if (result && result.detections && result.detections.length > 0) {
                         const bestDetection = result.detections[0];
                         const score = bestDetection.categories?.[0]?.score ?? 1.0;
-                        if (score >= 0.40) {
-                            if (!isFrontFacingFace(bestDetection)) {
+                        if (score < 0.70) {
+                            faceValid = false;
+                            statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah tidak terdeteksi secara utuh. Pastikan seluruh wajah (mata, hidung, mulut) terlihat jelas tanpa tertutup tangan atau benda.';
+                        } else {
+                            // Pemeriksaan kualitas wajah: pose lurus (tidak menoleh kiri/kanan) & tidak tertutup
+                            const quality = checkFaceQuality(ctx, canvas, bestDetection);
+                            if (!quality.valid) {
                                 faceValid = false;
-                                statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah harus tegak lurus menghadap kamera.';
+                                statusMsg = `<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> ${quality.message}`;
                             } else {
                                 faceValid = true;
-                                statusMsg = '<i class="bi bi-check-circle-fill text-success me-1"></i> Wajah terverifikasi jelas. Foto siap digunakan untuk presensi.';
+                                statusMsg = '<i class="bi bi-check-circle-fill text-success me-1"></i> Wajah terverifikasi jelas, tegak lurus, dan tidak terhalang.';
                             }
-                        } else {
-                            faceValid = false;
-                            statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah kurang terlihat jelas. Pastikan pencahayaan cukup.';
                         }
                     } else {
                         faceValid = false;
-                        statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah tidak terdeteksi. Posisikan wajah tepat di dalam lingkaran panduan.';
+                        statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah tidak terdeteksi. Posisikan wajah Anda tepat di depan kamera.';
                     }
                 } catch (err) {
                     console.warn('Runtime deteksi error:', err);
@@ -614,7 +834,6 @@
             imgPreview.src = dataUrl;
             imgPreview.style.display = 'block';
             video.style.display = 'none';
-            if (faceGuide) faceGuide.style.display = 'none';
 
             btnSnap.classList.add('d-none');
             btnRetake.classList.remove('d-none');
@@ -626,12 +845,11 @@
             faceDetectedForCurrentPhoto = false;
             imgPreview.style.display = 'none';
             video.style.display = 'block';
-            if (faceGuide) faceGuide.style.display = 'flex';
 
             btnRetake.classList.add('d-none');
             btnSnap.classList.remove('d-none');
             updateCaptureButton();
-            setFaceCheckStatus('info', '<i class="bi bi-info-circle me-1"></i> Posisikan wajah Anda pada lingkaran panduan dan ambil foto selfie.');
+            setFaceCheckStatus('info', '<i class="bi bi-info-circle me-1"></i> Posisikan wajah Anda tegak lurus menghadap kamera dan ambil foto selfie.');
         });
 
         // Tombol Refresh GPS
