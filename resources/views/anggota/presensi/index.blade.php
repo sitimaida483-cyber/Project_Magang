@@ -509,20 +509,20 @@
             };
         }
 
-        // C. Cek asimetri drastis pipi (misal satu sisi muka tertutup buku seperti pada foto)
+        // C. Cek asimetri drastis pipi (misal satu sisi muka tertutup buku/tangan)
         const cheekDiff = Math.abs(cheekLeftStats.avgLum - cheekRightStats.avgLum);
         const cheekMax  = Math.max(cheekLeftStats.avgLum, cheekRightStats.avgLum, 1);
-        if (cheekDiff > 35 && (cheekDiff / cheekMax) > 0.28) {
+        if (cheekDiff > 30 && (cheekDiff / cheekMax) > 0.22) {
             return {
                 valid: false,
-                message: 'Sebagian wajah tertutup di salah satu sisi. Seluruh wajah harus terlihat jelas tanpa penghalang.'
+                message: 'Sebagian wajah tertutup di salah satu sisi (buku/tangan). Seluruh wajah harus terlihat jelas tanpa penghalang.'
             };
         }
 
         // D. Cek asimetri drastis kedua mata
         const eyeDiff = Math.abs(eyeLeftStats.avgLum - eyeRightStats.avgLum);
         const eyeMax  = Math.max(eyeLeftStats.avgLum, eyeRightStats.avgLum, 1);
-        if (eyeDiff > 35 && (eyeDiff / eyeMax) > 0.28) {
+        if (eyeDiff > 30 && (eyeDiff / eyeMax) > 0.22) {
             return {
                 valid: false,
                 message: 'Salah satu mata terhalang atau tertutup benda. Kedua mata harus terlihat jelas.'
@@ -553,50 +553,50 @@
             };
         }
 
-        // H. Cek tangan menutupi mulut/hidung (tangan/lengan melintang dari tepi layar ke arah wajah)
-        const armY0 = Math.max(0, Math.round((nose.y - eyeNormDist * 0.15) * canvas.height));
-        const armY1 = Math.min(canvas.height, Math.round((mouth.y + eyeNormDist * 0.45) * canvas.height));
-        const armH  = Math.max(10, armY1 - armY0);
-
-        // Cek sisi kiri (apakah ada lengan/tangan masuk dari sisi kiri menutupi wajah)
-        const leftLimitX = Math.round(Math.max(15, (nose.x - eyeNormDist * 0.55) * canvas.width));
-        if (leftLimitX > 25) {
-            const leftData = ctx.getImageData(0, armY0, leftLimitX, armH).data;
-            let leftSkin = 0;
-            const totalLeft = leftData.length / 4;
-            for (let i = 0; i < leftData.length; i += 4) {
-                const r = leftData[i], g = leftData[i + 1], b = leftData[i + 2];
-                if (r > g - 5 && r > b + 10 && (r + g + b) > 70 && (r + g + b) < 680) {
-                    leftSkin++;
-                }
-            }
-            if ((leftSkin / totalLeft) > 0.38) {
-                return {
-                    valid: false,
-                    message: 'Terdeteksi tangan menutupi wajah. Jauhkan tangan dari wajah saat melakukan presensi.'
-                };
+        // H. Cek kontras fitur alami hidung (lubang hidung) & mulut (garis bibir)
+        // Memastikan hidung dan mulut tidak ditutupi tangan, kain, atau masker
+        const nosePxX = Math.round(nose.x * canvas.width);
+        const nosePxY = Math.round(nose.y * canvas.height);
+        const dyMin = Math.round(eyePixelDist * 0.03);
+        const dyMax = Math.round(eyePixelDist * 0.15);
+        const dxSpan = Math.round(eyePixelDist * 0.20);
+        let minNostrilLum = 255;
+        for (let dy = dyMin; dy <= dyMax; dy++) {
+            for (let dx = -dxSpan; dx <= dxSpan; dx += 2) {
+                const px = Math.max(0, Math.min(canvas.width - 1, nosePxX + dx));
+                const py = Math.max(0, Math.min(canvas.height - 1, nosePxY + dy));
+                const d = ctx.getImageData(px, py, 1, 1).data;
+                const lum = 0.299 * d[0] + 0.587 * d[1] + 0.114 * d[2];
+                if (lum < minNostrilLum) minNostrilLum = lum;
             }
         }
+        const hasNoseFeature = (noseStats.avgLum - minNostrilLum >= 15) || (minNostrilLum < 80);
 
-        // Cek sisi kanan (apakah ada lengan/tangan masuk dari sisi kanan menutupi wajah)
-        const rightStartX = Math.round(Math.min(canvas.width - 25, (nose.x + eyeNormDist * 0.55) * canvas.width));
-        const rightW = canvas.width - rightStartX;
-        if (rightW > 25) {
-            const rightData = ctx.getImageData(rightStartX, armY0, rightW, armH).data;
-            let rightSkin = 0;
-            const totalRight = rightData.length / 4;
-            for (let i = 0; i < rightData.length; i += 4) {
-                const r = rightData[i], g = rightData[i + 1], b = rightData[i + 2];
-                if (r > g - 5 && r > b + 10 && (r + g + b) > 70 && (r + g + b) < 680) {
-                    rightSkin++;
-                }
+        const mouthPxX = Math.round(mouth.x * canvas.width);
+        const mouthPxY = Math.round(mouth.y * canvas.height);
+        const spanY = Math.round(eyePixelDist * 0.14);
+        let maxLipLum = 0;
+        let minLipLum = 255;
+        for (let dy = -spanY; dy <= spanY; dy += 2) {
+            let rowLum = 0;
+            for (let dx = -2; dx <= 2; dx++) {
+                const px = Math.max(0, Math.min(canvas.width - 1, mouthPxX + dx));
+                const py = Math.max(0, Math.min(canvas.height - 1, mouthPxY + dy));
+                const d = ctx.getImageData(px, py, 1, 1).data;
+                rowLum += 0.299 * d[0] + 0.587 * d[1] + 0.114 * d[2];
             }
-            if ((rightSkin / totalRight) > 0.38) {
-                return {
-                    valid: false,
-                    message: 'Terdeteksi tangan menutupi wajah. Jauhkan tangan dari wajah saat melakukan presensi.'
-                };
-            }
+            rowLum /= 5;
+            if (rowLum > maxLipLum) maxLipLum = rowLum;
+            if (rowLum < minLipLum) minLipLum = rowLum;
+        }
+        const hasMouthFeature = (maxLipLum - minLipLum >= 12) || (minLipLum < 75);
+
+        // Jika kedua fitur (hidung dan mulut) sama sekali tidak terdeteksi kontrasnya (tertutup tangan/benda)
+        if (!hasNoseFeature && !hasMouthFeature) {
+            return {
+                valid: false,
+                message: 'Bagian hidung atau mulut terhalang atau tertutup tangan/masker. Pastikan wajah terlihat jelas tanpa penutup.'
+            };
         }
 
         return {
