@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login Personel - PresTIK Polda Kalsel</title>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}">
     
     <!-- Google Fonts & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -131,7 +131,7 @@
         <!-- Header Identitas -->
         <div class="card-header-custom">
             <div class="mb-3">
-                <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo Bidtik Polda Kalsel" style="width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.6));">
+                <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" alt="Logo Bidtik Polda Kalsel" style="width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 4px 14px rgba(0,0,0,0.6));">
             </div>
             <span class="gold-badge">PresTIK · Presensi Digital</span>
             <h4 class="fw-bold mb-1 tracking-wide text-white">PresTIK POLDA KALSEL</h4>

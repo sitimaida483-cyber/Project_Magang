@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Panel') - Presensi Bidtik Polda Kalsel</title>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}">
     
     <!-- Google Fonts & Bootstrap 5 & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -160,7 +160,7 @@
     <!-- Sidebar -->
     <nav id="sidebar">
         <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-            <img src="{{ asset('images/logo-bidtik.svg') }}" alt="Logo PresTIK Polda Kalsel" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
+            <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" alt="Logo PresTIK Polda Kalsel" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
             <div>
                 <div class="d-flex align-items-center gap-2">
                     <span class="fw-bold text-white fs-5 lh-1" style="letter-spacing: 0.5px;">PresTIK</span>
