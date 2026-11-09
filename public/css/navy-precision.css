@@ -695,68 +695,85 @@ body[data-design="A"] .np-bottom-nav {
 }
 
 /* ============================================================
-   AUTH / LOGIN PAGE (SPLIT SHOWCASE A)
+   AUTH / LOGIN PAGE (NAVY PRECISION POLDA HERO)
    ============================================================ */
-.auth-split-wrapper {
+.auth-page-hero {
     min-height: 100vh;
-    display: flex;
-    background: linear-gradient(135deg, rgba(248, 250, 252, 0.92) 0%, rgba(241, 245, 249, 0.95) 100%),
-                url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat;
-}
-
-.auth-split-showcase {
-    width: 480px;
-    background: linear-gradient(180deg, rgba(11, 19, 43, 0.84) 0%, rgba(23, 38, 63, 0.92) 100%),
-                url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat;
-    color: #FFFFFF;
-    padding: 56px 48px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    flex-shrink: 0;
-    position: relative;
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-}
-
-.auth-split-form-panel {
-    flex-grow: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 24px;
-    background: linear-gradient(135deg, rgba(248, 250, 252, 0.92) 0%, rgba(241, 245, 249, 0.95) 100%),
-                url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat;
+    padding: 24px 16px;
+    background: linear-gradient(135deg, rgba(11, 26, 46, 0.88) 0%, rgba(9, 22, 36, 0.94) 100%),
+                url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat fixed;
 }
 
-.auth-form-card {
+.auth-container {
     width: 100%;
-    max-width: 460px;
-    background: #FFFFFF;
-    border: 1px solid var(--np-line);
-    border-radius: var(--np-radius-card);
-    padding: 36px 32px;
-    box-shadow: 0 16px 36px rgba(11, 19, 43, 0.08);
+    max-width: 440px;
+    margin: auto;
 }
 
-@media (max-width: 991.98px) {
-    .auth-split-wrapper {
-        flex-direction: column;
-        justify-content: center;
-        background: linear-gradient(180deg, rgba(11, 19, 43, 0.88) 0%, rgba(23, 38, 63, 0.94) 100%),
-                    url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat fixed;
-    }
-    .auth-split-showcase {
-        display: none !important;
-    }
-    .auth-split-form-panel {
-        padding: 32px 20px;
-        background: transparent;
-    }
-    .auth-form-card {
-        padding: 28px 24px;
-        border-radius: 16px;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-    }
+.auth-card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-card-header {
+    background: #0B132B;
+    color: #FFFFFF;
+    padding: 2.2rem 1.8rem 1.6rem;
+    text-align: center;
+    position: relative;
+}
+
+.auth-card-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #F59E0B, #E5A93C, #FBBF24);
+}
+
+.gold-badge {
+    display: inline-block;
+    background: #E5A93C;
+    color: #0B132B;
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 4px 14px;
+    border-radius: 30px;
+    letter-spacing: 0.6px;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+}
+
+.auth-card-body {
+    padding: 2rem 1.8rem 1.8rem;
+}
+
+.btn-police-submit {
+    background: linear-gradient(135deg, #17263F 0%, #254BD6 100%);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(23, 38, 63, 0.3);
+}
+
+.btn-police-submit:hover {
+    background: linear-gradient(135deg, #1E3EA8 0%, #1D4ED8 100%);
+    color: #F59E0B;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(23, 38, 63, 0.4);
 }
 
 
