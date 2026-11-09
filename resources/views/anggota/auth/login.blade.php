@@ -26,9 +26,13 @@
             justify-content: center;
             box-sizing: border-box;
             font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            background: 
+            background-color: #0B1A2E;
+            background-image: 
                 linear-gradient(180deg, rgba(8, 20, 36, 0.72) 0%, rgba(11, 26, 46, 0.40) 240px, rgba(11, 26, 46, 0.76) 100%),
-                url('{{ asset("images/bg-polda-kalsel.jpg") }}') no-repeat center top;
+                url('{{ asset("images/bg-polda-kalsel.webp") }}'),
+                url('{{ asset("images/bg-polda-kalsel.jpg") }}');
+            background-repeat: no-repeat;
+            background-position: center top;
             background-size: cover;
             background-attachment: fixed;
         }
@@ -48,11 +52,11 @@
             border: 1px solid rgba(255, 255, 255, 0.25);
         }
 
-        /* Panel Kiri: Showcase Navy Precision (Sesuai Acuan Gambar User) */
+        /* Panel Kiri: Showcase Navy Precision (Sesuai Acuan Gambar) */
         .auth-showcase-panel {
             width: 45%;
-            background-color: #0B132B;
-            color: #FFFFFF;
+            background-color: #0B132B !important;
+            color: #FFFFFF !important;
             padding: 50px 42px;
             display: flex;
             flex-direction: column;
@@ -67,22 +71,36 @@
             object-fit: contain;
         }
 
-        .auth-showcase-panel h1 {
-            font-size: 30px;
-            font-weight: 700;
-            line-height: 1.3;
-            letter-spacing: -0.5px;
-            color: #FFFFFF;
+        /* Override aturan global body[data-design="A"] h1 */
+        body[data-design="A"] .auth-showcase-panel h1,
+        body[data-design="A"] h1.showcase-title,
+        .auth-showcase-panel h1,
+        h1.showcase-title {
+            font-size: 30px !important;
+            font-weight: 700 !important;
+            line-height: 1.3 !important;
+            letter-spacing: -0.5px !important;
+            color: #FFFFFF !important;
         }
 
-        .auth-showcase-panel p {
-            font-size: 14.5px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.75);
+        body[data-design="A"] .auth-showcase-panel p,
+        body[data-design="A"] p.showcase-desc,
+        .auth-showcase-panel p,
+        p.showcase-desc {
+            font-size: 14.5px !important;
+            line-height: 1.6 !important;
+            color: #D7E0F0 !important;
+        }
+
+        .auth-showcase-panel .showcase-brand-sub {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            letter-spacing: normal !important;
+            color: #D7E0F0 !important;
         }
 
         .showcase-features {
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
             padding-top: 26px;
             display: flex;
             flex-direction: column;
@@ -97,15 +115,16 @@
 
         .showcase-features .feature-num {
             font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-            font-size: 15px;
-            font-weight: 700;
-            color: #FFFFFF;
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            color: #FFFFFF !important;
         }
 
         .showcase-features .feature-text {
-            font-size: 14px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            letter-spacing: normal !important;
+            color: #FFFFFF !important;
         }
 
         /* Panel Kanan: Form Card */
@@ -122,19 +141,21 @@
             font-size: 24px;
             font-weight: 700;
             color: #0B132B;
-            margin-bottom: 4px;
+            margin-bottom: 0;
         }
 
         .auth-form-panel .form-subtitle {
-            font-size: 14px;
-            color: #64748B;
+            font-size: 14px !important;
+            line-height: 1.5;
+            color: #475569 !important;
             margin-bottom: 24px;
         }
 
         .auth-form-panel .form-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #334155;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            letter-spacing: normal !important;
+            color: #1E293B !important;
             margin-bottom: 6px;
         }
 
@@ -150,6 +171,18 @@
         .auth-form-panel .form-control:focus {
             border-color: #254BD6;
             box-shadow: 0 0 0 3px rgba(37, 75, 214, 0.15);
+        }
+
+        .badge-personel {
+            background-color: #DCFCE7;
+            color: #15803D;
+            border: 1px solid #BBF7D0;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
         }
 
         .btn-toggle-pwd {
@@ -237,15 +270,15 @@
                              alt="Logo PresTIK" class="brand-logo">
                         <div>
                             <div class="fw-bold fs-5 text-white lh-1">PresTIK</div>
-                            <div class="text-white-50 small fw-bold mt-1" style="font-size: 10px; letter-spacing: 0.8px;">BIDTIK POLDA KALSEL</div>
+                            <div class="showcase-brand-sub mt-1">BIDTIK POLDA KALSEL</div>
                         </div>
                     </div>
 
                     <!-- Headline & Subtitle -->
-                    <h1 class="mb-3">
+                    <h1 class="showcase-title mb-3">
                         Hadir dengan pasti.<br>Tercatat dengan rapi.
                     </h1>
-                    <p>
+                    <p class="showcase-desc">
                         Presensi lokasi dan layanan surat personel dalam satu portal.
                     </p>
                 </div>
@@ -275,11 +308,15 @@
                          alt="Logo PresTIK" style="width: 34px; height: 34px; object-fit: contain;">
                     <div>
                         <div class="fw-bold text-dark lh-1" style="font-size: 17px;">PresTIK</div>
-                        <div class="text-muted" style="font-size: 10px; font-weight: 700;">BIDTIK POLDA KALSEL</div>
+                        <div class="text-muted fw-semibold" style="font-size: 14px; letter-spacing: normal;">BIDTIK POLDA KALSEL</div>
                     </div>
                 </div>
 
-                <div class="form-title">Masuk Personel</div>
+                <!-- Header Form dengan Lencana PERSONEL -->
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <h2 class="form-title">Masuk Personel</h2>
+                    <span class="badge badge-personel">PERSONEL</span>
+                </div>
                 <div class="form-subtitle">Gunakan akun yang telah terdaftar di PresTIK.</div>
 
                 <!-- Alerts Pesan -->
@@ -317,7 +354,7 @@
 
                     <!-- Email Kedinasan -->
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email Kedinasan *</label>
+                        <label for="email" class="form-label">Email Kedinasan <span class="text-danger">*</span></label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" 
                                id="email" name="email" value="{{ old('email') }}" 
                                placeholder="nama@bidtik.polri.go.id" required autofocus autocomplete="email">
@@ -325,7 +362,7 @@
 
                     <!-- Password -->
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password *</label>
+                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                         <div class="position-relative">
                             <input type="password" class="form-control pe-5 @error('password') is-invalid @enderror" 
                                    id="password" name="password" placeholder="Masukkan password" 
@@ -340,7 +377,7 @@
                     <div class="mb-4">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                            <label class="form-check-label text-muted small" for="remember">
+                            <label class="form-check-label text-muted" for="remember" style="font-size: 14px;">
                                 Ingat saya
                             </label>
                         </div>
