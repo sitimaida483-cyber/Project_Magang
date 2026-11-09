@@ -37,25 +37,25 @@
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Total Titik</span>
-            <span class="np-stat-value text-dark">{{ $totalTitik }}</span>
+            <span class="np-stat-value text-dark">{{ $totalTitik ?? 0 }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Tepat Waktu</span>
-            <span class="np-stat-value text-dark">{{ $totalTepat }}</span>
+            <span class="np-stat-value text-dark">{{ max(0, ($totalMasuk ?? 0) - ($totalTerlambat ?? 0)) }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Terlambat</span>
-            <span class="np-stat-value text-dark">{{ $totalTerlambat }}</span>
+            <span class="np-stat-value text-dark">{{ $totalTerlambat ?? 0 }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Pulang</span>
-            <span class="np-stat-value text-dark">{{ $totalPulang }}</span>
+            <span class="np-stat-value text-dark">{{ $totalPulang ?? 0 }}</span>
         </div>
     </div>
 </div>
@@ -119,9 +119,9 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const kantorLat = {{ $pengaturan->latitude ?? -3.3194 }};
-    const kantorLng = {{ $pengaturan->longitude ?? 114.5908 }};
-    const radiusMeter = {{ $pengaturan->radius_meter ?? 100 }};
+    const kantorLat = {{ !empty($pengaturan->latitude) ? (float)$pengaturan->latitude : -3.3194 }};
+    const kantorLng = {{ !empty($pengaturan->longitude) ? (float)$pengaturan->longitude : 114.5908 }};
+    const radiusMeter = {{ !empty($pengaturan->radius_meter) ? (int)$pengaturan->radius_meter : 100 }};
     const namaKantor = @json($pengaturan->nama_kantor ?? 'Kantor Bidtik Polda Kalsel');
 
     const dataPresensi = @json($dataPresensiList);

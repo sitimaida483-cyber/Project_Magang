@@ -51,13 +51,19 @@
                 <span class="fw-bold text-dark fs-6">Berkas Presensi</span>
             </div>
             <div class="card-body p-3">
-                <div class="preview-box mb-2">
-                    <img src="{{ route('admin.presensi.file', ['type' => 'foto_selfie', 'filename' => basename($presensi->foto_selfie)]) }}" 
-                         alt="Foto Selfie {{ $presensi->anggota->nama ?? '-' }}">
-                </div>
-                <div class="text-center text-muted small" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">
-                    SELFIE KAMERA DEPAN
-                </div>
+                @if($presensi->foto_selfie && trim($presensi->foto_selfie) !== '')
+                    <div class="preview-box mb-2">
+                        <img src="{{ route('admin.presensi.file', ['type' => 'foto_selfie', 'filename' => basename($presensi->foto_selfie)]) }}" 
+                             alt="Foto Selfie {{ $presensi->anggota->nama ?? '-' }}">
+                    </div>
+                    <div class="text-center text-muted small" style="font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase;">
+                        SELFIE KAMERA DEPAN
+                    </div>
+                @else
+                    <div class="py-4 text-center text-muted small">
+                        Foto selfie tidak tersedia pada rekaman ini.
+                    </div>
+                @endif
             </div>
         </div>
 
