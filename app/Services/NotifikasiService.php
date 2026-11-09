@@ -78,8 +78,9 @@ class NotifikasiService
                 self::catatLog($perangkat->id_perangkat, $jenisNotifikasi, $pesan, 'terkirim');
                 return true;
             } else {
-                // Jika endpoint kedaluwarsa atau tidak valid lagi (404/410), nonaktifkan perangkat
-                if ($report->isSubscriptionExpired()) {
+                // Jika endpoint kedaluwarsa atau tidak valid lagi (respons 404/410), nonaktifkan perangkat
+                $statusCode = $report->getResponse()?->getStatusCode();
+                if ($report->isSubscriptionExpired() || $statusCode === 404 || $statusCode === 410) {
                     $perangkat->update(['status' => 'nonaktif']);
                 }
                 self::catatLog($perangkat->id_perangkat, $jenisNotifikasi, $pesan . ' (Error: ' . $report->getReason() . ')', 'gagal');
@@ -87,7 +88,12 @@ class NotifikasiService
             }
         } catch (\Throwable $e) {
             report($e);
-            self::catatLog($perangkat->id_perangkat, $jenisNotifikasi, $pesan . ' (Ex: ' . $e->getMessage() . ')', 'gagal');
+            $statusCode = (int) $e->getCode();
+            $msg = $e->getMessage();
+            if ($statusCode === 404 || $statusCode === 410 || str_contains($msg, '404') || str_contains($msg, '410') || str_contains($msg, 'Gone') || str_contains($msg, 'Not Found')) {
+                $perangkat->update(['status' => 'nonaktif']);
+            }
+            self::catatLog($perangkat->id_perangkat, $jenisNotifikasi, $pesan . ' (Ex: ' . $msg . ')', 'gagal');
             return false;
         }
     }

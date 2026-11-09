@@ -1,6 +1,14 @@
 // Service Worker untuk Sistem Presensi Bidtik Polda Kalsel
 // Menangani notifikasi Web Push dan aksi klik
 
+self.addEventListener('install', function(event) {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', function(event) {
+    event.waitUntil(clients.claim());
+});
+
 self.addEventListener('push', function(event) {
     let payload = {
         title: 'Presensi Bidtik Polda Kalsel',

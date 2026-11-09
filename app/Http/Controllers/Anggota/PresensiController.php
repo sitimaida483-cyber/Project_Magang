@@ -280,8 +280,8 @@ class PresensiController extends Controller
             'status_kehadiran' => $statusKehadiran,
         ]);
 
-        // Cek apakah anggota belum memiliki perangkat notifikasi (untuk pemicu izin push di Tahap 6)
-        $mintaIzinNotifikasi = ! $anggota->perangkatNotifikasi()->exists();
+        // Cek apakah anggota belum memiliki perangkat notifikasi aktif (untuk pemicu izin push)
+        $mintaIzinNotifikasi = ! $anggota->perangkatNotifikasi()->where('status', 'aktif')->exists();
 
         $pesanSukses = "Presensi " . strtoupper($request->jenis_presensi) . " berhasil dicatat!";
         if ($request->jenis_presensi === 'masuk') {

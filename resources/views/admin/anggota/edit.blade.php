@@ -3,145 +3,111 @@
 @section('title', 'Edit Data Anggota')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold text-dark mb-0">Edit Data Anggota</h3>
-                <p class="text-muted small mb-0">
-                    Perbarui informasi data personel: <strong>{{ $anggota->nama }}</strong>
-                </p>
+<!-- Page Header -->
+<div class="mb-4">
+    <h1 class="h1-navy">Edit Data Anggota</h1>
+    <p class="subtitle-navy mb-0">Presensi Digital Bidtik Polda Kalimantan Selatan</p>
+</div>
+
+<!-- Alert Error Validasi -->
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show mb-4 border-0" role="alert" style="background-color: var(--np-danger-soft); color: var(--np-danger); border-left: 4px solid var(--np-danger) !important; border-radius: 8px;">
+        <ul class="mb-0 ps-3">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
+<div class="np-card p-4">
+    <form action="{{ route('admin.anggota.update', $anggota->id_anggota) }}" method="POST">
+        @csrf
+        @method('PUT')
+
+        <div class="row g-4">
+            <!-- Kolom 1 -->
+            <div class="col-12 col-md-6">
+                <!-- NRP -->
+                <div class="mb-3">
+                    <label for="nrp" class="form-label mb-1">NRP *</label>
+                    <input type="text" class="form-control font-monospace @error('nrp') is-invalid @enderror" 
+                           id="nrp" name="nrp" value="{{ old('nrp', $anggota->nrp) }}" 
+                           placeholder="000001" required>
+                </div>
+
+                <!-- Nama Lengkap -->
+                <div class="mb-3">
+                    <label for="nama" class="form-label mb-1">Nama Lengkap *</label>
+                    <input type="text" class="form-control @error('nama') is-invalid @enderror" 
+                           id="nama" name="nama" value="{{ old('nama', $anggota->nama) }}" 
+                           placeholder="Ahmad Pratama" required>
+                </div>
+
+                <!-- Password (Opsional) -->
+                <div class="mb-3">
+                    <label for="password" class="form-label mb-1">Password (Opsional)</label>
+                    <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                           id="password" name="password" placeholder="Minimal 8 karakter" minlength="8">
+                    <small class="text-muted" style="font-size: 12px;">Kosongkan jika tidak ingin mengganti password.</small>
+                </div>
+
+                <!-- Unit Kerja -->
+                <div class="mb-3">
+                    <label for="unit_kerja" class="form-label mb-1">Unit Kerja *</label>
+                    <input type="text" class="form-control @error('unit_kerja') is-invalid @enderror" 
+                           id="unit_kerja" name="unit_kerja" value="{{ old('unit_kerja', $anggota->unit_kerja) }}" 
+                           placeholder="Bid TIK" required>
+                </div>
             </div>
-            <a href="{{ route('admin.anggota.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Kembali
+
+            <!-- Kolom 2 -->
+            <div class="col-12 col-md-6">
+                <!-- Status -->
+                <div class="mb-3">
+                    <label for="status" class="form-label mb-1">Status *</label>
+                    <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
+                        <option value="aktif" {{ old('status', $anggota->status) === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="nonaktif" {{ old('status', $anggota->status) === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                    </select>
+                </div>
+
+                <!-- Email Kedinasan -->
+                <div class="mb-3">
+                    <label for="email" class="form-label mb-1">Email Kedinasan *</label>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                           id="email" name="email" value="{{ old('email', $anggota->email) }}" 
+                           placeholder="ahmad@contoh.test" required>
+                </div>
+
+                <!-- Jabatan -->
+                <div class="mb-3">
+                    <label for="jabatan" class="form-label mb-1">Jabatan *</label>
+                    <input type="text" class="form-control @error('jabatan') is-invalid @enderror" 
+                           id="jabatan" name="jabatan" value="{{ old('jabatan', $anggota->jabatan) }}" 
+                           placeholder="Personel" required>
+                </div>
+
+                <!-- Nomor Telepon -->
+                <div class="mb-3">
+                    <label for="no_telepon" class="form-label mb-1">Nomor Telepon (Opsional)</label>
+                    <input type="text" class="form-control @error('no_telepon') is-invalid @enderror" 
+                           id="no_telepon" name="no_telepon" value="{{ old('no_telepon', $anggota->no_telepon) }}" 
+                           placeholder="08xxxxxxxxxx">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="d-flex gap-2 mt-4 pt-3 border-top" style="border-color: var(--np-line) !important;">
+            <button type="submit" class="btn np-btn-primary fw-bold" style="height: 48px; min-width: 160px;">
+                Simpan Perubahan
+            </button>
+            <a href="{{ route('admin.anggota.index') }}" class="btn np-btn-outline fw-bold d-inline-flex align-items-center justify-content-center" style="height: 48px; min-width: 100px;">
+                Batal
             </a>
         </div>
-
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h5 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-person-gear me-1 text-primary"></i> Formulir Perubahan Data
-                </h5>
-            </div>
-            <div class="card-body p-4">
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show small" role="alert">
-                        <ul class="mb-0 ps-3">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                <form action="{{ route('admin.anggota.update', $anggota->id_anggota) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label for="nrp" class="form-label fw-semibold text-secondary small">
-                                Nomor Registrasi Pokok (NRP) <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control font-monospace @error('nrp') is-invalid @enderror" 
-                                   id="nrp" name="nrp" value="{{ old('nrp', $anggota->nrp) }}" 
-                                   placeholder="Contoh: 80010006" required>
-                            <small class="text-muted" style="font-size: 0.75rem;">Perubahan NRP akan memengaruhi identitas saat presensi.</small>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="status" class="form-label fw-semibold text-secondary small">
-                                Status Keaktifan <span class="text-danger">*</span>
-                            </label>
-                            <select name="status" id="status" class="form-select @error('status') is-invalid @enderror" required>
-                                <option value="aktif" {{ old('status', $anggota->status) === 'aktif' ? 'selected' : '' }}>Aktif (Dapat Presensi)</option>
-                                <option value="nonaktif" {{ old('status', $anggota->status) === 'nonaktif' ? 'selected' : '' }}>Nonaktif (Tidak Dapat Presensi)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="nama" class="form-label fw-semibold text-secondary small">
-                            Nama Lengkap & Gelar <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control @error('nama') is-invalid @enderror" 
-                               id="nama" name="nama" value="{{ old('nama', $anggota->nama) }}" 
-                               placeholder="Contoh: Bripka Muhammad Ilham, S.Kom." required>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label for="email" class="form-label fw-semibold text-secondary small">
-                                Email Kedinasan (Login Anggota) <span class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
-                                <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                       id="email" name="email" value="{{ old('email', $anggota->email) }}" 
-                                       placeholder="Contoh: nama@bidtik.polri.go.id" required>
-                            </div>
-                            <small class="text-muted" style="font-size: 0.75rem;">Digunakan untuk login personel pada sistem presensi.</small>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="password" class="form-label fw-semibold text-secondary small">
-                                Password Baru (Opsional)
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light text-muted"><i class="bi bi-shield-lock"></i></span>
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah" minlength="8">
-                            </div>
-                            <small class="text-muted" style="font-size: 0.75rem;">Kosongkan bila tidak diubah. Minimal 8 karakter jika diisi.</small>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-6">
-                            <label for="jabatan" class="form-label fw-semibold text-secondary small">
-                                Pangkat / Jabatan <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control @error('jabatan') is-invalid @enderror" 
-                                   id="jabatan" name="jabatan" value="{{ old('jabatan', $anggota->jabatan) }}" 
-                                   placeholder="Contoh: Bintara Tekinfo / Banum" required>
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label for="unit_kerja" class="form-label fw-semibold text-secondary small">
-                                Unit Kerja / Satuan <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" class="form-control @error('unit_kerja') is-invalid @enderror" 
-                                   id="unit_kerja" name="unit_kerja" value="{{ old('unit_kerja', $anggota->unit_kerja) }}" 
-                                   placeholder="Contoh: Subbid Tekkom / Bidtik" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="no_telepon" class="form-label fw-semibold text-secondary small">
-                            Nomor Telepon / WhatsApp (Opsional)
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-muted"><i class="bi bi-phone"></i></span>
-                            <input type="text" class="form-control @error('no_telepon') is-invalid @enderror" 
-                                   id="no_telepon" name="no_telepon" value="{{ old('no_telepon', $anggota->no_telepon) }}" 
-                                   placeholder="Contoh: 081234567890">
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                        <a href="{{ route('admin.anggota.show', $anggota->id_anggota) }}" class="btn btn-outline-info btn-sm">
-                            <i class="bi bi-eye me-1"></i> Lihat Detail Profil
-                        </a>
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('admin.anggota.index') }}" class="btn btn-light border px-4">
-                                Batal
-                            </a>
-                            <button type="submit" class="btn btn-primary px-4 shadow-sm" style="background-color: #0e2238; border-color: #0e2238;">
-                                <i class="bi bi-check-circle me-1"></i> Simpan Perubahan
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    </form>
 </div>
 @endsection

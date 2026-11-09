@@ -5,6 +5,15 @@
 
     RewriteEngine On
 
+    # ---------------------------------------------------------------------------------
+    # ATURAN PENGALIHAN 301 (tes.tesmagang.site -> prestik.tesmagang.site)
+    # STATUS: NONAKTIF (diberi komentar).
+    # Aktifkan aturan ini SETELAH subdomain prestik.tesmagang.site aktif & SSL terpasang.
+    # Cara aktifkan: Hapus tanda '#' pada 2 baris RewriteCond dan RewriteRule di bawah ini:
+    # ---------------------------------------------------------------------------------
+    # RewriteCond %{HTTP_HOST} ^tes\.tesmagang\.site$ [NC]
+    # RewriteRule ^(.*)$ https://prestik.tesmagang.site/$1 [L,R=301,NE,QSA]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

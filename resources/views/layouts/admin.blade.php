@@ -2,283 +2,149 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin Panel') - Presensi Bidtik Polda Kalsel</title>
+    <title>@yield('title', 'Admin Panel') - PresTIK Bidtik Polda Kalsel</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}">
-    
-    <!-- Google Fonts & Bootstrap 5 & Icons -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
-    <style>
-        :root {
-            --police-navy: #0e2238;
-            --police-dark: #091624;
-            --police-gold: #e5a93c;
-            --police-gold-hover: #cf9327;
-            --sidebar-width: 260px;
-        }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f4f6f9;
-            color: #334155;
-            min-height: 100vh;
-        }
-        /* Sidebar Styling */
-        #sidebar {
-            width: var(--sidebar-width);
-            min-height: 100vh;
-            background: linear-gradient(180deg, var(--police-navy) 0%, var(--police-dark) 100%);
-            color: #e2e8f0;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            transition: all 0.3s;
-            box-shadow: 4px 0 10px rgba(0,0,0,0.05);
-        }
-        .sidebar-brand {
-            padding: 1.25rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            text-decoration: none;
-            color: #ffffff;
-        }
-        .sidebar-brand .badge-role {
-            background-color: var(--police-gold);
-            color: #000;
-            font-weight: 700;
-            font-size: 0.65rem;
-            padding: 3px 7px;
-            border-radius: 4px;
-            letter-spacing: 0.5px;
-        }
-        .sidebar-menu {
-            padding: 1rem 0.75rem;
-            list-style: none;
-            margin: 0;
-        }
-        .menu-header {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #64748b;
-            padding: 0.75rem 0.75rem 0.25rem;
-        }
-        .sidebar-menu .nav-link {
-            color: #94a3b8;
-            padding: 0.7rem 0.85rem;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
-            margin-bottom: 2px;
-        }
-        .sidebar-menu .nav-link:hover {
-            color: #ffffff;
-            background-color: rgba(255,255,255,0.06);
-        }
-        .sidebar-menu .nav-link.active {
-            color: #ffffff;
-            background-color: #1e3a8a;
-            font-weight: 600;
-        }
-        .sidebar-menu .nav-link.active i {
-            color: var(--police-gold);
-        }
-
-        /* Content Area */
-        #main-content {
-            margin-left: var(--sidebar-width);
-            transition: all 0.3s;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .topbar {
-            background: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0.85rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 999;
-        }
-
-        /* Stat Cards */
-        .card-stat {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            color: inherit;
-        }
-        .card-stat:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 24px rgba(0,0,0,0.1);
-            color: inherit;
-        }
-        .card-stat:active {
-            transform: translateY(-1px);
-        }
-        .card-stat.active-filter {
-            outline: 2px solid #0e2238;
-            box-shadow: 0 8px 24px rgba(14, 34, 56, 0.16);
-        }
-
-        @media (max-width: 991.98px) {
-            #sidebar {
-                margin-left: calc(-1 * var(--sidebar-width));
-            }
-            #sidebar.active {
-                margin-left: 0;
-            }
-            #main-content {
-                margin-left: 0;
-            }
-        }
-    </style>
+    
+    <!-- Redesign CSS (Navy Precision) -->
+    <link rel="stylesheet" href="{{ asset('css/navy-precision.css') }}?v={{ file_exists(public_path('css/navy-precision.css')) ? filemtime(public_path('css/navy-precision.css')) : time() }}">
+    
     @stack('styles')
 </head>
-<body>
+<body data-design="A" class="design-navy-precision">
 
-    <!-- Sidebar -->
+    <!-- Mobile Drawer Backdrop -->
+    <div class="np-drawer-backdrop" id="drawerBackdrop"></div>
+
+    <!-- Sidebar Admin (Pilihan A: 248px) -->
     <nav id="sidebar">
+        <div class="d-flex align-items-center justify-content-between p-3 border-bottom border-secondary border-opacity-25 d-lg-none">
+            <span class="text-white fw-bold">Menu Navigasi</span>
+            <button class="btn btn-sm text-white-50 p-1" id="sidebarCloseBtn" aria-label="Tutup Menu">
+                <i class="bi bi-x-lg fs-5"></i>
+            </button>
+        </div>
+
         <a href="{{ route('admin.dashboard') }}" class="sidebar-brand">
-            <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" alt="Logo PresTIK Polda Kalsel" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));">
+            <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" 
+                 alt="Logo PresTIK Polda Kalsel" style="width: 38px; height: 38px; object-fit: contain;">
             <div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="fw-bold text-white fs-5 lh-1" style="letter-spacing: 0.5px;">PresTIK</span>
-                    <span class="badge-role">ADMIN</span>
-                </div>
-                <small class="text-white-50 d-block mt-1" style="font-size: 0.68rem; letter-spacing: 0.2px;">Presensi Digital Bidtik</small>
+                <div class="sidebar-brand-title">PresTIK</div>
+                <div class="sidebar-brand-subtitle">BIDTIK POLDA KALSEL</div>
             </div>
         </a>
 
-        <ul class="sidebar-menu">
-            <li class="menu-header">Menu Utama</li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
-                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
-                </a>
-            </li>
+        <div class="sidebar-role-label">ADMINISTRATOR</div>
 
-            <li class="menu-header">Presensi & Monitoring</li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}" href="{{ url('/admin/presensi') }}">
-                    <i class="bi bi-calendar-check-fill"></i> Rekap Absensi
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a class="sidebar-nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}">
+                    <i class="bi bi-grid-fill"></i>
+                    <span>Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.surat.*') ? 'active' : '' }}" href="{{ route('admin.surat.index') }}">
-                    <i class="bi bi-file-earmark-text-fill"></i> Pengajuan Surat
+            <li class="sidebar-nav-item">
+                <a class="sidebar-nav-link {{ request()->routeIs('admin.presensi.*') ? 'active' : '' }}" href="{{ url('/admin/presensi') }}">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>Rekap Absensi</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a class="sidebar-nav-link {{ request()->routeIs('admin.surat.*') ? 'active' : '' }}" href="{{ route('admin.surat.index') }}">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    <span>Pengajuan Surat</span>
                     @php
                         $badgeMenunggu = \App\Models\PengajuanSurat::where('status_pengajuan', 'menunggu')->count();
                     @endphp
                     @if($badgeMenunggu > 0)
-                        <span class="badge bg-warning text-dark ms-auto fw-bold" style="font-size: 0.72rem;">{{ $badgeMenunggu }}</span>
+                        <span class="badge bg-warning text-dark ms-auto fw-bold" style="font-size: 0.7rem; border-radius: 4px;">{{ $badgeMenunggu }}</span>
                     @endif
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.peta.*') ? 'active' : '' }}" href="{{ url('/admin/peta') }}">
-                    <i class="bi bi-geo-alt-fill"></i> Peta Lokasi
+            <li class="sidebar-nav-item">
+                <a class="sidebar-nav-link {{ request()->routeIs('admin.anggota.*') ? 'active' : '' }}" href="{{ url('/admin/anggota') }}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Data Anggota</span>
                 </a>
             </li>
-
-            <li class="menu-header">Master & Pengaturan</li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.anggota.*') ? 'active' : '' }}" href="{{ url('/admin/anggota') }}">
-                    <i class="bi bi-people-fill"></i> Data Anggota
+            <li class="sidebar-nav-item">
+                <a class="sidebar-nav-link {{ request()->routeIs('admin.peta.*') ? 'active' : '' }}" href="{{ url('/admin/peta') }}">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Peta Lokasi</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.pengaturan.*') ? 'active' : '' }}" href="{{ url('/admin/pengaturan') }}">
-                    <i class="bi bi-sliders"></i> Pengaturan Kantor
+            <li class="sidebar-nav-item">
+                <a class="sidebar-nav-link {{ request()->routeIs('admin.pengaturan.*') ? 'active' : '' }}" href="{{ url('/admin/pengaturan') }}">
+                    <i class="bi bi-sliders"></i>
+                    <span>Pengaturan Kantor</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('admin.log.*') ? 'active' : '' }}" href="{{ url('/admin/log') }}">
-                    <i class="bi bi-clock-history"></i> Log Aktivitas
-                </a>
-            </li>
-
-            <li class="menu-header">Akses Cepat</li>
-            <li class="nav-item">
-                <a class="nav-link text-info" href="{{ url('/presensi') }}" target="_blank">
-                    <i class="bi bi-box-arrow-up-right"></i> Buka Halaman Presensi
+            <li class="sidebar-nav-item">
+                <a class="sidebar-nav-link {{ request()->routeIs('admin.log.*') ? 'active' : '' }}" href="{{ url('/admin/log') }}">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Log Aktivitas</span>
                 </a>
             </li>
         </ul>
+
+        <div class="sidebar-footer">
+            <form action="{{ route('admin.logout') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                @csrf
+                <button type="submit" class="sidebar-logout-btn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Keluar</span>
+                </button>
+            </form>
+            <div class="sidebar-copyright">Presensi Digital Bidtik</div>
+        </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Main Content Shell -->
     <div id="main-content">
-        <!-- Topbar -->
-        <header class="topbar">
-            <button class="btn btn-sm btn-outline-secondary d-lg-none" id="sidebarToggle">
-                <i class="bi bi-list fs-5"></i>
-            </button>
-            <div class="fw-semibold text-secondary">
-                PresTIK · Presensi Digital Bidtik Polda Kalsel
+        <!-- Topbar Desktop (76px) & Mobile Header (72px) -->
+        <header class="np-topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm btn-outline-secondary d-lg-none p-2" id="sidebarToggle" aria-label="Toggle Menu" style="min-height: 40px; border-radius: 8px;">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <div class="np-topbar-date d-none d-sm-block">
+                    {{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, DD MMMM Y') }}
+                </div>
             </div>
 
-            <div class="dropdown">
-                <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2 border" type="button" data-bs-toggle="dropdown">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
-                    <span class="fw-medium text-dark">{{ auth('admin')->user()->nama ?? 'Admin' }}</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                    <li class="px-3 py-2 border-bottom">
-                        <small class="text-muted d-block">Masuk sebagai</small>
-                        <span class="fw-bold">{{ auth('admin')->user()->username ?? 'admin' }}</span>
-                    </li>
-                    <li>
-                        <form action="{{ route('admin.logout') }}" method="POST">
-                            @csrf
-                            <button type="submit" class="dropdown-item text-danger py-2">
-                                <i class="bi bi-box-arrow-right me-2"></i> Logout
-                            </button>
-                        </form>
-                    </li>
-                </ul>
+            <div class="np-topbar-right">
+                <div id="digitalClock" class="font-monospace text-dark fw-bold">--:--:-- WITA</div>
+                <span class="text-muted d-none d-md-inline">/</span>
+                <span class="d-none d-md-inline text-dark">{{ auth('admin')->user()->nama ?? 'Admin' }}</span>
+                <!-- Mobile Profile Avatar Initial -->
+                <div class="d-md-none rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 11px;">
+                    {{ strtoupper(substr(auth('admin')->user()->nama ?? 'AD', 0, 2)) }}
+                </div>
             </div>
         </header>
 
-        <!-- Page Body -->
-        <main class="p-4 flex-grow-1">
+        <!-- Main Body Wrapper -->
+        <main class="np-content-wrapper">
             {{-- Notifikasi Flash Message --}}
             @if(session('sukses'))
-                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 mb-4" role="alert" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0 !important;">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('sukses') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
             @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 mb-4" role="alert" style="background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA !important;">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             @endif
             @if(session('info'))
-                <div class="alert alert-info alert-dismissible fade show border-0 shadow-sm" role="alert">
+                <div class="alert alert-info alert-dismissible fade show border-0 rounded-3 mb-4" role="alert" style="background-color: #EAF0FF; color: #254BD6; border: 1px solid #C7D7FE !important;">
                     <i class="bi bi-info-circle-fill me-2"></i> {{ session('info') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -286,18 +152,53 @@
 
             @yield('content')
         </main>
-
-        <footer class="bg-white border-top text-center py-3 text-muted small">
-            &copy; {{ date('Y') }} PresTIK (Presensi Digital Bidtik) · Polda Kalimantan Selatan
-        </footer>
     </div>
 
-    <!-- Bootstrap Bundle JS -->
+    @stack('modals')
+
+    <!-- Bootstrap 5 Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('active');
+        // Sidebar Toggle & Mobile Drawer Control
+        const sidebarEl = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const closeBtn = document.getElementById('sidebarCloseBtn');
+        const backdropEl = document.getElementById('drawerBackdrop');
+
+        function toggleSidebar() {
+            if (sidebarEl) {
+                const isActive = sidebarEl.classList.toggle('active');
+                if (backdropEl) backdropEl.classList.toggle('active', isActive);
+            }
+        }
+
+        toggleBtn?.addEventListener('click', toggleSidebar);
+        closeBtn?.addEventListener('click', toggleSidebar);
+        backdropEl?.addEventListener('click', toggleSidebar);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebarEl?.classList.contains('active')) {
+                toggleSidebar();
+            }
         });
+
+        // Jam digital real-time WITA
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('id-ID', {
+                timeZone: 'Asia/Makassar',
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(/\./g, ':');
+            const clockEl = document.getElementById('digitalClock');
+            if (clockEl) {
+                clockEl.textContent = timeString + ' WITA';
+            }
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
     </script>
     @stack('scripts')
 </body>

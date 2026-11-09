@@ -20,5 +20,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         \Illuminate\Support\Carbon::setLocale('id');
+
+        // Paksa skema HTTPS saat berada di environment production atau saat APP_URL menggunakan HTTPS
+        if (app()->environment('production') || str_starts_with((string) config('app.url'), 'https://')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
     }
 }

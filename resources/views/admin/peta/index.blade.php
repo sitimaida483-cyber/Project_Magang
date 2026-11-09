@@ -7,230 +7,108 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <style>
     #mapPresensi {
-        height: 600px;
+        height: 560px;
         width: 100%;
-        border-radius: 12px;
+        border-radius: 8px;
         z-index: 1;
     }
     .custom-pin {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 34px;
-        height: 34px;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
-        color: #ffffff;
-        font-size: 15px;
-        box-shadow: 0 3px 8px rgba(0,0,0,0.35);
-        border: 2.5px solid #ffffff;
-        transition: transform 0.15s ease-in-out;
+        border: 2px solid #FFFFFF;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
     }
-    .custom-pin:hover {
-        transform: scale(1.15);
-    }
-    .pin-office {
-        background: linear-gradient(135deg, #0e2238 0%, #1e3a8a 100%);
-        border-color: #f59e0b;
-        color: #f59e0b;
-    }
-    .pin-tepat {
-        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-    }
-    .pin-terlambat {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    }
-    .pin-pulang {
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    }
-    .popup-content {
-        min-width: 230px;
-        max-width: 270px;
-    }
-    .leaflet-popup-content-wrapper {
-        border-radius: 10px;
-        padding: 4px;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
-    }
-    .leaflet-popup-content {
-        margin: 10px 12px;
-        line-height: 1.4;
-    }
-    .legend-box {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(4px);
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 10px 14px;
-        font-size: 12px;
-    }
+    .pin-tepat { background-color: #15803D; }
+    .pin-terlambat { background-color: #DC2626; }
+    .pin-pulang { background-color: #254BD6; }
+    .pin-office { background-color: #17263F; border-color: #F59E0B; }
 </style>
 @endpush
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h3 class="fw-bold text-dark mb-0">Peta Sebaran Lokasi Presensi</h3>
-        <p class="text-muted small mb-0">
-            Monitoring spasial titik koordinat kehadiran personel Bidtik Polda Kalsel secara interaktif.
-        </p>
+<div class="mb-4">
+    <h1 class="h1-navy">Peta Lokasi Presensi</h1>
+    <div class="subtitle-navy">Presensi Digital Bidtik Polda Kalimantan Selatan</div>
+</div>
+
+<!-- 4 Stat Cards -->
+<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+    <div class="col">
+        <div class="np-stat-card">
+            <span class="np-stat-label">Total Titik</span>
+            <span class="np-stat-value text-dark">{{ $totalTitik }}</span>
+        </div>
     </div>
-    <div class="d-flex gap-2">
-        <button type="button" class="btn btn-outline-primary btn-sm" id="btnFokusKantor">
-            <i class="bi bi-building me-1"></i> Fokus Titik Kantor
-        </button>
-        <button type="button" class="btn btn-primary btn-sm" id="btnFitMarkers" style="background-color: #0e2238; border-color: #0e2238;">
-            <i class="bi bi-arrows-fullscreen me-1"></i> Tampilkan Semua Titik
-        </button>
+    <div class="col">
+        <div class="np-stat-card">
+            <span class="np-stat-label">Tepat Waktu</span>
+            <span class="np-stat-value text-dark">{{ $totalTepat }}</span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="np-stat-card">
+            <span class="np-stat-label">Terlambat</span>
+            <span class="np-stat-value text-dark">{{ $totalTerlambat }}</span>
+        </div>
+    </div>
+    <div class="col">
+        <div class="np-stat-card">
+            <span class="np-stat-label">Pulang</span>
+            <span class="np-stat-value text-dark">{{ $totalPulang }}</span>
+        </div>
     </div>
 </div>
 
-<!-- Kartu Statistik Titik (Bisa Diklik untuk Filter Peta) -->
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <a href="{{ request()->fullUrlWithQuery(['jenis_presensi' => null, 'status_kehadiran' => null]) }}" 
-           class="card card-stat bg-white p-3 border-start border-4 border-dark text-decoration-none {{ (!request('jenis_presensi') && !request('status_kehadiran')) ? 'active-filter' : '' }}"
-           title="Klik untuk melihat semua titik koordinat">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <small class="text-muted text-uppercase fw-semibold">Titik Terdeteksi</small>
-                    <h3 class="fw-bold text-dark mb-0 mt-1">{{ $totalTitik }}</h3>
-                    <small class="text-muted">Semua titik <i class="bi bi-arrow-right-short text-dark"></i></small>
-                </div>
-                <div class="p-2 bg-dark bg-opacity-10 rounded-circle text-dark fs-4">
-                    <i class="bi bi-geo-alt"></i>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-3">
-        <a href="{{ request()->fullUrlWithQuery(['status_kehadiran' => 'tepat_waktu', 'jenis_presensi' => 'masuk']) }}" 
-           class="card card-stat bg-white p-3 border-start border-4 border-success text-decoration-none {{ (request('status_kehadiran') === 'tepat_waktu') ? 'active-filter' : '' }}"
-           title="Klik untuk filter hanya titik masuk tepat waktu">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <small class="text-muted text-uppercase fw-semibold">Masuk Tepat Waktu</small>
-                    <h3 class="fw-bold text-success mb-0 mt-1">{{ $totalMasuk - $totalTerlambat > 0 ? $totalMasuk - $totalTerlambat : 0 }}</h3>
-                    <small class="text-muted">Titik hijau <i class="bi bi-arrow-right-short text-success"></i></small>
-                </div>
-                <div class="p-2 bg-success bg-opacity-10 rounded-circle text-success fs-4">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-3">
-        <a href="{{ request()->fullUrlWithQuery(['status_kehadiran' => 'terlambat', 'jenis_presensi' => 'masuk']) }}" 
-           class="card card-stat bg-white p-3 border-start border-4 border-danger text-decoration-none {{ (request('status_kehadiran') === 'terlambat') ? 'active-filter' : '' }}"
-           title="Klik untuk filter hanya titik terlambat">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <small class="text-muted text-uppercase fw-semibold">Terlambat</small>
-                    <h3 class="fw-bold text-danger mb-0 mt-1">{{ $totalTerlambat }}</h3>
-                    <small class="text-muted">Titik merah <i class="bi bi-arrow-right-short text-danger"></i></small>
-                </div>
-                <div class="p-2 bg-danger bg-opacity-10 rounded-circle text-danger fs-4">
-                    <i class="bi bi-alarm"></i>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-3">
-        <a href="{{ request()->fullUrlWithQuery(['jenis_presensi' => 'pulang', 'status_kehadiran' => null]) }}" 
-           class="card card-stat bg-white p-3 border-start border-4 border-primary text-decoration-none {{ (request('jenis_presensi') === 'pulang') ? 'active-filter' : '' }}"
-           title="Klik untuk filter hanya titik presensi pulang">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <small class="text-muted text-uppercase fw-semibold">Presensi Pulang</small>
-                    <h3 class="fw-bold text-primary mb-0 mt-1">{{ $totalPulang }}</h3>
-                    <small class="text-muted">Titik biru <i class="bi bi-arrow-right-short text-primary"></i></small>
-                </div>
-                <div class="p-2 bg-primary bg-opacity-10 rounded-circle text-primary fs-4">
-                    <i class="bi bi-box-arrow-right"></i>
-                </div>
-            </div>
-        </a>
-    </div>
-</div>
-
-<!-- Form Filter Peta -->
-<div class="card border-0 shadow-sm rounded-3 mb-4">
+<!-- Filter Bar -->
+<div class="card np-card mb-4">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('admin.peta.index') }}" class="row g-2 align-items-end">
-            <!-- Filter Tanggal -->
-            <div class="col-12 col-md-3">
-                <label class="form-label small fw-semibold text-muted mb-1">
-                    <i class="bi bi-calendar-event me-1"></i> Tanggal Presensi
-                </label>
-                <input type="date" name="tanggal" class="form-control form-control-sm" value="{{ $tanggalAktif }}">
+        <form action="{{ route('admin.peta.index') }}" method="GET">
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Tanggal</label>
+                    <input type="date" name="tanggal" class="form-control" value="{{ request('tanggal', date('Y-m-d')) }}">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Personel</label>
+                    <select name="id_anggota" class="form-select">
+                        <option value="">Semua personel</option>
+                        @foreach($anggotaList as $a)
+                            <option value="{{ $a->id_anggota }}" {{ request('id_anggota') == $a->id_anggota ? 'selected' : '' }}>
+                                {{ $a->nrp }} - {{ $a->nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label">Jenis Presensi</label>
+                    <select name="jenis_presensi" class="form-select">
+                        <option value="">Semua jenis</option>
+                        <option value="masuk" {{ request('jenis_presensi') === 'masuk' ? 'selected' : '' }}>Masuk</option>
+                        <option value="pulang" {{ request('jenis_presensi') === 'pulang' ? 'selected' : '' }}>Pulang</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- Filter Anggota -->
-            <div class="col-12 col-md-4">
-                <label class="form-label small fw-semibold text-muted mb-1">
-                    <i class="bi bi-person me-1"></i> Personel / Anggota
-                </label>
-                <select name="id_anggota" class="form-select form-select-sm">
-                    <option value="">-- Semua Personel --</option>
-                    @foreach($anggotaList as $a)
-                        <option value="{{ $a->id_anggota }}" {{ request('id_anggota') == $a->id_anggota ? 'selected' : '' }}>
-                            {{ $a->nrp }} - {{ $a->nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Filter Jenis Presensi -->
-            <div class="col-12 col-md-3">
-                <label class="form-label small fw-semibold text-muted mb-1">
-                    <i class="bi bi-tag me-1"></i> Jenis Presensi
-                </label>
-                <select name="jenis_presensi" class="form-select form-select-sm">
-                    <option value="">-- Masuk & Pulang --</option>
-                    <option value="masuk" {{ request('jenis_presensi') == 'masuk' ? 'selected' : '' }}>Masuk</option>
-                    <option value="pulang" {{ request('jenis_presensi') == 'pulang' ? 'selected' : '' }}>Pulang</option>
-                </select>
-            </div>
-
-            <!-- Tombol Submit & Reset -->
-            <div class="col-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary btn-sm w-100 fw-semibold" style="background-color: #0e2238; border-color: #0e2238;">
-                    <i class="bi bi-filter me-1"></i> Terapkan
+            <!-- Tombol Aksi -->
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-primary fw-bold">
+                    Tampilkan Peta
                 </button>
-                <a href="{{ route('admin.peta.index') }}" class="btn btn-outline-secondary btn-sm" title="Reset Filter">
-                    <i class="bi bi-arrow-counterclockwise"></i>
-                </a>
+                <button type="button" class="btn btn-outline-secondary fw-bold" id="btnFokusKantor">
+                    Fokus Kantor
+                </button>
+                <button type="button" class="btn btn-outline-secondary fw-bold" id="btnFitMarkers">
+                    Semua Penanda
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Container Peta Leaflet & Legenda -->
-<div class="card border-0 shadow-sm rounded-3 overflow-hidden">
-    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-        <h6 class="fw-bold text-dark mb-0">
-            <i class="bi bi-map-fill me-1 text-primary"></i> Peta Interaktif Presensi
-            <span class="badge bg-light text-dark border ms-2">
-                {{ \Carbon\Carbon::parse($tanggalAktif)->translatedFormat('l, d F Y') }}
-            </span>
-        </h6>
-        <!-- Legenda Indikator -->
-        <div class="d-none d-md-flex align-items-center gap-3 small">
-            <span class="d-flex align-items-center gap-1">
-                <span class="badge rounded-circle p-1" style="background-color: #0e2238; border: 1px solid #f59e0b;">&nbsp;</span>
-                Kantor Polda (Radius {{ $pengaturan->radius_meter ?? 100 }}m)
-            </span>
-            <span class="d-flex align-items-center gap-1">
-                <span class="badge rounded-circle p-1 bg-success">&nbsp;</span> Tepat Waktu
-            </span>
-            <span class="d-flex align-items-center gap-1">
-                <span class="badge rounded-circle p-1 bg-danger">&nbsp;</span> Terlambat
-            </span>
-            <span class="d-flex align-items-center gap-1">
-                <span class="badge rounded-circle p-1 bg-primary">&nbsp;</span> Pulang
-            </span>
-        </div>
-    </div>
-    <div class="card-body p-0 position-relative">
+<!-- Map Container -->
+<div class="card np-card mb-4">
+    <div class="card-body p-3">
         <div id="mapPresensi"></div>
     </div>
 </div>
@@ -241,124 +119,70 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Data Konfigurasi Kantor
     const kantorLat = {{ $pengaturan->latitude ?? -3.3194 }};
     const kantorLng = {{ $pengaturan->longitude ?? 114.5908 }};
     const radiusMeter = {{ $pengaturan->radius_meter ?? 100 }};
     const namaKantor = @json($pengaturan->nama_kantor ?? 'Kantor Bidtik Polda Kalsel');
-    const alamatKantor = @json($pengaturan->alamat_kantor ?? 'Banjarmasin');
 
-    // 2. Data Presensi Personel dari Backend
     const dataPresensi = @json($dataPresensiList);
 
-    // 3. Inisialisasi Peta
     const map = L.map('mapPresensi').setView([kantorLat, kantorLng], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    // 4. Marker Kantor Polisi
+    // Marker Kantor
     const officeIcon = L.divIcon({
-        className: 'custom-pin-container',
-        html: `<div class="custom-pin pin-office" title="${namaKantor}"><i class="bi bi-shield-lock-fill"></i></div>`,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17],
-        popupAnchor: [0, -18]
+        className: 'custom-pin-wrapper',
+        html: `<div class="custom-pin pin-office" title="${namaKantor}"></div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
     });
 
     const officeMarker = L.marker([kantorLat, kantorLng], { icon: officeIcon }).addTo(map);
-    officeMarker.bindPopup(`
-        <div class="popup-content">
-            <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom">
-                <div class="rounded-circle bg-warning text-dark p-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                    <i class="bi bi-building fw-bold"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 text-dark">${namaKantor}</h6>
-                    <small class="text-muted">Titik Acuan Presensi</small>
-                </div>
-            </div>
-            <p class="small text-muted mb-2">${alamatKantor}</p>
-            <div class="p-2 bg-light rounded small">
-                <strong>Radius Sah:</strong> ${radiusMeter} Meter dari titik ini.
-            </div>
-        </div>
-    `);
+    officeMarker.bindPopup(`<strong>${namaKantor}</strong><br>Radius: ${radiusMeter} m`);
 
-    // Lingkaran Radius Kantor
-    const officeCircle = L.circle([kantorLat, kantorLng], {
-        color: '#1e3a8a',
-        fillColor: '#3b82f6',
-        fillOpacity: 0.12,
-        weight: 2,
-        dashArray: '5, 8',
+    L.circle([kantorLat, kantorLng], {
+        color: '#254BD6',
+        fillColor: '#254BD6',
+        fillOpacity: 0.15,
         radius: radiusMeter
     }).addTo(map);
 
-    // 5. Marker Presensi Anggota
     const markersGroup = L.featureGroup();
     markersGroup.addLayer(officeMarker);
 
+    // Marker Presensi
     dataPresensi.forEach(p => {
         let pinClass = 'pin-tepat';
-        let pinIcon = 'bi-box-arrow-in-right';
-        let statusBadge = '<span class="badge bg-success">Tepat Waktu</span>';
+        let statusBadge = '<span class="badge badge-np-success">Tepat Waktu</span>';
 
         if (p.jenis_presensi === 'pulang') {
             pinClass = 'pin-pulang';
-            pinIcon = 'bi-box-arrow-right';
-            statusBadge = '<span class="badge bg-primary">Pulang</span>';
+            statusBadge = '<span class="badge badge-np-info">Pulang</span>';
         } else if (p.status_kehadiran === 'terlambat') {
             pinClass = 'pin-terlambat';
-            pinIcon = 'bi-exclamation-triangle-fill';
-            statusBadge = '<span class="badge bg-danger">Terlambat</span>';
+            statusBadge = '<span class="badge badge-np-danger">Terlambat</span>';
         }
 
         const personIcon = L.divIcon({
-            className: 'custom-pin-container',
-            html: `<div class="custom-pin ${pinClass}" title="${p.nama} (${p.nrp})"><i class="bi ${pinIcon}"></i></div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16],
-            popupAnchor: [0, -18]
+            className: 'custom-pin-wrapper',
+            html: `<div class="custom-pin ${pinClass}"></div>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9]
         });
 
         const marker = L.marker([p.latitude, p.longitude], { icon: personIcon });
 
-        // Foto preview di popup
-        let fotoHtml = '';
-        if (p.foto_url) {
-            fotoHtml = `
-                <div class="text-center mb-2">
-                    <img src="${p.foto_url}" class="rounded-3 border shadow-sm" style="width: 100%; max-height: 120px; object-fit: cover;" alt="Foto Selfie">
-                </div>
-            `;
-        }
-
         const popupHtml = `
-            <div class="popup-content">
-                ${fotoHtml}
-                <div class="d-flex justify-content-between align-items-start mb-1">
-                    <h6 class="fw-bold mb-0 text-dark">${p.nama}</h6>
-                </div>
-                <div class="text-muted small mb-2">NRP: <strong>${p.nrp}</strong> &bull; ${p.pangkat}</div>
-                <div class="p-2 bg-light rounded small mb-2">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted">Jenis:</span>
-                        <strong class="text-uppercase">${p.jenis_presensi}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted">Waktu:</span>
-                        <span>${p.waktu}</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span class="text-muted">Status:</span>
-                        <span>${statusBadge}</span>
-                    </div>
-                </div>
-                <a href="${p.detail_url}" class="btn btn-outline-primary btn-sm w-100 py-1" style="font-size: 11px;">
-                    <i class="bi bi-eye me-1"></i> Buka Detail Lengkap
+            <div style="min-width: 180px; padding: 4px;">
+                <div class="fw-bold text-dark fs-6 mb-1">${p.nama}</div>
+                <div class="text-secondary small mb-2 text-capitalize">${p.jenis_presensi} / ${p.waktu} WITA</div>
+                <div class="mb-2">${statusBadge}</div>
+                <a href="${p.detail_url}" class="fw-bold text-decoration-none" style="font-size: 13px; color: var(--np-primary);">
+                    Lihat Detail Presensi
                 </a>
             </div>
         `;
@@ -368,19 +192,17 @@ document.addEventListener('DOMContentLoaded', function () {
         markersGroup.addLayer(marker);
     });
 
-    // 6. Tombol Aksi Kontrol
-    document.getElementById('btnFokusKantor').addEventListener('click', function () {
-        map.flyTo([kantorLat, kantorLng], 17, { duration: 1.2 });
+    document.getElementById('btnFokusKantor')?.addEventListener('click', function () {
+        map.flyTo([kantorLat, kantorLng], 17, { duration: 1 });
         officeMarker.openPopup();
     });
 
-    document.getElementById('btnFitMarkers').addEventListener('click', function () {
+    document.getElementById('btnFitMarkers')?.addEventListener('click', function () {
         if (markersGroup.getLayers().length > 0) {
             map.fitBounds(markersGroup.getBounds().pad(0.15));
         }
     });
 
-    // Auto fit jika ada data presensi selain kantor
     if (dataPresensi.length > 0) {
         map.fitBounds(markersGroup.getBounds().pad(0.2));
     }

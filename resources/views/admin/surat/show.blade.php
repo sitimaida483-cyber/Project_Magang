@@ -3,23 +3,22 @@
 @section('title', 'Detail Pengajuan Surat - ' . ($pengajuan->anggota->nama ?? 'Personel'))
 
 @section('content')
+<!-- Page Header -->
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <div>
-        <h3 class="fw-bold text-dark mb-0">Detail Pengajuan Surat</h3>
-        <p class="text-muted small mb-0">
-            Periksa berkas PDF dan tentukan status verifikasi permohonan keterangan personel.
-        </p>
+        <h1 class="h1-navy">Detail Pengajuan Surat</h1>
+        <p class="subtitle-navy mb-0">Presensi Digital Bidtik Polda Kalimantan Selatan</p>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{{ route('admin.surat.index') }}" class="btn btn-outline-secondary btn-sm">
+    <div>
+        <a href="{{ route('admin.surat.index') }}" class="btn np-btn-outline btn-sm d-inline-flex align-items-center" style="height: 38px;">
             <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
         </a>
     </div>
 </div>
 
-<!-- Alert Pesan Error -->
+<!-- Alert Error Validasi -->
 @if($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show small mb-4" role="alert">
+    <div class="alert alert-danger alert-dismissible fade show mb-4 border-0" role="alert" style="background-color: var(--np-danger-soft); color: var(--np-danger); border-left: 4px solid var(--np-danger) !important; border-radius: 8px;">
         <ul class="mb-0 ps-3">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -30,186 +29,162 @@
 @endif
 
 <div class="row g-4">
-    <!-- Kolom Kiri: Informasi Personel & Pengajuan & Form Aksi -->
+    <!-- Kolom Kiri: Data Pengajuan Surat & Form Keputusan -->
     <div class="col-12 col-lg-5">
-        <!-- Kartu Identitas Personel -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-person-badge-fill me-1 text-primary"></i> Data Personel
-                </h6>
-                <span class="badge bg-light text-secondary border font-monospace">NRP: {{ $pengajuan->anggota->nrp ?? '-' }}</span>
-            </div>
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 fs-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
-                        <i class="bi bi-person-fill"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold mb-0 text-dark">{{ $pengajuan->anggota->nama ?? '-' }}</h6>
-                        <div class="small text-secondary">{{ $pengajuan->anggota->jabatan ?? '-' }}</div>
-                        <div class="small text-muted">{{ $pengajuan->anggota->unit_kerja ?? '-' }}</div>
-                    </div>
-                </div>
-
-                <div class="list-group list-group-flush border-top small">
-                    <div class="list-group-item d-flex justify-content-between py-2 px-0">
-                        <span class="text-muted">Email Kedinasan:</span>
-                        <span class="fw-semibold text-dark">{{ $pengajuan->anggota->email ?? '-' }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between py-2 px-0">
-                        <span class="text-muted">Nomor Telepon / WA:</span>
-                        <span class="fw-semibold text-dark">{{ $pengajuan->anggota->no_telepon ?? '-' }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kartu Detail Permohonan -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                <h6 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-file-earmark-text-fill me-1 text-warning"></i> Detail Keterangan
-                </h6>
-                {!! $pengajuan->status_badge !!}
-            </div>
-            <div class="card-body p-3">
-                <div class="list-group list-group-flush small">
-                    <div class="list-group-item d-flex justify-content-between py-2 px-0">
-                        <span class="text-muted">Jenis Keterangan:</span>
-                        <span class="badge bg-primary text-uppercase px-2 py-1">{{ $pengajuan->label_jenis }}</span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between py-2 px-0">
-                        <span class="text-muted">Periode Tanggal:</span>
-                        <span class="fw-semibold text-dark">
-                            {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->translatedFormat('d M Y') }}
-                            s/d
-                            {{ \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->translatedFormat('d M Y') }}
-                        </span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between py-2 px-0">
-                        <span class="text-muted">Total Durasi:</span>
-                        <span class="fw-semibold text-dark">
-                            {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($pengajuan->tanggal_selesai)) + 1 }} Hari
-                        </span>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between py-2 px-0">
-                        <span class="text-muted">Diajukan Pada:</span>
-                        <span class="text-dark">
-                            {{ \Carbon\Carbon::parse($pengajuan->created_at)->translatedFormat('d F Y, H:i') }} WITA
-                        </span>
-                    </div>
-                </div>
-
-                <div class="mt-3 pt-2 border-top">
-                    <label class="form-label small fw-bold text-secondary mb-1">Uraian / Alasan Personel:</label>
-                    <div class="p-3 bg-light rounded-3 border small text-dark" style="white-space: pre-line;">
-                        {{ $pengajuan->keterangan }}
-                    </div>
-                </div>
-
-                <!-- Info Verifikasi Jika Sudah Diproses -->
-                @if($pengajuan->id_admin)
-                    <div class="mt-3 pt-2 border-top small">
-                        <div class="p-3 rounded {{ $pengajuan->status_pengajuan === 'disetujui' ? 'bg-success bg-opacity-10 border border-success-subtle' : 'bg-danger bg-opacity-10 border border-danger-subtle' }}">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <strong class="text-dark">Diverifikasi Oleh: {{ $pengajuan->admin->nama ?? 'Admin' }}</strong>
-                                <span class="text-muted" style="font-size: 0.72rem;">{{ \Carbon\Carbon::parse($pengajuan->tanggal_diproses)->translatedFormat('d M Y, H:i') }}</span>
-                            </div>
-                            @if($pengajuan->catatan_admin)
-                                <div class="mt-1">
-                                    <span class="text-secondary fw-semibold">Catatan Admin:</span>
-                                    <div class="text-dark mt-1">{{ $pengajuan->catatan_admin }}</div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+        <!-- Kartu Data Pengajuan Surat -->
+        <div class="np-card mb-4 p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h2 class="h2-navy mb-0" style="font-size: 18px;">Data Pengajuan Surat</h2>
+                @if($pengajuan->status_pengajuan === 'disetujui')
+                    <span class="np-badge np-badge-success">Disetujui</span>
+                @elseif($pengajuan->status_pengajuan === 'ditolak')
+                    <span class="np-badge np-badge-danger">Ditolak</span>
+                @else
+                    <span class="np-badge np-badge-warning">Menunggu</span>
                 @endif
             </div>
-        </div>
 
-        <!-- Panel Form Verifikasi Admin -->
-        <div class="card border-0 shadow-sm rounded-3 border-top border-4 border-primary">
-            <div class="card-header bg-white py-3 border-bottom">
-                <h6 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-shield-check me-1 text-primary"></i> Tindakan Verifikasi Admin
-                </h6>
+            <!-- Personel -->
+            <div class="mb-3">
+                <div class="text-muted small fw-semibold">Personel</div>
+                <div class="fw-bold" style="color: var(--np-ink); font-size: 15px;">
+                    {{ $pengajuan->anggota->nama ?? '-' }} / NRP {{ $pengajuan->anggota->nrp ?? '-' }}
+                </div>
+                <div class="text-muted small mt-1">
+                    {{ $pengajuan->anggota->jabatan ?? '-' }} • {{ $pengajuan->anggota->unit_kerja ?? '-' }}
+                </div>
+                <div class="text-muted small">
+                    {{ $pengajuan->anggota->email ?? '-' }} @if($pengajuan->anggota->no_telepon) • {{ $pengajuan->anggota->no_telepon }} @endif
+                </div>
             </div>
-            <div class="card-body p-3">
-                <form action="{{ route('admin.surat.proses', $pengajuan->id_pengajuan) }}" method="POST" id="formProsesSurat">
-                    @csrf
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-secondary mb-1">
-                            Keputusan Verifikasi <span class="text-danger">*</span>
-                        </label>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <input type="radio" class="btn-check" name="status" id="statusSetuju" value="disetujui" 
-                                       {{ old('status', $pengajuan->status_pengajuan) === 'disetujui' ? 'checked' : '' }} required>
-                                <label class="btn btn-outline-success w-100 py-2 d-flex flex-column align-items-center" for="statusSetuju">
-                                    <i class="bi bi-check-circle-fill fs-5 mb-1"></i>
-                                    <span class="fw-bold small">Setujui Surat</span>
-                                </label>
+            <!-- Jenis / Periode -->
+            <div class="mb-3 pt-3 border-top" style="border-color: var(--np-line) !important;">
+                <div class="text-muted small fw-semibold">Jenis / Periode</div>
+                <div class="fw-bold" style="color: var(--np-ink); font-size: 14px;">
+                    {{ $pengajuan->label_jenis }} / {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->translatedFormat('d-m-Y') }} s/d {{ \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->translatedFormat('d-m-Y') }}
+                </div>
+                <div class="text-muted small mt-1">
+                    Total Durasi: {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($pengajuan->tanggal_selesai)) + 1 }} Hari • Diajukan {{ \Carbon\Carbon::parse($pengajuan->created_at)->translatedFormat('d F Y, H:i') }} WITA
+                </div>
+            </div>
+
+            <!-- Uraian / Alasan -->
+            <div class="mb-3 pt-3 border-top" style="border-color: var(--np-line) !important;">
+                <div class="text-muted small fw-semibold mb-1">Uraian Keterangan / Alasan</div>
+                <div class="p-3 rounded-2 small" style="background-color: var(--np-bg); border: 1px solid var(--np-line); color: var(--np-ink); white-space: pre-line;">
+                    {{ $pengajuan->keterangan }}
+                </div>
+            </div>
+
+            <!-- Riwayat Verifikasi Jika Pernah Diproses -->
+            @if($pengajuan->id_admin)
+                <div class="mb-3 pt-3 border-top" style="border-color: var(--np-line) !important;">
+                    <div class="p-3 rounded-2 small {{ $pengajuan->status_pengajuan === 'disetujui' ? 'bg-success-subtle text-success-emphasis border border-success' : 'bg-danger-subtle text-danger-emphasis border border-danger' }}">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong>Diverifikasi oleh: {{ $pengajuan->admin->nama ?? 'Admin' }}</strong>
+                            <span class="text-muted" style="font-size: 11px;">{{ \Carbon\Carbon::parse($pengajuan->tanggal_diproses)->translatedFormat('d M Y, H:i') }}</span>
+                        </div>
+                        @if($pengajuan->catatan_admin)
+                            <div class="mt-2 pt-2 border-top">
+                                <span class="fw-semibold">Catatan Admin:</span>
+                                <div>{{ $pengajuan->catatan_admin }}</div>
                             </div>
-                            <div class="col-6">
-                                <input type="radio" class="btn-check" name="status" id="statusTolak" value="ditolak"
-                                       {{ old('status', $pengajuan->status_pengajuan) === 'ditolak' ? 'checked' : '' }} required>
-                                <label class="btn btn-outline-danger w-100 py-2 d-flex flex-column align-items-center" for="statusTolak">
-                                    <i class="bi bi-x-circle-fill fs-5 mb-1"></i>
-                                    <span class="fw-bold small">Tolak Surat</span>
-                                </label>
-                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
+            <!-- Form Keputusan Verifikasi -->
+            <form action="{{ route('admin.surat.proses', $pengajuan->id_pengajuan) }}" method="POST" id="formProsesSurat" class="pt-3 border-top" style="border-color: var(--np-line) !important;">
+                @csrf
+
+                <div class="mb-3">
+                    <label class="form-label mb-2">
+                        Keputusan Verifikasi <span class="text-danger">*</span>
+                    </label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="status" id="statusSetuju" value="disetujui" 
+                                   {{ old('status', $pengajuan->status_pengajuan) === 'disetujui' ? 'checked' : '' }} required>
+                            <label class="btn w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 decision-btn-setuju" for="statusSetuju" style="height: 48px; border-radius: 10px; border: 1px solid var(--np-line);">
+                                <i class="bi bi-check-circle-fill"></i> Setujui
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="status" id="statusTolak" value="ditolak"
+                                   {{ old('status', $pengajuan->status_pengajuan) === 'ditolak' ? 'checked' : '' }} required>
+                            <label class="btn w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2 decision-btn-tolak" for="statusTolak" style="height: 48px; border-radius: 10px; border: 1px solid var(--np-line);">
+                                <i class="bi bi-x-circle-fill"></i> Tolak
+                            </label>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="catatan_admin" class="form-label small fw-bold text-secondary mb-1">
-                            Catatan Admin <span id="labelWajibTolak" class="text-danger d-none">(Wajib diisi jika ditolak)</span>
-                        </label>
-                        <textarea name="catatan_admin" id="catatan_admin" rows="3" class="form-control form-control-sm @error('catatan_admin') is-invalid @enderror" 
-                                  placeholder="Tuliskan catatan verifikasi atau alasan penolakan permohonan...">{{ old('catatan_admin', $pengajuan->catatan_admin) }}</textarea>
-                        <small class="text-muted" style="font-size: 0.72rem;">Catatan ini akan dapat dibaca langsung oleh personel di aplikasi presensi mereka.</small>
-                    </div>
+                <div class="mb-4">
+                    <label for="catatan_admin" class="form-label mb-1">
+                        Catatan Admin <span id="labelWajibTolak" class="text-danger d-none">*</span>
+                        <span id="labelOpsional" class="text-muted fw-normal">(Opsional)</span>
+                    </label>
+                    <textarea name="catatan_admin" id="catatan_admin" rows="3" class="form-control @error('catatan_admin') is-invalid @enderror" 
+                              placeholder="Tuliskan catatan verifikasi atau alasan penolakan permohonan...">{{ old('catatan_admin', $pengajuan->catatan_admin) }}</textarea>
+                    <div class="text-muted mt-1" style="font-size: 12px;">Catatan ini akan dapat dibaca langsung oleh personel.</div>
+                </div>
 
-                    <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm" style="background-color: #0e2238; border-color: #0e2238;">
-                        <i class="bi bi-save me-1"></i> Simpan Keputusan
-                    </button>
-                </form>
-            </div>
+                <button type="submit" class="btn np-btn-primary w-100 fw-bold" style="height: 48px;">
+                    Simpan Keputusan
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Kolom Kanan: Pratinjau Dokumen PDF -->
+    <!-- Kolom Kanan: Pratinjau Lampiran PDF -->
     <div class="col-12 col-lg-7">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <h6 class="fw-bold text-dark mb-0">
-                    <i class="bi bi-file-earmark-pdf-fill me-1 text-danger"></i> Pratinjau Berkas Lampiran PDF
-                </h6>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('admin.surat.file', $pengajuan->id_pengajuan) }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-box-arrow-up-right me-1"></i> Buka di Tab Baru
-                    </a>
-                </div>
+        <div class="np-card p-4 h-100 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h2 class="h2-navy mb-0" style="font-size: 18px;">Pratinjau Lampiran PDF</h2>
+                <a href="{{ route('admin.surat.file', $pengajuan->id_pengajuan) }}" target="_blank" class="btn np-btn-outline btn-sm d-inline-flex align-items-center gap-1" style="height: 38px;">
+                    <i class="bi bi-box-arrow-up-right"></i> Buka Dokumen PDF
+                </a>
             </div>
-            <div class="card-body p-2 bg-light">
-                <div class="ratio ratio-1x1 border rounded-2 overflow-hidden bg-white shadow-sm" style="min-height: 620px;">
-                    <iframe src="{{ route('admin.surat.file', $pengajuan->id_pengajuan) }}#toolbar=1" 
-                            title="Pratinjau Surat PDF" 
-                            style="width: 100%; height: 100%; border: none;">
-                        <p class="p-4 text-center text-muted">
-                            Peramban Anda tidak mendukung pratinjau PDF langsung. 
-                            <a href="{{ route('admin.surat.file', $pengajuan->id_pengajuan) }}" target="_blank" class="btn btn-primary btn-sm mt-2">
-                                Unduh / Buka Dokumen PDF
-                            </a>
-                        </p>
-                    </iframe>
-                </div>
+
+            <div class="flex-grow-1 border rounded-2 overflow-hidden bg-white" style="min-height: 580px; border-color: var(--np-line) !important;">
+                <iframe src="{{ route('admin.surat.file', $pengajuan->id_pengajuan) }}#toolbar=1" 
+                        title="Pratinjau Surat PDF" 
+                        style="width: 100%; height: 100%; min-height: 580px; border: none;">
+                    <div class="p-4 text-center text-muted">
+                        Peramban Anda tidak mendukung pratinjau PDF langsung.
+                        <a href="{{ route('admin.surat.file', $pengajuan->id_pengajuan) }}" target="_blank" class="btn np-btn-primary btn-sm mt-3 d-inline-block">
+                            Buka Dokumen PDF
+                        </a>
+                    </div>
+                </iframe>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Radio Decision Button Active States */
+    .btn-check:checked + label.decision-btn-setuju {
+        background-color: var(--np-primary) !important;
+        color: #FFFFFF !important;
+        border-color: var(--np-primary) !important;
+    }
+    .btn-check:not(:checked) + label.decision-btn-setuju {
+        background-color: var(--np-surface);
+        color: var(--np-ink);
+    }
+    .btn-check:checked + label.decision-btn-tolak {
+        background-color: var(--np-danger) !important;
+        color: #FFFFFF !important;
+        border-color: var(--np-danger) !important;
+    }
+    .btn-check:not(:checked) + label.decision-btn-tolak {
+        background-color: var(--np-surface);
+        color: var(--np-ink);
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -217,21 +192,23 @@
         const statusTolak = document.getElementById('statusTolak');
         const catatanAdmin = document.getElementById('catatan_admin');
         const labelWajib = document.getElementById('labelWajibTolak');
+        const labelOpsional = document.getElementById('labelOpsional');
 
         function updateCatatanRequirement() {
-            if (statusTolak.checked) {
+            if (statusTolak && statusTolak.checked) {
                 catatanAdmin.required = true;
-                labelWajib.classList.remove('d-none');
+                if (labelWajib) labelWajib.classList.remove('d-none');
+                if (labelOpsional) labelOpsional.classList.add('d-none');
             } else {
                 catatanAdmin.required = false;
-                labelWajib.classList.add('d-none');
+                if (labelWajib) labelWajib.classList.add('d-none');
+                if (labelOpsional) labelOpsional.classList.remove('d-none');
             }
         }
 
-        statusSetuju.addEventListener('change', updateCatatanRequirement);
-        statusTolak.addEventListener('change', updateCatatanRequirement);
+        if (statusSetuju) statusSetuju.addEventListener('change', updateCatatanRequirement);
+        if (statusTolak) statusTolak.addEventListener('change', updateCatatanRequirement);
         updateCatatanRequirement();
     });
 </script>
 @endsection
-

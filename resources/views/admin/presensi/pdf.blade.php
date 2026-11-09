@@ -2,62 +2,67 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Rekap Presensi Personel Bidtik Polda Kalsel</title>
+    <title>Rekapitulasi Kehadiran Personel - Bidtik Polda Kalsel</title>
     <style>
         @page {
-            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+            margin: 1.2cm 1.2cm 1.2cm 1.2cm;
             size: a4 landscape;
         }
         body {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 10pt;
-            color: #1e293b;
+            font-size: 9pt;
+            color: #17263F;
             line-height: 1.3;
+            margin: 0;
+            padding: 0;
         }
 
-        /* Kop Surat Resmi Dinas */
+        /* Kop Surat Resmi Kepolisian */
         .kop-surat {
-            border-bottom: 3px double #000;
+            border-bottom: 2px solid #17263F;
             padding-bottom: 8px;
             margin-bottom: 14px;
-            text-align: center;
+            text-align: left;
         }
         .kop-surat h4 {
             margin: 0;
-            font-size: 11pt;
-            font-weight: normal;
-            letter-spacing: 1px;
+            font-size: 10pt;
+            font-weight: 700;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
+            color: #17263F;
         }
         .kop-surat h3 {
             margin: 2px 0 0 0;
-            font-size: 13pt;
-            font-weight: bold;
-            letter-spacing: 1.5px;
+            font-size: 11pt;
+            font-weight: 700;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
+            color: #17263F;
         }
         .kop-surat p {
             margin: 3px 0 0 0;
-            font-size: 8.5pt;
-            color: #475569;
+            font-size: 8pt;
+            color: #52637A;
         }
 
         /* Judul Laporan */
         .judul-laporan {
-            text-align: center;
+            text-align: left;
             margin-bottom: 16px;
         }
         .judul-laporan h2 {
             margin: 0;
-            font-size: 12pt;
-            text-decoration: underline;
+            font-size: 13pt;
             text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 700;
+            color: #17263F;
+            letter-spacing: 0.5px;
         }
         .judul-laporan .sub-judul {
             margin: 4px 0 0 0;
             font-size: 9pt;
-            color: #334155;
+            color: #52637A;
         }
 
         /* Tabel Data Presensi */
@@ -67,62 +72,65 @@
             margin-bottom: 20px;
         }
         table.data-table th {
-            background-color: #0e2238;
-            color: #ffffff;
-            font-weight: bold;
-            font-size: 8.5pt;
-            padding: 7px 5px;
-            border: 1px solid #0e2238;
-            text-align: center;
+            background-color: #FAFCFE;
+            color: #17263F;
+            font-weight: 700;
+            font-size: 8pt;
+            padding: 8px 6px;
+            border: 1px solid #DCE3ED;
+            text-align: left;
             vertical-align: middle;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         table.data-table td {
             font-size: 8.5pt;
-            padding: 6px 5px;
-            border: 1px solid #cbd5e1;
+            padding: 7px 6px;
+            border: 1px solid #DCE3ED;
             vertical-align: middle;
+            color: #17263F;
         }
         table.data-table tr:nth-child(even) td {
-            background-color: #f8fafc;
+            background-color: #F8FAFD;
         }
 
         .text-center { text-align: center; }
         .text-left { text-align: left; }
         .text-right { text-align: right; }
-        .text-bold { font-weight: bold; }
+        .text-bold { font-weight: 700; }
 
         /* Badge Status */
         .badge-tepat {
-            color: #166534;
-            font-weight: bold;
+            color: #15803D;
+            font-weight: 700;
         }
         .badge-terlambat {
-            color: #991b1b;
-            font-weight: bold;
+            color: #DC2626;
+            font-weight: 700;
         }
         .badge-masuk {
-            color: #1e40af;
-            font-weight: bold;
+            color: #254BD6;
+            font-weight: 700;
         }
         .badge-pulang {
-            color: #0e7490;
-            font-weight: bold;
+            color: #17263F;
+            font-weight: 700;
         }
 
-        /* Tanda Tangan */
+        /* Pengesahan */
         .ttd-container {
             width: 100%;
             margin-top: 25px;
         }
         .ttd-box {
             float: right;
-            width: 260px;
+            width: 280px;
             text-align: center;
-            font-size: 9.5pt;
+            font-size: 9pt;
+            color: #17263F;
         }
         .ttd-space {
-            height: 65px;
+            height: 60px;
         }
         .clear {
             clear: both;
@@ -130,16 +138,15 @@
 
         /* Footer */
         .footer-cetak {
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 8pt;
-            color: #64748b;
-            font-style: italic;
+            color: #52637A;
         }
     </style>
 </head>
 <body>
 
-    <!-- KOP SURAT KEPOLISIAN -->
+    <!-- KOP RESMI KEPOLISIAN (Page 39) -->
     <div class="kop-surat">
         <h4>KEPOLISIAN NEGARA REPUBLIK INDONESIA</h4>
         <h4>DAERAH KALIMANTAN SELATAN</h4>
@@ -149,44 +156,43 @@
         </p>
     </div>
 
-    <!-- JUDUL LAPORAN -->
+    <!-- JUDUL REKAPITULASI (Page 39) -->
     <div class="judul-laporan">
         <h2>REKAPITULASI KEHADIRAN PERSONEL</h2>
         <div class="sub-judul">
-            <strong>Periode:</strong> {{ $periodeTeks }} &nbsp;|&nbsp;
-            <strong>Total Rekaman:</strong> {{ $dataPresensi->count() }} Data
+            Periode: {{ $periodeTeks }}
         </div>
     </div>
 
-    <!-- TABEL DATA -->
+    <!-- TABEL 10 KOLOM (Page 39) -->
     <table class="data-table">
         <thead>
             <tr>
-                <th style="width: 25px;">NO</th>
+                <th class="text-center" style="width: 25px;">NO</th>
                 <th style="width: 70px;">TANGGAL</th>
-                <th style="width: 60px;">WAKTU</th>
-                <th style="width: 85px;">NRP / NIP</th>
+                <th style="width: 75px;">WAKTU</th>
+                <th style="width: 80px;">NRP / NIP</th>
                 <th>NAMA PERSONEL</th>
-                <th style="width: 105px;">JABATAN</th>
-                <th style="width: 90px;">SUBBID / UNIT</th>
-                <th style="width: 65px;">JENIS</th>
-                <th style="width: 90px;">STATUS</th>
-                <th style="width: 85px;">KETERANGAN</th>
+                <th style="width: 110px;">JABATAN</th>
+                <th style="width: 95px;">SUBBID / UNIT</th>
+                <th class="text-center" style="width: 70px;">JENIS</th>
+                <th class="text-center" style="width: 95px;">STATUS</th>
+                <th style="width: 90px;">KETERANGAN</th>
             </tr>
         </thead>
         <tbody>
             @forelse($dataPresensi as $index => $p)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
-                    <td class="text-center">{{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d/m/Y') }}</td>
-                    <td class="text-center">{{ $p->waktu ? \Carbon\Carbon::parse($p->waktu)->format('H:i:s') . ' WITA' : '-' }}</td>
-                    <td class="text-center text-bold">{{ $p->anggota->nrp ?? '-' }}</td>
-                    <td>{{ $p->anggota->nama ?? '-' }}</td>
+                    <td>{{ \Carbon\Carbon::parse($p->tanggal)->format('d/m/y') }}</td>
+                    <td>{{ $p->waktu ? \Carbon\Carbon::parse($p->waktu)->format('H:i') . ' WITA' : '-' }}</td>
+                    <td class="text-bold font-monospace">{{ $p->anggota->nrp ?? '-' }}</td>
+                    <td class="text-bold">{{ $p->anggota->nama ?? '-' }}</td>
                     <td>{{ $p->anggota->jabatan ?? '-' }}</td>
                     <td>{{ $p->anggota->unit_kerja ?? '-' }}</td>
                     <td class="text-center">
                         @if($p->is_surat ?? false)
-                            <span style="color: #2563eb; font-weight: bold;">SURAT IZIN</span>
+                            <span style="color: #254BD6; font-weight: 700;">{{ strtoupper($p->jenis_keterangan ?? 'SURAT') }}</span>
                         @else
                             <span class="{{ $p->jenis_presensi === 'masuk' ? 'badge-masuk' : 'badge-pulang' }}">
                                 {{ strtoupper($p->jenis_presensi) }}
@@ -202,13 +208,13 @@
                             </span>
                         @endif
                     </td>
-                    <td class="text-center text-bold">
+                    <td>
                         {{ $p->keterangan_surat ?? '-' }}
                     </td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" class="text-center" style="padding: 20px; color: #64748b;">
+                    <td colspan="10" class="text-center" style="padding: 24px; color: #52637A;">
                         Tidak ada catatan presensi pada periode dan kriteria filter yang dipilih.
                     </td>
                 </tr>
@@ -216,22 +222,21 @@
         </tbody>
     </table>
 
-    <!-- TANDA TANGAN RESMI -->
+    <!-- PENGESAHAN (Page 39) -->
     <div class="ttd-container">
         <div class="ttd-box">
-            Banjarmasin, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
-            <strong>A.n. KEPALA BIDANG TIK POLDA KALSEL</strong><br>
-            Administrator Sistem Presensi,
+            Mengetahui,<br>
+            <strong>Pejabat Pengesahan</strong>
             <div class="ttd-space"></div>
-            <strong><u>{{ $namaAdmin }}</u></strong><br>
-            <span>Polda Kalimantan Selatan</span>
+            <strong><u>{{ $namaAdmin ?? 'Administrator' }}</u></strong><br>
+            <span>Bid TIK Polda Kalsel</span>
         </div>
         <div class="clear"></div>
     </div>
 
-    <!-- FOOTER INFORMASI SISTEM -->
+    <!-- FOOTER INFORMASI CETAK (Page 39) -->
     <div class="footer-cetak">
-        Dokumen ini diterbitkan secara otomatis melalui Sistem Presensi Web Bidtik Polda Kalimantan Selatan pada {{ $waktuCetak }}.
+        Dicetak {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}, {{ \Carbon\Carbon::now()->format('H:i') }} WITA / {{ $namaAdmin ?? 'Administrator' }}
     </div>
 
 </body>

@@ -1,109 +1,88 @@
 @extends('layouts.anggota')
 
-@section('title', 'Ubah Password Akun')
+@section('title', 'Ubah Password')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card border-0 shadow-sm p-4 rounded-3 bg-white mb-4">
-    <div class="d-flex align-items-center justify-content-between pb-3 border-bottom mb-4">
-        <div>
-            <h5 class="fw-bold text-dark mb-0">
-                <i class="bi bi-key-fill text-warning me-2"></i>Ubah Password Akun
-            </h5>
-            <small class="text-muted">Perbarui kata sandi akun presensi Anda secara mandiri.</small>
-        </div>
-        <a href="{{ route('presensi.index') }}" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>Kembali
-        </a>
-    </div>
+<div class="mb-4">
+    <h1 class="h1-navy">Ubah Password</h1>
+    <div class="subtitle-navy">Presensi Digital Bidtik Polda Kalimantan Selatan</div>
+</div>
 
-    <!-- Alert Status -->
-    @if(session('sukses'))
-        <div class="alert alert-success py-2 px-3 small d-flex align-items-center mb-3 rounded-3" role="alert">
-            <i class="bi bi-check-circle-fill flex-shrink-0 me-2 fs-5"></i>
-            <div>{{ session('sukses') }}</div>
-        </div>
-    @endif
+<div class="row">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card np-card">
+            <div class="card-body p-4">
+                <!-- Banner Keamanan Akun -->
+                <div class="p-3 mb-4 rounded-2" style="background-color: var(--np-soft); border: 1px solid var(--np-line);">
+                    <div class="fw-bold text-dark mb-1">Keamanan Akun</div>
+                    <div class="text-muted small">Gunakan password baru minimal 8 karakter.</div>
+                </div>
 
-    @if(session('error'))
-        <div class="alert alert-danger py-2 px-3 small d-flex align-items-center mb-3 rounded-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2 fs-5"></i>
-            <div>{{ session('error') }}</div>
-        </div>
-    @endif
+                <!-- Alert Status -->
+                @if(session('sukses'))
+                    <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 mb-3" role="alert" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0 !important;">
+                        <i class="bi bi-check-circle-fill me-2"></i> {{ session('sukses') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
-    @if($errors->any())
-        <div class="alert alert-danger py-2 px-3 small mb-3 rounded-3">
-            <ul class="mb-0 ps-3">
-                @foreach($errors->all() as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 mb-3" role="alert" style="background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA !important;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
-    <!-- Informasi Akun -->
-    <div class="p-3 bg-light rounded-3 border mb-4">
-        <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 fs-4">
-                <i class="bi bi-person-badge"></i>
+                @if($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 mb-3" role="alert" style="background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA !important;">
+                        <ul class="mb-0 ps-3">
+                            @foreach($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
+
+                <!-- Form Ubah Password -->
+                <form action="{{ route('anggota.password.update') }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <!-- Password Saat Ini -->
+                    <div class="mb-3">
+                        <label for="password_lama" class="form-label">
+                            Password Saat Ini *
+                        </label>
+                        <input type="password" class="form-control @error('password_lama') is-invalid @enderror" 
+                               id="password_lama" name="password_lama" required autocomplete="current-password">
+                    </div>
+
+                    <!-- Password Baru -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            Password Baru *
+                        </label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               id="password" name="password" required minlength="8" autocomplete="new-password">
+                    </div>
+
+                    <!-- Konfirmasi Password Baru -->
+                    <div class="mb-4">
+                        <label for="password_confirmation" class="form-label">
+                            Konfirmasi Password Baru *
+                        </label>
+                        <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" 
+                               id="password_confirmation" name="password_confirmation" required minlength="8" autocomplete="new-password">
+                    </div>
+
+                    <!-- Tombol Simpan -->
+                    <button type="submit" class="btn btn-primary w-100 fw-bold" style="min-height: 48px; border-radius: 10px;">
+                        Simpan Password
+                    </button>
+                </form>
             </div>
-            <div>
-                <div class="fw-bold text-dark">{{ $anggota->nama }}</div>
-                <div class="small text-muted">NRP: {{ $anggota->nrp }} | {{ $anggota->jabatan }}</div>
-                <div class="small text-secondary">{{ $anggota->email }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Form Ubah Password -->
-    <form action="{{ route('anggota.password.update') }}" method="POST">
-        @csrf
-        @method('PUT')
-
-        <!-- Password Lama -->
-        <div class="mb-3">
-            <label for="password_lama" class="form-label small fw-semibold text-dark mb-1">
-                Password Saat Ini <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
-                <input type="password" class="form-control" id="password_lama" name="password_lama" 
-                       placeholder="Masukkan password saat ini" required autocomplete="current-password">
-            </div>
-        </div>
-
-        <!-- Password Baru -->
-        <div class="mb-3">
-            <label for="password" class="form-label small fw-semibold text-dark mb-1">
-                Password Baru (Minimal 8 karakter) <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted"><i class="bi bi-shield-lock"></i></span>
-                <input type="password" class="form-control" id="password" name="password" 
-                       placeholder="Masukkan password baru" required minlength="8" autocomplete="new-password">
-            </div>
-        </div>
-
-        <!-- Konfirmasi Password Baru -->
-        <div class="mb-4">
-            <label for="password_confirmation" class="form-label small fw-semibold text-dark mb-1">
-                Ulangi Password Baru <span class="text-danger">*</span>
-            </label>
-            <div class="input-group">
-                <span class="input-group-text bg-light text-muted"><i class="bi bi-check2-circle"></i></span>
-                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" 
-                       placeholder="Ketik ulang password baru" required minlength="8" autocomplete="new-password">
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold" style="background-color: #0e2238; border-color: #0e2238;">
-            <i class="bi bi-save me-1"></i> Simpan Password Baru
-        </button>
-    </form>
         </div>
     </div>
 </div>
 @endsection
-

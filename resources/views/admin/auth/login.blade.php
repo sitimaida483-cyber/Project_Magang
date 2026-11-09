@@ -2,157 +2,170 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - PresTIK Polda Kalsel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Masuk Admin - PresTIK Bidtik Polda Kalsel</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
-    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #0e2238 0%, #17385c 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .login-card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 440px;
-            overflow: hidden;
-            border: none;
-        }
-        .card-header-custom {
-            background: #091624;
-            color: #ffffff;
-            padding: 2.2rem 2rem 1.8rem;
-            text-align: center;
-        }
-        .gold-badge {
-            display: inline-block;
-            background: #e5a93c;
-            color: #000;
-            font-weight: 700;
-            font-size: 0.75rem;
-            padding: 4px 12px;
-            border-radius: 30px;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.75rem;
-        }
-        .form-control {
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            border: 1px solid #cbd5e1;
-        }
-        .form-control:focus {
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15);
-        }
-        .btn-police {
-            background-color: #0e2238;
-            color: #ffffff;
-            border-radius: 8px;
-            padding: 0.8rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            border: none;
-        }
-        .btn-police:hover {
-            background-color: #17385c;
-            color: #e5a93c;
-        }
-    </style>
+    
+    <!-- Redesign CSS (Navy Precision) -->
+    <link rel="stylesheet" href="{{ asset('css/navy-precision.css') }}?v={{ file_exists(public_path('css/navy-precision.css')) ? filemtime(public_path('css/navy-precision.css')) : time() }}">
 </head>
-<body>
+<body data-design="A" class="design-navy-precision">
 
-    <div class="login-card">
-        <div class="card-header-custom">
-            <div class="mb-3">
-                <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" alt="Logo Bidtik Polda Kalsel" style="width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));">
+    <div class="auth-split-wrapper">
+        <!-- Panel Kiri: Showcase Navy Precision -->
+        <div class="auth-split-showcase">
+            <div>
+                <!-- Brand Header -->
+                <div class="d-flex align-items-center gap-3 mb-5">
+                    <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" 
+                         alt="Logo PresTIK" style="width: 44px; height: 44px; object-fit: contain;">
+                    <div>
+                        <div class="fw-bold fs-5 text-white lh-1">PresTIK</div>
+                        <div class="text-white-50 small fw-bold mt-1" style="font-size: 10px; letter-spacing: 0.8px;">BIDTIK POLDA KALSEL</div>
+                    </div>
+                </div>
+
+                <!-- Headline -->
+                <h1 class="text-white fw-bold mb-3" style="font-size: 34px; line-height: 1.25; letter-spacing: -0.5px;">
+                    Hadir dengan pasti.<br>Tercatat dengan rapi.
+                </h1>
+                <p class="text-white-50" style="font-size: 15px; line-height: 1.6; max-width: 380px;">
+                    Presensi lokasi dan layanan surat personel dalam satu portal.
+                </p>
             </div>
-            <span class="gold-badge">PresTIK ADMINISTRATOR</span>
-            <h4 class="fw-bold mb-1">PresTIK POLDA KALSEL</h4>
-            <p class="text-white-50 mb-0 small">Presensi Digital Bidtik - Panel Masuk Administrator</p>
+
+            <!-- Feature Points List -->
+            <div class="d-flex flex-column gap-3 pt-4 border-top border-white border-opacity-10">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fw-bold fs-6 text-white" style="font-family: monospace;">01</span>
+                    <span class="text-white text-opacity-80 small fw-semibold">Lokasi GPS kantor</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fw-bold fs-6 text-white" style="font-family: monospace;">02</span>
+                    <span class="text-white text-opacity-80 small fw-semibold">Selfie kamera depan</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="fw-bold fs-6 text-white" style="font-family: monospace;">03</span>
+                    <span class="text-white text-opacity-80 small fw-semibold">Status presensi harian</span>
+                </div>
+            </div>
         </div>
 
-        <div class="p-4 p-md-4">
-            @if(session('sukses'))
-                <div class="alert alert-success alert-dismissible fade show small" role="alert">
-                    {{ session('sukses') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <!-- Panel Kanan: Form Login Admin -->
+        <div class="auth-split-form-panel">
+            <div class="auth-form-card">
+                <!-- Mobile Brand Header (< 992px) -->
+                <div class="d-flex align-items-center gap-2 mb-4 d-lg-none">
+                    <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" 
+                         alt="Logo PresTIK" style="width: 36px; height: 36px; object-fit: contain;">
+                    <div>
+                        <div class="fw-bold text-dark lh-1">PresTIK</div>
+                        <div class="text-muted" style="font-size: 10px; font-weight: 700;">BIDTIK POLDA KALSEL</div>
+                    </div>
                 </div>
-            @endif
 
-            @if(session('info'))
-                <div class="alert alert-info alert-dismissible fade show small" role="alert">
-                    {{ session('info') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+                <h2 class="h1-navy fs-4 fw-bold mb-1">Masuk Admin</h2>
+                <p class="subtitle-navy mb-4">Gunakan akun yang telah terdaftar di PresTIK.</p>
 
-            @if($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show small" role="alert">
-                    <ul class="mb-0 ps-3">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+                <!-- Alerts -->
+                @if(session('error'))
+                    <div class="alert alert-danger py-2 px-3 small d-flex align-items-center mb-3 rounded-3" style="background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA;" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                        <div>{{ session('error') }}</div>
+                    </div>
+                @endif
+                @if(session('sukses'))
+                    <div class="alert alert-success py-2 px-3 small d-flex align-items-center mb-3 rounded-3" style="background-color: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0;" role="alert">
+                        <i class="bi bi-check-circle-fill flex-shrink-0 me-2"></i>
+                        <div>{{ session('sukses') }}</div>
+                    </div>
+                @endif
+                @if(session('info'))
+                    <div class="alert alert-info py-2 px-3 small d-flex align-items-center mb-3 rounded-3" style="background-color: #EAF0FF; color: #254BD6; border: 1px solid #C7D7FE;" role="alert">
+                        <i class="bi bi-info-circle-fill flex-shrink-0 me-2"></i>
+                        <div>{{ session('info') }}</div>
+                    </div>
+                @endif
+                @if($errors->any())
+                    <div class="alert alert-danger py-2 px-3 small mb-3 rounded-3" style="background-color: #FEE2E2; color: #DC2626; border: 1px solid #FECACA;">
+                        <ul class="mb-0 ps-3">
+                            @foreach($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-            <form action="{{ route('admin.login.proses') }}" method="POST">
-                @csrf
-                <div class="mb-3">
-                    <label for="username" class="form-label fw-semibold text-secondary small">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control border-start-0 @error('username') is-invalid @enderror" 
+                <!-- Form Login -->
+                <form action="{{ route('admin.login.proses') }}" method="POST" autocomplete="on">
+                    @csrf
+
+                    <!-- Username -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username *</label>
+                        <input type="text" class="form-control @error('username') is-invalid @enderror" 
                                id="username" name="username" value="{{ old('username') }}" 
-                               placeholder="Masukkan username" required autofocus>
+                               placeholder="Masukkan username" required autofocus autocomplete="username">
                     </div>
-                </div>
 
-                <div class="mb-3">
-                    <label for="password" class="form-label fw-semibold text-secondary small">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-                        <input type="password" class="form-control border-start-0 @error('password') is-invalid @enderror" 
-                               id="password" name="password" placeholder="Masukkan password" required>
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password *</label>
+                        <div class="position-relative">
+                            <input type="password" class="form-control pe-5 @error('password') is-invalid @enderror" 
+                                   id="password" name="password" placeholder="Masukkan password" 
+                                   required autocomplete="current-password">
+                            <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted text-decoration-none me-2" 
+                                    id="btnTogglePassword" title="Lihat/Sembunyikan password" style="z-index: 5;">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="ingat_saya" id="ingat_saya">
-                        <label class="form-check-label text-muted small" for="ingat_saya">
-                            Ingat saya
-                        </label>
+                    <!-- Ingat Saya -->
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="ingat_saya" id="ingat_saya">
+                            <label class="form-check-label" for="ingat_saya">
+                                Ingat saya
+                            </label>
+                        </div>
                     </div>
+
+                    <!-- Tombol Masuk -->
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        Masuk ke Panel Admin
+                    </button>
+                </form>
+
+                <!-- Link Login Personel -->
+                <div class="mt-3 text-start">
+                    <a href="{{ route('login') }}" class="fw-semibold text-decoration-none" style="color: var(--np-primary); font-size: 14px;">
+                        Login Personel
+                    </a>
                 </div>
-
-                <button type="submit" class="btn btn-police w-100 mb-3 shadow-sm">
-                    <i class="bi bi-box-arrow-in-right me-1"></i> Masuk ke Panel
-                </button>
-            </form>
-
-            <div class="text-center pt-2 border-top">
-                <a href="{{ url('/presensi') }}" class="text-decoration-none small text-muted">
-                    <i class="bi bi-arrow-left me-1"></i> Menuju Halaman Presensi Anggota
-                </a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Toggle Password JS -->
+    <script>
+        const btnTogglePassword = document.getElementById('btnTogglePassword');
+        const passwordField = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+        if (btnTogglePassword && passwordField && toggleIcon) {
+            btnTogglePassword.addEventListener('click', function () {
+                const isPassword = passwordField.getAttribute('type') === 'password';
+                passwordField.setAttribute('type', isPassword ? 'text' : 'password');
+                toggleIcon.classList.toggle('bi-eye', !isPassword);
+                toggleIcon.classList.toggle('bi-eye-slash', isPassword);
+            });
+        }
+    </script>
 </body>
 </html>
