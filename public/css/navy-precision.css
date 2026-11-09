@@ -749,3 +749,20 @@ body[data-design="A"] .np-bottom-nav {
         border-radius: 12px;
     }
 }
+
+
+/* Radio Presensi Buttons (Pilihan A: Navy Precision Page 5) */
+body[data-design="A"] .btn-check:checked + label.jenis-presensi-btn {
+    background-color: var(--np-primary) !important;
+    border: 1px solid var(--np-primary) !important;
+    color: #FFFFFF !important;
+}
+body[data-design="A"] .btn-check:not(:checked) + label.jenis-presensi-btn {
+    background-color: #FFFFFF !important;
+    border: 1px solid var(--np-line) !important;
+    color: var(--np-ink) !important;
+}
+body[data-design="A"] .btn-check:disabled + label.jenis-presensi-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

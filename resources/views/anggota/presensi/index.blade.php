@@ -41,76 +41,76 @@
 
     <div class="row g-4">
         <!-- Kolom Kiri: 420px Desktop (Identitas, Jenis, GPS) -->
-        <div class="col-12 col-lg-5">
-            <!-- 1. IDENTITAS PERSONEL -->
+        <div class="col-12 col-lg-5" style="max-width: 440px;">
+            <!-- 1. IDENTITAS PERSONEL (Page 5) -->
             <div class="card np-card mb-3" id="identityCard">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" 
-                             style="width: 44px; height: 44px; background-color: var(--np-primary); font-size: 16px;">
-                            {{ strtoupper(substr($anggota->nama, 0, 1)) }}
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 48px; height: 48px; background-color: var(--np-soft); color: var(--np-primary); font-size: 24px; border: 1px solid #C7D7FE;">
+                            <i class="bi bi-person"></i>
                         </div>
                         <div>
-                            <div class="fw-bold text-dark fs-6" id="personelNama">{{ $anggota->nama }}</div>
-                            <div class="small text-muted" id="personelNrp">NRP {{ $anggota->nrp }} / <span id="personelPangkat">{{ $anggota->unit_kerja ?? 'Bid TIK' }}</span></div>
+                            <div class="fw-bold" style="color: var(--np-ink); font-size: 16px;" id="personelNama">{{ $anggota->nama }}</div>
+                            <div class="text-muted small" id="personelNrp">NRP {{ $anggota->nrp }} / <span id="personelPangkat">{{ $anggota->unit_kerja ?? 'Bid TIK' }}</span></div>
                         </div>
                     </div>
 
-                    <!-- Status Presensi Hari Ini -->
-                    <div class="pt-2 border-top d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="text-muted d-block small" style="font-size: 11px;">Masuk</span>
-                            <span id="badgeStatusMasuk" class="badge {{ $presensiMasuk ? 'badge-np-success' : 'badge-np-warning' }}">
-                                @if($presensiMasuk)
-                                    Sudah ({{ \Carbon\Carbon::parse($presensiMasuk->waktu)->format('H:i') }} WITA)
-                                @else
-                                    Belum Masuk
-                                @endif
-                            </span>
+                    <!-- Status Presensi Hari Ini (Masuk / Pulang) -->
+                    <div class="row g-2 pt-2 border-top" style="border-color: var(--np-line) !important;">
+                        <div class="col-6">
+                            <span class="text-muted d-block small" style="font-size: 12px;">Masuk</span>
+                            <div class="mt-1">
+                                <span id="badgeStatusMasuk" class="badge {{ $presensiMasuk ? 'badge-np-success' : 'badge-np-warning' }}">
+                                    @if($presensiMasuk)
+                                        Sudah ({{ \Carbon\Carbon::parse($presensiMasuk->waktu)->format('H:i') }} WITA)
+                                    @else
+                                        Belum Masuk
+                                    @endif
+                                </span>
+                            </div>
                         </div>
-                        <div class="text-end">
-                            <span class="text-muted d-block small" style="font-size: 11px;">Pulang</span>
-                            <span id="badgeStatusPulang" class="badge {{ $presensiPulang ? 'badge-np-info' : 'badge-np-warning' }}">
-                                @if($presensiPulang)
-                                    Sudah ({{ \Carbon\Carbon::parse($presensiPulang->waktu)->format('H:i') }} WITA)
-                                @else
-                                    Belum Pulang
-                                @endif
-                            </span>
+                        <div class="col-6">
+                            <span class="text-muted d-block small" style="font-size: 12px;">Pulang</span>
+                            <div class="mt-1">
+                                <span id="badgeStatusPulang" class="badge {{ $presensiPulang ? 'badge-np-info' : 'badge-np-warning' }}">
+                                    @if($presensiPulang)
+                                        Sudah ({{ \Carbon\Carbon::parse($presensiPulang->waktu)->format('H:i') }} WITA)
+                                    @else
+                                        Belum Pulang
+                                    @endif
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. PILIH JENIS PRESENSI -->
-            <div class="card np-card mb-3">
-                <div class="card-body p-3">
-                    <div class="d-flex gap-2">
-                        <div class="flex-grow-1">
-                            <input type="radio" class="btn-check" name="jenis_presensi" id="jenisMasuk" value="masuk" 
-                                   {{ (!$presensiMasuk) ? 'checked' : '' }}
-                                   {{ ($presensiMasuk) ? 'disabled' : '' }}>
-                            <label class="btn btn-outline-secondary w-100 py-2 d-flex align-items-center justify-content-center" for="jenisMasuk" style="min-height: 48px; border-radius: 8px;">
-                                <span class="fw-bold">Presensi Masuk</span>
-                            </label>
-                        </div>
-                        <div class="flex-grow-1">
-                            <input type="radio" class="btn-check" name="jenis_presensi" id="jenisPulang" value="pulang" 
-                                   {{ ($presensiMasuk && !$presensiPulang) ? 'checked' : '' }}
-                                   {{ (!$presensiMasuk || $presensiPulang) ? 'disabled' : '' }}>
-                            <label class="btn btn-outline-secondary w-100 py-2 d-flex align-items-center justify-content-center" for="jenisPulang" style="min-height: 48px; border-radius: 8px;">
-                                <span class="fw-bold">Presensi Pulang</span>
-                            </label>
-                        </div>
-                    </div>
+            <!-- 2. PILIH JENIS PRESENSI (Page 5: Tombol Berdampingan Langsung) -->
+            <div class="d-flex gap-2 mb-3">
+                <div class="flex-grow-1">
+                    <input type="radio" class="btn-check" name="jenis_presensi" id="jenisMasuk" value="masuk" 
+                           {{ (!$presensiMasuk) ? 'checked' : '' }}
+                           {{ ($presensiMasuk) ? 'disabled' : '' }}>
+                    <label class="btn w-100 py-2 d-flex align-items-center justify-content-center jenis-presensi-btn" for="jenisMasuk" style="min-height: 48px; border-radius: 10px; font-weight: 700;">
+                        <span>Presensi Masuk</span>
+                    </label>
+                </div>
+                <div class="flex-grow-1">
+                    <input type="radio" class="btn-check" name="jenis_presensi" id="jenisPulang" value="pulang" 
+                           {{ ($presensiMasuk && !$presensiPulang) ? 'checked' : '' }}
+                           {{ (!$presensiMasuk || $presensiPulang) ? 'disabled' : '' }}>
+                    <label class="btn w-100 py-2 d-flex align-items-center justify-content-center jenis-presensi-btn" for="jenisPulang" style="min-height: 48px; border-radius: 10px; font-weight: 700;">
+                        <span>Presensi Pulang</span>
+                    </label>
                 </div>
             </div>
 
-            <!-- 3. LOKASI GPS & RADIUS -->
+            <!-- 3. LOKASI GPS & RADIUS (Page 5) -->
             <div class="card np-card mb-3">
                 <div class="card-body p-3">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="fw-bold text-dark">Lokasi GPS</span>
+                        <span class="fw-bold" style="color: var(--np-ink); font-size: 15px;">Lokasi GPS</span>
                         <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 fw-bold" id="btnRefreshGps" style="color: var(--np-primary); font-size: 13px;">
                             Refresh GPS
                         </button>
@@ -118,7 +118,7 @@
                     <div class="mb-2">
                         <span id="radiusBadge" class="badge badge-np-warning">Mendeteksi GPS...</span>
                     </div>
-                    <div class="small text-muted" id="gpsInfo" style="font-size: 13px;">
+                    <div class="text-muted small" id="gpsInfo" style="font-size: 13px;">
                         Sedang mencari sinyal satelit GPS perangkat Anda...
                     </div>
                 </div>
@@ -151,40 +151,38 @@
                     </div>
 
                     <!-- Status Deteksi Wajah -->
-                    <div id="faceCheckStatus" class="alert alert-info py-2 small mb-3 rounded-2" role="status" aria-live="polite" style="font-size: 13px;">
-                        <i class="bi bi-info-circle me-1"></i> Posisikan wajah tegak lurus dan tidak terhalang.
+                    <div id="faceCheckStatus" class="p-3 rounded-2 small mb-3" role="status" aria-live="polite" style="background-color: #FAFCFE; border: 1px solid var(--np-line); color: var(--np-muted); font-size: 13px;">
+                        Posisikan wajah tegak lurus dan tidak terhalang.
                     </div>
 
                     <!-- Tombol Kamera (Ambil Foto / Foto Ulang) -->
                     <div class="d-flex flex-column gap-2 mb-3">
-                        <button type="button" class="btn btn-primary w-100 fw-bold" id="btnSnapPhoto" disabled style="min-height: 48px;">
+                        <button type="button" class="btn btn-primary w-100 fw-bold" id="btnSnapPhoto" disabled style="min-height: 48px; border-radius: 10px;">
                             <span class="spinner-border spinner-border-sm me-1" role="status"></span> Menghubungkan Kamera...
                         </button>
-                        <button type="button" class="btn btn-outline-secondary w-100 fw-bold d-none" id="btnRetakePhoto" style="min-height: 48px;">
+                        <button type="button" class="btn btn-outline-secondary w-100 fw-bold d-none" id="btnRetakePhoto" style="min-height: 48px; border-radius: 10px;">
                             Foto Ulang
                         </button>
+                        @if(isset($bebasPresensi) && $bebasPresensi)
+                            <button type="button" id="btnSubmitPresensi" class="btn btn-secondary w-100 fw-bold" disabled style="min-height: 48px; border-radius: 10px;">
+                                Presensi Dinonaktifkan
+                            </button>
+                        @elseif($presensiMasuk && $presensiPulang)
+                            <button type="button" class="btn btn-secondary w-100 fw-bold" disabled style="min-height: 48px; border-radius: 10px;">
+                                Kirim Presensi Sekarang
+                            </button>
+                        @else
+                            <button type="button" id="btnSubmitPresensi" class="btn btn-primary w-100 fw-bold presensi-submit-button" style="min-height: 48px; border-radius: 10px;">
+                                Kirim Presensi Sekarang
+                            </button>
+                        @endif
                     </div>
 
                     <!-- Canvas Snapshot (Tersembunyi) -->
                     <canvas id="photoCanvas" class="d-none"></canvas>
 
-                    <!-- Tombol Kirim Presensi -->
-                    @if(isset($bebasPresensi) && $bebasPresensi)
-                        <button type="button" id="btnSubmitPresensi" class="btn btn-secondary w-100 fw-bold" disabled style="min-height: 48px; border-radius: 10px;">
-                            Presensi Dinonaktifkan
-                        </button>
-                    @elseif($presensiMasuk && $presensiPulang)
-                        <button type="button" class="btn btn-secondary w-100 fw-bold" disabled style="min-height: 48px; border-radius: 10px;">
-                            Kirim Presensi Sekarang
-                        </button>
-                    @else
-                        <button type="button" id="btnSubmitPresensi" class="btn btn-primary w-100 fw-bold presensi-submit-button" style="min-height: 48px; border-radius: 10px;">
-                            Kirim Presensi Sekarang
-                        </button>
-                    @endif
-
                     <!-- Subtext Jam Kerja -->
-                    <div class="text-center text-muted small mt-3" style="font-size: 12px;">
+                    <div class="text-center text-muted small mt-2" style="font-size: 12px;">
                         Jam masuk {{ substr($pengaturan->jam_masuk ?? '07:30', 0, 5) }} / Jam pulang {{ substr($pengaturan->jam_keluar ?? '16:00', 0, 5) }} WITA
                     </div>
                 </div>
@@ -327,7 +325,19 @@
     function setFaceCheckStatus(type, message) {
         const status = document.getElementById('faceCheckStatus');
         if (!status) return;
-        status.className = `alert alert-${type} py-2 small mb-2`;
+        if (type === 'success') {
+            status.style.backgroundColor = 'var(--np-soft)';
+            status.style.borderColor = '#C7D7FE';
+            status.style.color = 'var(--np-primary)';
+        } else if (type === 'warning' || type === 'danger') {
+            status.style.backgroundColor = 'var(--np-warning-soft)';
+            status.style.borderColor = 'var(--np-warning-line)';
+            status.style.color = 'var(--np-warning)';
+        } else {
+            status.style.backgroundColor = '#FAFCFE';
+            status.style.borderColor = 'var(--np-line)';
+            status.style.color = 'var(--np-muted)';
+        }
         status.innerHTML = message;
     }
 
@@ -689,20 +699,22 @@
 
                 const distanceFormatted = formatDistance(distance);
                 if (distance <= KANTOR_CONFIG.radius) {
-                    radiusBadge.className = 'badge bg-success';
-                    radiusBadge.innerHTML = `<i class="bi bi-check-circle me-1"></i> Dalam Radius (${distanceFormatted})`;
-                    gpsInfo.innerHTML = `Lokasi terverifikasi di kantor <strong>${KANTOR_CONFIG.nama}</strong>. Koordinat: <span class="font-monospace">${lat.toFixed(6)}, ${lng.toFixed(6)}</span>`;
+                    radiusBadge.className = 'badge badge-np-success';
+                    radiusBadge.innerHTML = 'Dalam Radius';
+                    gpsInfo.innerHTML = `Jarak ${distanceFormatted} dari kantor. Batas radius ${KANTOR_CONFIG.radius} m.`;
                 } else {
-                    radiusBadge.className = 'badge bg-danger';
-                    radiusBadge.innerHTML = `<i class="bi bi-x-circle me-1"></i> Luar Radius (${distanceFormatted})`;
-                    gpsInfo.innerHTML = `<span class="text-danger fw-semibold">Jarak Anda ${distanceFormatted} dari kantor!</span> Batas radius presensi adalah ${KANTOR_CONFIG.radius} meter.`;
+                    radiusBadge.className = 'badge badge-np-danger';
+                    radiusBadge.innerHTML = 'Di Luar Radius';
+                    gpsInfo.innerHTML = `Jarak ${distanceFormatted} dari kantor. Batas radius ${KANTOR_CONFIG.radius} m.`;
+                    setFaceCheckStatus('warning', '<strong>Presensi Belum Dapat Dikirim</strong><div class="mt-1">Periksa lokasi perangkat, izinkan GPS dan kamera, lalu coba kembali.</div>');
                 }
             },
             function(err) {
                 console.error('Error GPS:', err);
-                radiusBadge.className = 'badge bg-danger';
-                radiusBadge.textContent = 'GPS Mati / Ditolak';
-                gpsInfo.innerHTML = `<span class="text-danger">Izin lokasi GPS tidak aktif atau ditolak. Silakan aktifkan GPS dan refresh halaman.</span>`;
+                radiusBadge.className = 'badge badge-np-warning';
+                radiusBadge.textContent = 'GPS Belum Aktif';
+                gpsInfo.innerHTML = 'Izinkan akses lokasi di pengaturan browser.';
+                setFaceCheckStatus('warning', '<strong>Presensi Belum Dapat Dikirim</strong><div class="mt-1">Periksa lokasi perangkat, izinkan GPS dan kamera, lalu coba kembali.</div>');
             },
             {
                 enableHighAccuracy: true,
@@ -774,26 +786,26 @@
                         const score = bestDetection.categories?.[0]?.score ?? 1.0;
                         if (score < 0.70) {
                             faceValid = false;
-                            statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah tidak terdeteksi secara utuh. Pastikan seluruh wajah (mata, hidung, mulut) terlihat jelas tanpa tertutup tangan atau benda.';
+                            statusMsg = '<strong>Wajah Belum Terdeteksi</strong><div class="mt-1">Posisikan wajah tepat di depan kamera, tegak lurus, dan tidak terhalang.</div>';
                         } else {
                             // Pemeriksaan kualitas wajah: pose lurus (tidak menoleh kiri/kanan) & tidak tertutup
                             const quality = checkFaceQuality(ctx, canvas, bestDetection);
                             if (!quality.valid) {
                                 faceValid = false;
-                                statusMsg = `<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> ${quality.message}`;
+                                statusMsg = `<strong>Wajah Belum Terdeteksi</strong><div class="mt-1">${quality.message}</div>`;
                             } else {
                                 faceValid = true;
-                                statusMsg = '<i class="bi bi-check-circle-fill text-success me-1"></i> Wajah terverifikasi jelas, tegak lurus, dan tidak terhalang.';
+                                statusMsg = '<strong>Foto Selfie Siap Dikirim</strong><div class="mt-1">Periksa hasil foto sebelum mengirim presensi.</div>';
                             }
                         }
                     } else {
                         faceValid = false;
-                        statusMsg = '<i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Wajah tidak terdeteksi. Posisikan wajah Anda tepat di depan kamera.';
+                        statusMsg = '<strong>Wajah Belum Terdeteksi</strong><div class="mt-1">Posisikan wajah tepat di depan kamera, tegak lurus, dan tidak terhalang.</div>';
                     }
                 } catch (err) {
                     console.warn('Runtime deteksi error:', err);
                     faceValid = true;
-                    statusMsg = '<i class="bi bi-check-circle-fill text-success me-1"></i> Foto selfie berhasil diambil.';
+                    statusMsg = '<strong>Foto Selfie Siap Dikirim</strong><div class="mt-1">Periksa hasil foto sebelum mengirim presensi.</div>';
                 }
             }
 
@@ -826,7 +838,7 @@
             btnRetake.classList.add('d-none');
             btnSnap.classList.remove('d-none');
             updateCaptureButton();
-            setFaceCheckStatus('info', '<i class="bi bi-info-circle me-1"></i> Posisikan wajah Anda tegak lurus menghadap kamera dan ambil foto selfie.');
+            setFaceCheckStatus('default', 'Posisikan wajah tegak lurus dan tidak terhalang.');
         });
 
         // Tombol Refresh GPS
