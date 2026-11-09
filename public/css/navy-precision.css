@@ -700,18 +700,22 @@ body[data-design="A"] .np-bottom-nav {
 .auth-split-wrapper {
     min-height: 100vh;
     display: flex;
-    background-color: var(--np-surface);
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.92) 0%, rgba(241, 245, 249, 0.95) 100%),
+                url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat;
 }
 
 .auth-split-showcase {
     width: 480px;
-    background-color: var(--np-ink);
+    background: linear-gradient(180deg, rgba(11, 19, 43, 0.84) 0%, rgba(23, 38, 63, 0.92) 100%),
+                url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat;
     color: #FFFFFF;
     padding: 56px 48px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     flex-shrink: 0;
+    position: relative;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
 }
 
 .auth-split-form-panel {
@@ -720,7 +724,8 @@ body[data-design="A"] .np-bottom-nav {
     align-items: center;
     justify-content: center;
     padding: 40px 24px;
-    background-color: var(--np-bg);
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.92) 0%, rgba(241, 245, 249, 0.95) 100%),
+                url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat;
 }
 
 .auth-form-card {
@@ -730,23 +735,27 @@ body[data-design="A"] .np-bottom-nav {
     border: 1px solid var(--np-line);
     border-radius: var(--np-radius-card);
     padding: 36px 32px;
+    box-shadow: 0 16px 36px rgba(11, 19, 43, 0.08);
 }
 
 @media (max-width: 991.98px) {
     .auth-split-wrapper {
         flex-direction: column;
-        background-color: var(--np-bg);
+        justify-content: center;
+        background: linear-gradient(180deg, rgba(11, 19, 43, 0.88) 0%, rgba(23, 38, 63, 0.94) 100%),
+                    url('../images/bg-polda-kalsel.jpg') center center / cover no-repeat fixed;
     }
     .auth-split-showcase {
-        width: 100%;
-        padding: 24px 20px;
+        display: none !important;
     }
     .auth-split-form-panel {
-        padding: 20px;
+        padding: 32px 20px;
+        background: transparent;
     }
     .auth-form-card {
-        padding: 24px 20px;
-        border-radius: 12px;
+        padding: 28px 24px;
+        border-radius: 16px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
     }
 }
 
