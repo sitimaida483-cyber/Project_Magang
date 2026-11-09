@@ -17,57 +17,76 @@
     <link rel="stylesheet" href="{{ asset('css/navy-precision.css') }}?v={{ file_exists(public_path('css/navy-precision.css')) ? filemtime(public_path('css/navy-precision.css')) : time() }}">
 
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+        body.auth-page-body {
             margin: 0;
-            padding: 0;
-            background-color: #F8FAFC;
-        }
-
-        .auth-split-wrapper {
+            padding: 30px 16px;
             min-height: 100vh;
             display: flex;
-            background-color: #F8FAFC;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background: 
+                linear-gradient(180deg, rgba(8, 20, 36, 0.72) 0%, rgba(11, 26, 46, 0.40) 240px, rgba(11, 26, 46, 0.76) 100%),
+                url('{{ asset("images/bg-polda-kalsel.jpg") }}') no-repeat center top;
+            background-size: cover;
+            background-attachment: fixed;
         }
 
-        /* Panel Kiri: Showcase Navy Precision (Sesuai Halaman 4 PDF) */
-        .auth-split-showcase {
-            width: 480px;
+        .auth-wrapper {
+            width: 100%;
+            max-width: 960px;
+            margin: auto;
+        }
+
+        .auth-card-dual {
+            display: flex;
+            background: #FFFFFF;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 65px rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        /* Panel Kiri: Showcase Navy Precision (Sesuai Acuan Gambar User) */
+        .auth-showcase-panel {
+            width: 45%;
             background-color: #0B132B;
             color: #FFFFFF;
-            padding: 56px 48px;
+            padding: 50px 42px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             flex-shrink: 0;
+            position: relative;
         }
 
-        .auth-split-showcase .brand-logo {
+        .auth-showcase-panel .brand-logo {
             width: 44px;
             height: 44px;
             object-fit: contain;
         }
 
-        .auth-split-showcase h1 {
-            font-size: 32px;
+        .auth-showcase-panel h1 {
+            font-size: 30px;
             font-weight: 700;
-            line-height: 1.28;
+            line-height: 1.3;
             letter-spacing: -0.5px;
             color: #FFFFFF;
         }
 
-        .auth-split-showcase p {
-            font-size: 15px;
+        .auth-showcase-panel p {
+            font-size: 14.5px;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.75);
         }
 
         .showcase-features {
             border-top: 1px solid rgba(255, 255, 255, 0.12);
-            padding-top: 28px;
+            padding-top: 26px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 15px;
         }
 
         .showcase-features .feature-item {
@@ -86,50 +105,40 @@
         .showcase-features .feature-text {
             font-size: 14px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.85);
+            color: rgba(255, 255, 255, 0.9);
         }
 
         /* Panel Kanan: Form Card */
-        .auth-split-form-panel {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 24px;
-            background-color: #F8FAFC;
-        }
-
-        .auth-form-card {
-            width: 100%;
-            max-width: 440px;
+        .auth-form-panel {
+            width: 55%;
+            padding: 46px 40px;
             background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 16px;
-            padding: 38px 34px;
-            box-shadow: 0 10px 25px -5px rgba(11, 19, 43, 0.05), 0 8px 10px -6px rgba(11, 19, 43, 0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .auth-form-card .form-title {
+        .auth-form-panel .form-title {
             font-size: 24px;
             font-weight: 700;
             color: #0B132B;
             margin-bottom: 4px;
         }
 
-        .auth-form-card .form-subtitle {
+        .auth-form-panel .form-subtitle {
             font-size: 14px;
             color: #64748B;
             margin-bottom: 24px;
         }
 
-        .auth-form-card .form-label {
+        .auth-form-panel .form-label {
             font-size: 13px;
             font-weight: 600;
             color: #334155;
             margin-bottom: 6px;
         }
 
-        .auth-form-card .form-control {
+        .auth-form-panel .form-control {
             border: 1.5px solid #CBD5E1;
             border-radius: 8px;
             padding: 10px 14px;
@@ -138,7 +147,7 @@
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
-        .auth-form-card .form-control:focus {
+        .auth-form-panel .form-control:focus {
             border-color: #254BD6;
             box-shadow: 0 0 0 3px rgba(37, 75, 214, 0.15);
         }
@@ -195,71 +204,71 @@
         }
 
         @media (max-width: 991.98px) {
-            .auth-split-wrapper {
-                flex-direction: column;
+            body.auth-page-body {
+                padding: 24px 14px;
             }
-            .auth-split-showcase {
+            .auth-wrapper {
+                max-width: 440px;
+            }
+            .auth-card-dual {
+                flex-direction: column;
+                border-radius: 16px;
+            }
+            .auth-showcase-panel {
+                display: none !important;
+            }
+            .auth-form-panel {
                 width: 100%;
                 padding: 32px 24px;
-            }
-            .auth-split-showcase h1 {
-                font-size: 26px;
-            }
-            .auth-split-form-panel {
-                padding: 24px 16px 40px;
-            }
-            .auth-form-card {
-                padding: 28px 20px;
-                border-radius: 14px;
             }
         }
     </style>
 </head>
-<body data-design="A" class="design-navy-precision">
+<body data-design="A" class="auth-page-body">
 
-    <div class="auth-split-wrapper">
-        <!-- Panel Kiri: Showcase Navy Precision (TETAP ADA SESUAI ACUAN PDF) -->
-        <div class="auth-split-showcase">
-            <div>
-                <!-- Brand Header -->
-                <div class="d-flex align-items-center gap-3 mb-5">
-                    <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" 
-                         alt="Logo PresTIK" class="brand-logo">
-                    <div>
-                        <div class="fw-bold fs-5 text-white lh-1">PresTIK</div>
-                        <div class="text-white-50 small fw-bold mt-1" style="font-size: 10px; letter-spacing: 0.8px;">BIDTIK POLDA KALSEL</div>
+    <div class="auth-wrapper">
+        <div class="auth-card-dual">
+            <!-- Panel Kiri: Showcase Navy Precision (SESUAI GAMBAR ACUAN) -->
+            <div class="auth-showcase-panel">
+                <div>
+                    <!-- Brand Header -->
+                    <div class="d-flex align-items-center gap-3 mb-5">
+                        <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" 
+                             alt="Logo PresTIK" class="brand-logo">
+                        <div>
+                            <div class="fw-bold fs-5 text-white lh-1">PresTIK</div>
+                            <div class="text-white-50 small fw-bold mt-1" style="font-size: 10px; letter-spacing: 0.8px;">BIDTIK POLDA KALSEL</div>
+                        </div>
+                    </div>
+
+                    <!-- Headline & Subtitle -->
+                    <h1 class="mb-3">
+                        Hadir dengan pasti.<br>Tercatat dengan rapi.
+                    </h1>
+                    <p>
+                        Presensi lokasi dan layanan surat personel dalam satu portal.
+                    </p>
+                </div>
+
+                <!-- Feature Points List (01, 02, 03) -->
+                <div class="showcase-features">
+                    <div class="feature-item">
+                        <span class="feature-num">01</span>
+                        <span class="feature-text">Lokasi GPS kantor</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-num">02</span>
+                        <span class="feature-text">Selfie kamera depan</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-num">03</span>
+                        <span class="feature-text">Status presensi harian</span>
                     </div>
                 </div>
-
-                <!-- Headline -->
-                <h1 class="mb-3">
-                    Hadir dengan pasti.<br>Tercatat dengan rapi.
-                </h1>
-                <p>
-                    Presensi lokasi dan layanan surat personel dalam satu portal.
-                </p>
             </div>
 
-            <!-- Feature Points List (01, 02, 03) -->
-            <div class="showcase-features">
-                <div class="feature-item">
-                    <span class="feature-num">01</span>
-                    <span class="feature-text">Lokasi GPS kantor</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-num">02</span>
-                    <span class="feature-text">Selfie kamera depan</span>
-                </div>
-                <div class="feature-item">
-                    <span class="feature-num">03</span>
-                    <span class="feature-text">Status presensi harian</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Panel Kanan: Form Login Admin -->
-        <div class="auth-split-form-panel">
-            <div class="auth-form-card">
+            <!-- Panel Kanan: Form Login Admin -->
+            <div class="auth-form-panel">
                 <!-- Mobile Brand Header (< 992px) -->
                 <div class="d-flex align-items-center gap-2 mb-4 d-lg-none">
                     <img src="{{ asset('images/logo-bidtik.svg') }}?v={{ file_exists(public_path('images/logo-bidtik.svg')) ? filemtime(public_path('images/logo-bidtik.svg')) : time() }}" 
