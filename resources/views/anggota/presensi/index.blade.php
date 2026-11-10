@@ -41,7 +41,7 @@
 
     <div class="row g-4">
         <!-- Kolom Kiri: Identitas, Jenis Presensi, GPS -->
-        <div class="col-12 col-lg-5 col-xl-4">
+        <div class="col-12 col-lg-5 col-xl-5">
             <!-- 1. IDENTITAS PERSONEL (Page 5) -->
             <div class="card np-card mb-3" id="identityCard">
                 <div class="card-body p-3">
@@ -126,14 +126,14 @@
         </div>
 
         <!-- Kolom Kanan: Selfie Kamera Depan & Aksi -->
-        <div class="col-12 col-lg-7 col-xl-8">
+        <div class="col-12 col-lg-7 col-xl-7">
             <div class="card np-card mb-3">
                 <div class="card-header border-0 pb-0 pt-3 px-3">
                     <span class="fw-bold text-dark fs-6">Foto Selfie Kamera Depan</span>
                 </div>
                 <div class="card-body p-3">
-                    <!-- Frame Kamera -->
-                    <div class="position-relative overflow-hidden mb-3" style="aspect-ratio: 4/3; max-height: 520px; background-color: #0F172A; border: 1px solid var(--np-line); border-radius: 8px;">
+                    <!-- Frame Kamera (Full Width & Centered) -->
+                    <div class="position-relative overflow-hidden mb-3 w-100" style="aspect-ratio: 4/3; background-color: #0F172A; border: 1px solid var(--np-line); border-radius: 8px; margin: 0 auto;">
                         <video id="cameraStream" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block;"></video>
                         <img id="photoPreview" alt="Pratinjau Foto Selfie" style="width: 100%; height: 100%; object-fit: cover; display: none;">
 

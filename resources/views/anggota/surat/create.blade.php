@@ -69,11 +69,11 @@
             </div>
 
             <!-- Tombol Aksi -->
-            <div class="d-flex flex-column gap-2" style="max-width: 280px;">
-                <button type="submit" class="btn btn-primary w-100 fw-bold">
-                    Kirim Pengajuan Surat
+            <div class="d-flex align-items-center gap-3">
+                <button type="submit" class="btn btn-primary fw-bold px-4" style="min-height: 48px; border-radius: 10px;">
+                    <i class="bi bi-send me-1"></i> Kirim Pengajuan Surat
                 </button>
-                <a href="{{ route('anggota.surat.index') }}" class="btn btn-outline-secondary w-100 fw-bold">
+                <a href="{{ route('anggota.surat.index') }}" class="btn btn-outline-secondary fw-bold px-4" style="min-height: 48px; border-radius: 10px;">
                     Batal
                 </a>
             </div>
