@@ -199,6 +199,49 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
+
+        // Action Button Switcher: geser sorotan biru saat hover/klik/fokus
+        document.querySelectorAll('.np-action-switcher').forEach(function(group) {
+            const buttons = group.querySelectorAll('.np-switch-btn');
+
+            buttons.forEach(function(btn) {
+                btn.addEventListener('pointerenter', function(e) {
+                    if (e.pointerType && e.pointerType !== 'mouse') return;
+                    group.classList.add('has-hover');
+                    buttons.forEach(function(b) { b.classList.remove('is-hovered'); });
+                    btn.classList.add('is-hovered');
+                });
+
+                btn.addEventListener('pointerleave', function(e) {
+                    if (e.pointerType && e.pointerType !== 'mouse') return;
+                    btn.classList.remove('is-hovered');
+                    if (!group.querySelector('.np-switch-btn.is-hovered')) {
+                        group.classList.remove('has-hover');
+                    }
+                });
+
+                btn.addEventListener('click', function() {
+                    buttons.forEach(function(b) { b.classList.remove('is-active'); });
+                    btn.classList.add('is-active');
+                    btn.blur();
+
+                    // Sinkronkan filter form saat ini ke tautan ekspor PDF / Excel
+                    if (btn.classList.contains('np-export-link') && btn.dataset.baseUrl) {
+                        const form = btn.closest('form');
+                        if (form) {
+                            const params = new URLSearchParams();
+                            new FormData(form).forEach(function(value, key) {
+                                if (typeof value === 'string' && value.trim() !== '') {
+                                    params.append(key, value.trim());
+                                }
+                            });
+                            const query = params.toString();
+                            btn.href = query ? (btn.dataset.baseUrl + '?' + query) : btn.dataset.baseUrl;
+                        }
+                    }
+                });
+            });
+        });
     </script>
     @stack('scripts')
 </body>

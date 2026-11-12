@@ -88,18 +88,18 @@
             </div>
 
             <!-- Tombol Aksi Filter & Ekspor -->
-            <div class="d-flex flex-wrap gap-2">
-                <button type="submit" class="btn btn-primary fw-bold">
+            <div class="d-flex flex-wrap gap-2 np-action-switcher">
+                <button type="submit" class="btn btn-outline-secondary fw-bold np-switch-btn is-active">
                     Terapkan Filter
                 </button>
-                <a href="{{ route('admin.presensi.ekspor_pdf', request()->all()) }}" class="btn btn-outline-secondary fw-bold">
+                <a href="{{ route('admin.presensi.ekspor_pdf', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_pdf') }}" class="btn btn-outline-secondary fw-bold np-switch-btn np-export-link">
                     Ekspor PDF
                 </a>
-                <a href="{{ route('admin.presensi.ekspor_excel', request()->all()) }}" class="btn btn-outline-secondary fw-bold">
+                <a href="{{ route('admin.presensi.ekspor_excel', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_excel') }}" class="btn btn-outline-secondary fw-bold np-switch-btn np-export-link">
                     Ekspor Excel
                 </a>
                 @if(request()->hasAny(['tanggal_mulai', 'tanggal_selesai', 'id_anggota', 'jenis_presensi', 'status_kehadiran', 'jenis_keterangan']))
-                    <a href="{{ route('admin.presensi.index') }}" class="btn btn-outline-secondary fw-bold">
+                    <a href="{{ route('admin.presensi.index') }}" class="btn btn-outline-secondary fw-bold np-switch-btn">
                         Reset
                     </a>
                 @endif

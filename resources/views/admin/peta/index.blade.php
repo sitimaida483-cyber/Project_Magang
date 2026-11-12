@@ -91,14 +91,14 @@
             </div>
 
             <!-- Tombol Aksi -->
-            <div class="d-flex flex-wrap gap-2">
-                <button type="submit" class="btn btn-primary fw-bold">
+            <div class="d-flex flex-wrap gap-2 np-action-switcher">
+                <button type="submit" class="btn btn-outline-secondary fw-bold np-switch-btn is-active">
                     Tampilkan Peta
                 </button>
-                <button type="button" class="btn btn-outline-secondary fw-bold" id="btnFokusKantor">
+                <button type="button" class="btn btn-outline-secondary fw-bold np-switch-btn" id="btnFokusKantor">
                     Fokus Kantor
                 </button>
-                <button type="button" class="btn btn-outline-secondary fw-bold" id="btnFitMarkers">
+                <button type="button" class="btn btn-outline-secondary fw-bold np-switch-btn" id="btnFitMarkers">
                     Semua Penanda
                 </button>
             </div>

@@ -1218,3 +1218,35 @@ body[data-design="A"] .btn-check:disabled + label.jenis-presensi-btn {
         height: 420px !important;
     }
 }
+
+/* Interactive Action Button Switcher (Filter / Ekspor / Reset / Peta) */
+body[data-design="A"] .np-action-switcher .np-switch-btn,
+body[data-design="A"] .np-action-switcher .np-switch-btn.btn-outline-secondary,
+body[data-design="A"] .np-action-switcher .np-switch-btn.btn-primary {
+    background-color: #FFFFFF !important;
+    border: 1px solid var(--np-line) !important;
+    color: var(--np-ink) !important;
+    border-radius: var(--np-radius-btn) !important;
+    font-weight: 700;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+body[data-design="A"] .np-action-switcher:not(.has-hover):not(:has(.np-switch-btn:hover)):not(:has(.np-switch-btn:focus-visible)) .np-switch-btn.is-active {
+    background-color: var(--np-primary) !important;
+    border-color: var(--np-primary) !important;
+    color: #FFFFFF !important;
+}
+
+body[data-design="A"] .np-action-switcher .np-switch-btn.is-hovered,
+body[data-design="A"] .np-action-switcher .np-switch-btn:hover,
+body[data-design="A"] .np-action-switcher .np-switch-btn:focus-visible {
+    background-color: var(--np-primary) !important;
+    border-color: var(--np-primary) !important;
+    color: #FFFFFF !important;
+}
+
+body[data-design="A"] .np-action-switcher .np-switch-btn:active {
+    background-color: var(--np-primary-hover) !important;
+    border-color: var(--np-primary-hover) !important;
+    color: #FFFFFF !important;
+}
