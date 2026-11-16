@@ -13,100 +13,100 @@
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Total Rekaman</span>
-            <span class="np-stat-value text-dark">{{ $totalPresensi }}</span>
+            <span class="np-stat-value text-primary">{{ $totalPresensi }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Masuk</span>
-            <span class="np-stat-value text-dark">{{ $totalMasuk }}</span>
+            <span class="np-stat-value text-primary">{{ $totalMasuk }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Pulang</span>
-            <span class="np-stat-value text-dark">{{ $totalPulang }}</span>
+            <span class="np-stat-value text-primary">{{ $totalPulang }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Terlambat</span>
-            <span class="np-stat-value text-dark">{{ $totalTerlambat }}</span>
+            <span class="np-stat-value text-primary">{{ $totalTerlambat }}</span>
         </div>
     </div>
 </div>
 
 <!-- 6 Filter Fields & Ekspor -->
-<div class="card np-card mb-4">
-    <div class="card-body p-3">
-        <form action="{{ route('admin.presensi.index') }}" method="GET">
-            <div class="row g-3 mb-3">
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Tanggal Mulai</label>
-                    <input type="date" name="tanggal_mulai" class="form-control" value="{{ request('tanggal_mulai') }}">
-                </div>
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Tanggal Selesai</label>
-                    <input type="date" name="tanggal_selesai" class="form-control" value="{{ request('tanggal_selesai') }}">
-                </div>
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Personel</label>
-                    <select name="id_anggota" class="form-select">
-                        <option value="">Semua personel</option>
-                        @foreach($anggotaList as $a)
-                            <option value="{{ $a->id_anggota }}" {{ request('id_anggota') == $a->id_anggota ? 'selected' : '' }}>
-                                {{ $a->nrp }} - {{ $a->nama }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Jenis Presensi</label>
-                    <select name="jenis_presensi" class="form-select">
-                        <option value="">Semua jenis</option>
-                        <option value="masuk" {{ request('jenis_presensi') === 'masuk' ? 'selected' : '' }}>Masuk</option>
-                        <option value="pulang" {{ request('jenis_presensi') === 'pulang' ? 'selected' : '' }}>Pulang</option>
-                    </select>
-                </div>
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Status Kehadiran</label>
-                    <select name="status_kehadiran" class="form-select">
-                        <option value="">Semua status</option>
-                        <option value="tepat_waktu" {{ request('status_kehadiran') === 'tepat_waktu' ? 'selected' : '' }}>Tepat Waktu</option>
-                        <option value="terlambat" {{ request('status_kehadiran') === 'terlambat' ? 'selected' : '' }}>Terlambat</option>
-                    </select>
-                </div>
-                <div class="col-12 col-md-4">
-                    <label class="form-label">Jenis Keterangan</label>
-                    <select name="jenis_keterangan" class="form-select">
-                        <option value="">Semua keterangan</option>
-                        @foreach($daftarJenisKeterangan as $k => $lbl)
-                            <option value="{{ $k }}" {{ request('jenis_keterangan') === $k ? 'selected' : '' }}>{{ $lbl }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <!-- Tombol Aksi Filter & Ekspor -->
-            <div class="d-flex flex-wrap gap-2 np-action-switcher">
-                <button type="submit" class="btn btn-outline-secondary fw-bold np-switch-btn is-active">
-                    Terapkan Filter
-                </button>
-                <a href="{{ route('admin.presensi.ekspor_pdf', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_pdf') }}" class="btn btn-outline-secondary fw-bold np-switch-btn np-export-link">
-                    Ekspor PDF
-                </a>
-                <a href="{{ route('admin.presensi.ekspor_excel', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_excel') }}" class="btn btn-outline-secondary fw-bold np-switch-btn np-export-link">
-                    Ekspor Excel
-                </a>
-                @if(request()->hasAny(['tanggal_mulai', 'tanggal_selesai', 'id_anggota', 'jenis_presensi', 'status_kehadiran', 'jenis_keterangan']))
-                    <a href="{{ route('admin.presensi.index') }}" class="btn btn-outline-secondary fw-bold np-switch-btn">
-                        Reset
-                    </a>
-                @endif
-            </div>
-        </form>
+<form action="{{ route('admin.presensi.index') }}" method="GET" class="mb-4">
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-md-4">
+            <label class="form-label">Tanggal Mulai</label>
+            <input type="date" name="tanggal_mulai" class="form-control" value="{{ request('tanggal_mulai') }}">
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label">Tanggal Selesai</label>
+            <input type="date" name="tanggal_selesai" class="form-control" value="{{ request('tanggal_selesai') }}">
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label">Personel</label>
+            <select name="id_anggota" class="form-select">
+                <option value="">Semua personel</option>
+                @foreach($anggotaList as $a)
+                    <option value="{{ $a->id_anggota }}" {{ request('id_anggota') == $a->id_anggota ? 'selected' : '' }}>
+                        {{ $a->nrp }} - {{ $a->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label">Jenis Presensi</label>
+            <select name="jenis_presensi" class="form-select">
+                <option value="">Semua jenis</option>
+                <option value="masuk" {{ request('jenis_presensi') === 'masuk' ? 'selected' : '' }}>Masuk</option>
+                <option value="pulang" {{ request('jenis_presensi') === 'pulang' ? 'selected' : '' }}>Pulang</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label">Status Kehadiran</label>
+            <select name="status_kehadiran" class="form-select">
+                <option value="">Semua status</option>
+                <option value="tepat_waktu" {{ request('status_kehadiran') === 'tepat_waktu' ? 'selected' : '' }}>Tepat Waktu</option>
+                <option value="terlambat" {{ request('status_kehadiran') === 'terlambat' ? 'selected' : '' }}>Terlambat</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label">Jenis Keterangan</label>
+            <select name="jenis_keterangan" class="form-select">
+                <option value="">Semua keterangan</option>
+                @foreach($daftarJenisKeterangan as $k => $lbl)
+                    <option value="{{ $k }}" {{ request('jenis_keterangan') === $k ? 'selected' : '' }}>{{ $lbl }}</option>
+                @endforeach
+            </select>
+        </div>
     </div>
-</div>
+
+    <!-- Tombol Aksi: Terapkan Filter di kiri, Ekspor di kanan -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+        <div class="d-flex gap-2 align-items-center">
+            <button type="submit" class="btn btn-primary fw-bold px-4">
+                Terapkan Filter
+            </button>
+            @if(request()->hasAny(['tanggal_mulai', 'tanggal_selesai', 'id_anggota', 'jenis_presensi', 'status_kehadiran', 'jenis_keterangan']))
+                <a href="{{ route('admin.presensi.index') }}" class="btn btn-outline-secondary fw-bold px-3">
+                    Reset
+                </a>
+            @endif
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.presensi.ekspor_pdf', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_pdf') }}" class="btn btn-outline-secondary fw-bold px-4 np-export-link">
+                Ekspor PDF
+            </a>
+            <a href="{{ route('admin.presensi.ekspor_excel', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_excel') }}" class="btn btn-outline-secondary fw-bold px-4 np-export-link">
+                Ekspor Excel
+            </a>
+        </div>
+    </div>
+</form>
 
 <!-- Tabel Rekapitulasi Presensi -->
 <div class="mb-4">
@@ -119,7 +119,7 @@
                     <th style="width: 25%;">TANGGAL / WAKTU</th>
                     <th style="width: 15%;">JENIS</th>
                     <th style="width: 15%;">STATUS</th>
-                    <th class="text-end" style="width: 15%;">AKSI</th>
+                    <th class="text-end pe-4" style="width: 15%;">AKSI</th>
                 </tr>
             </thead>
             <tbody>
@@ -143,27 +143,27 @@
                         </td>
                         <td>
                             @if($p->is_surat ?? false)
-                                <span class="text-dark fw-semibold">{{ $p->keterangan_surat ?? 'Surat Dinas' }}</span>
+                                <span class="text-dark fw-bold">{{ $p->keterangan_surat ?? 'Surat Dinas' }}</span>
                             @else
-                                <span class="text-dark fw-semibold text-capitalize">{{ $p->jenis_presensi }}</span>
+                                <span class="text-dark fw-bold text-capitalize">{{ $p->jenis_presensi }}</span>
                             @endif
                         </td>
                         <td>
                             @if($p->is_surat ?? false)
-                                <span class="badge badge-np-info">Disetujui</span>
+                                <span class="badge rounded-pill badge-np-info">Disetujui</span>
                             @elseif($p->status_kehadiran === 'tepat_waktu')
-                                <span class="badge badge-np-success">Tepat Waktu</span>
+                                <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
                             @else
-                                <span class="badge badge-np-danger">Terlambat</span>
+                                <span class="badge rounded-pill badge-np-danger">Terlambat</span>
                             @endif
                         </td>
-                        <td class="text-end">
+                        <td class="text-end pe-4">
                             @if($p->is_surat ?? false)
-                                <a href="{{ route('admin.surat.show', $p->id_pengajuan) }}" class="btn btn-sm btn-np-outline">
+                                <a href="{{ route('admin.surat.show', $p->id_pengajuan) }}" class="btn btn-sm btn-outline-secondary rounded-pill">
                                     Surat
                                 </a>
                             @else
-                                <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-np-outline">
+                                <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-outline-secondary rounded-pill">
                                     Detail
                                 </a>
                             @endif
@@ -188,11 +188,11 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="fw-bold text-dark fs-6">{{ $p->anggota->nama ?? '-' }}</div>
                     @if($p->is_surat ?? false)
-                        <span class="badge badge-np-info">Disetujui</span>
+                        <span class="badge rounded-pill badge-np-info">Disetujui</span>
                     @elseif($p->status_kehadiran === 'tepat_waktu')
-                        <span class="badge badge-np-success">Tepat Waktu</span>
+                        <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
                     @else
-                        <span class="badge badge-np-danger">Terlambat</span>
+                        <span class="badge rounded-pill badge-np-danger">Terlambat</span>
                     @endif
                 </div>
                 <div class="text-muted small mb-2">NRP {{ $p->anggota->nrp ?? '-' }} / {{ $p->anggota->unit_kerja ?? 'Bid TIK' }}</div>
@@ -204,11 +204,11 @@
                     @endif
                 </div>
                 @if($p->is_surat ?? false)
-                    <a href="{{ route('admin.surat.show', $p->id_pengajuan) }}" class="btn btn-sm btn-np-outline w-100">
+                    <a href="{{ route('admin.surat.show', $p->id_pengajuan) }}" class="btn btn-sm btn-outline-secondary rounded-pill w-100">
                         Detail Surat
                     </a>
                 @else
-                    <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-np-outline w-100">
+                    <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-outline-secondary rounded-pill w-100">
                         Detail Presensi
                     </a>
                 @endif

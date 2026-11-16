@@ -37,25 +37,25 @@
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Total Titik</span>
-            <span class="np-stat-value text-dark">{{ $totalTitik ?? 0 }}</span>
+            <span class="np-stat-value text-primary">{{ $totalTitik ?? 0 }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Tepat Waktu</span>
-            <span class="np-stat-value text-dark">{{ max(0, ($totalMasuk ?? 0) - ($totalTerlambat ?? 0)) }}</span>
+            <span class="np-stat-value text-primary">{{ max(0, ($totalMasuk ?? 0) - ($totalTerlambat ?? 0)) }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Terlambat</span>
-            <span class="np-stat-value text-dark">{{ $totalTerlambat ?? 0 }}</span>
+            <span class="np-stat-value text-primary">{{ $totalTerlambat ?? 0 }}</span>
         </div>
     </div>
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Pulang</span>
-            <span class="np-stat-value text-dark">{{ $totalPulang ?? 0 }}</span>
+            <span class="np-stat-value text-primary">{{ $totalPulang ?? 0 }}</span>
         </div>
     </div>
 </div>
@@ -91,14 +91,14 @@
             </div>
 
             <!-- Tombol Aksi -->
-            <div class="d-flex flex-wrap gap-2 np-action-switcher">
-                <button type="submit" class="btn btn-outline-secondary fw-bold np-switch-btn is-active">
+            <div class="d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-primary fw-bold px-4">
                     Tampilkan Peta
                 </button>
-                <button type="button" class="btn btn-outline-secondary fw-bold np-switch-btn" id="btnFokusKantor">
+                <button type="button" class="btn btn-outline-secondary fw-bold px-3" id="btnFokusKantor">
                     Fokus Kantor
                 </button>
-                <button type="button" class="btn btn-outline-secondary fw-bold np-switch-btn" id="btnFitMarkers">
+                <button type="button" class="btn btn-outline-secondary fw-bold px-3" id="btnFitMarkers">
                     Semua Penanda
                 </button>
             </div>

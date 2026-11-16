@@ -239,7 +239,7 @@ body[data-design="A"] .np-stat-label {
 body[data-design="A"] .np-stat-value {
     font-size: 32px;
     font-weight: 700;
-    color: var(--np-ink);
+    color: var(--np-primary) !important;
     line-height: 1.15;
 }
 
@@ -1219,34 +1219,38 @@ body[data-design="A"] .btn-check:disabled + label.jenis-presensi-btn {
     }
 }
 
-/* Interactive Action Button Switcher (Filter / Ekspor / Reset / Peta) */
-body[data-design="A"] .np-action-switcher .np-switch-btn,
-body[data-design="A"] .np-action-switcher .np-switch-btn.btn-outline-secondary,
-body[data-design="A"] .np-action-switcher .np-switch-btn.btn-primary {
+/* Pill Action Buttons & Status Badges (Pilihan A: Navy Precision) */
+body[data-design="A"] .btn-np-pill,
+body[data-design="A"] .table .btn.rounded-pill,
+body[data-design="A"] .table-np-container .btn.rounded-pill {
     background-color: #FFFFFF !important;
-    border: 1px solid var(--np-line) !important;
+    border: 1px solid #CBD5E1 !important;
     color: var(--np-ink) !important;
-    border-radius: var(--np-radius-btn) !important;
-    font-weight: 700;
+    border-radius: 50rem !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    padding: 6px 28px !important;
+    min-height: 38px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: none !important;
     transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
-body[data-design="A"] .np-action-switcher:not(.has-hover):not(:has(.np-switch-btn:hover)):not(:has(.np-switch-btn:focus-visible)) .np-switch-btn.is-active {
-    background-color: var(--np-primary) !important;
-    border-color: var(--np-primary) !important;
-    color: #FFFFFF !important;
+body[data-design="A"] .btn-np-pill:hover,
+body[data-design="A"] .table .btn.rounded-pill:hover,
+body[data-design="A"] .table-np-container .btn.rounded-pill:hover {
+    background-color: var(--np-bg) !important;
+    border-color: #94A3B8 !important;
+    color: var(--np-ink) !important;
 }
 
-body[data-design="A"] .np-action-switcher .np-switch-btn.is-hovered,
-body[data-design="A"] .np-action-switcher .np-switch-btn:hover,
-body[data-design="A"] .np-action-switcher .np-switch-btn:focus-visible {
-    background-color: var(--np-primary) !important;
-    border-color: var(--np-primary) !important;
-    color: #FFFFFF !important;
-}
-
-body[data-design="A"] .np-action-switcher .np-switch-btn:active {
-    background-color: var(--np-primary-hover) !important;
-    border-color: var(--np-primary-hover) !important;
-    color: #FFFFFF !important;
+body[data-design="A"] .badge.rounded-pill {
+    border-radius: 50rem !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    padding: 6px 16px !important;
+    letter-spacing: normal !important;
 }

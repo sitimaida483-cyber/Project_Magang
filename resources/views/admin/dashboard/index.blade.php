@@ -14,7 +14,7 @@
         <a href="{{ route('admin.presensi.index', ['tanggal_mulai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'tanggal_selesai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'jenis_presensi' => 'masuk']) }}" class="text-decoration-none">
             <div class="np-stat-card">
                 <span class="np-stat-label">Masuk Hari Ini</span>
-                <span class="np-stat-value text-dark">{{ $total_masuk }}</span>
+                <span class="np-stat-value text-primary">{{ $total_masuk }}</span>
             </div>
         </a>
     </div>
@@ -23,7 +23,7 @@
         <a href="{{ route('admin.presensi.index', ['tanggal_mulai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'tanggal_selesai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'jenis_presensi' => 'pulang']) }}" class="text-decoration-none">
             <div class="np-stat-card">
                 <span class="np-stat-label">Pulang Hari Ini</span>
-                <span class="np-stat-value text-dark">{{ $total_pulang }}</span>
+                <span class="np-stat-value text-primary">{{ $total_pulang }}</span>
             </div>
         </a>
     </div>
@@ -32,7 +32,7 @@
         <a href="{{ route('admin.presensi.index', ['tanggal_mulai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'tanggal_selesai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'status_kehadiran' => 'terlambat']) }}" class="text-decoration-none">
             <div class="np-stat-card">
                 <span class="np-stat-label">Terlambat</span>
-                <span class="np-stat-value text-dark">{{ $total_terlambat }}</span>
+                <span class="np-stat-value text-primary">{{ $total_terlambat }}</span>
             </div>
         </a>
     </div>
@@ -41,7 +41,7 @@
         <a href="{{ route('admin.surat.index', ['status' => 'menunggu']) }}" class="text-decoration-none">
             <div class="np-stat-card">
                 <span class="np-stat-label">Surat Menunggu</span>
-                <span class="np-stat-value text-dark">{{ $total_pengajuan_menunggu ?? 0 }}</span>
+                <span class="np-stat-value text-primary">{{ $total_pengajuan_menunggu ?? 0 }}</span>
             </div>
         </a>
     </div>
@@ -50,7 +50,7 @@
         <a href="{{ route('admin.anggota.index', ['status' => 'aktif']) }}" class="text-decoration-none">
             <div class="np-stat-card">
                 <span class="np-stat-label">Personel Aktif</span>
-                <span class="np-stat-value text-dark">{{ $total_anggota_aktif }}</span>
+                <span class="np-stat-value text-primary">{{ $total_anggota_aktif }}</span>
             </div>
         </a>
     </div>
@@ -69,7 +69,7 @@
                     <th style="width: 25%;">TANGGAL / WAKTU</th>
                     <th style="width: 15%;">JENIS</th>
                     <th style="width: 15%;">STATUS</th>
-                    <th class="text-end" style="width: 15%;">AKSI</th>
+                    <th class="text-end pe-4" style="width: 15%;">AKSI</th>
                 </tr>
             </thead>
             <tbody>
@@ -92,13 +92,13 @@
                         </td>
                         <td>
                             @if($p->status_kehadiran === 'tepat_waktu')
-                                <span class="badge badge-np-success">Tepat Waktu</span>
+                                <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
                             @else
-                                <span class="badge badge-np-danger">Terlambat</span>
+                                <span class="badge rounded-pill badge-np-danger">Terlambat</span>
                             @endif
                         </td>
-                        <td class="text-end">
-                            <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-np-outline">
+                        <td class="text-end pe-4">
+                            <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-outline-secondary rounded-pill">
                                 Detail
                             </a>
                         </td>
@@ -122,16 +122,16 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="fw-bold text-dark fs-6">{{ $p->anggota->nama ?? '-' }}</div>
                     @if($p->status_kehadiran === 'tepat_waktu')
-                        <span class="badge badge-np-success">Tepat Waktu</span>
+                        <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
                     @else
-                        <span class="badge badge-np-danger">Terlambat</span>
+                        <span class="badge rounded-pill badge-np-danger">Terlambat</span>
                     @endif
                 </div>
                 <div class="text-muted small mb-2">NRP {{ $p->anggota->nrp ?? '-' }} / {{ $p->anggota->unit_kerja ?? 'Bid TIK' }}</div>
                 <div class="text-secondary small mb-3">
                     <span class="text-capitalize">{{ $p->jenis_presensi }}</span> / {{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d M Y') }}, {{ \Carbon\Carbon::parse($p->waktu)->format('H:i') }} WITA
                 </div>
-                <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-np-outline w-100">
+                <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-outline-secondary rounded-pill w-100">
                     Detail Presensi
                 </a>
             </div>
