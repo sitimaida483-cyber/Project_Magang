@@ -209,7 +209,14 @@
                         @endif
                     </td>
                     <td>
-                        {{ $p->keterangan_surat ?? '-' }}
+                        @if(! ($p->is_surat ?? false) && $p->flag_anomali)
+                            <strong style="color: #D97706;">[PERLU DITINJAU]</strong>
+                            @if(! empty($p->daftar_alasan_anomali))
+                                <br><span style="font-size: 7pt; color: #64748B;">{{ implode('; ', $p->daftar_alasan_anomali) }}</span>
+                            @endif
+                        @else
+                            {{ $p->keterangan_surat ?? '-' }}
+                        @endif
                     </td>
                 </tr>
             @empty

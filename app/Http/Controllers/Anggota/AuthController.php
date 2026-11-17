@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 /**
@@ -46,11 +47,18 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        // 2. Rate Limiting Brute-Force (Maksimal 5 percobaan per menit per email & IP)
-        $throttleKey = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
+        // 2. Rate Limiting Brute-Force Berlapis:
+        // Lapis 1: Per kombinasi email & IP (5 percobaan per 60 detik)
+        $throttleKeyIp = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
+        // Lapis 2: Per email personel secara global (20 percobaan per 10 menit)
+        $throttleKeyUser = 'anggota_email:' . Str::transliterate(Str::lower($request->input('email')));
 
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
+        if (RateLimiter::tooManyAttempts($throttleKeyIp, 5) || RateLimiter::tooManyAttempts($throttleKeyUser, 20)) {
+            $seconds = max(
+                RateLimiter::availableIn($throttleKeyIp),
+                RateLimiter::availableIn($throttleKeyUser)
+            );
+
             return back()->withInput($request->only('email'))
                 ->with('error', "Terlalu banyak percobaan login yang gagal. Silakan coba kembali dalam {$seconds} detik.");
         }
@@ -60,7 +68,8 @@ class AuthController extends Controller
 
         // 4. Verifikasi kredensial (pesan error umum untuk keamanan)
         if (! $anggota || ! Hash::check($request->password, $anggota->password)) {
-            RateLimiter::hit($throttleKey, 60);
+            RateLimiter::hit($throttleKeyIp, 60);
+            RateLimiter::hit($throttleKeyUser, 600);
 
             return back()->withInput($request->only('email'))
                 ->with('error', 'Email atau password salah.');
@@ -68,14 +77,16 @@ class AuthController extends Controller
 
         // 5. Cek keaktifan status keanggotaan
         if (! $anggota->isAktif()) {
-            RateLimiter::hit($throttleKey, 60);
+            RateLimiter::hit($throttleKeyIp, 60);
+            RateLimiter::hit($throttleKeyUser, 600);
 
             return back()->withInput($request->only('email'))
                 ->with('error', 'Status keanggotaan Anda Nonaktif. Akses presensi dinonaktifkan.');
         }
 
-        // 6. Login berhasil: bersihkan rate limiter & regenerate session
-        RateLimiter::clear($throttleKey);
+        // 6. Login berhasil: bersihkan kedua lapis rate limiter & regenerate session
+        RateLimiter::clear($throttleKeyIp);
+        RateLimiter::clear($throttleKeyUser);
 
         auth('anggota')->login($anggota, $request->boolean('remember'));
         $request->session()->regenerate();
@@ -117,11 +128,18 @@ class AuthController extends Controller
 
         $request->validate([
             'password_lama' => ['required', 'string'],
-            'password'      => ['required', 'string', 'min:8', 'confirmed'],
+            'password'      => [
+                'required',
+                'string',
+                Password::min(10)
+                    ->mixedCase()
+                    ->numbers()
+                    ->uncompromised(),
+                'confirmed',
+            ],
         ], [
             'password_lama.required' => 'Password saat ini wajib diisi.',
             'password.required'      => 'Password baru wajib diisi.',
-            'password.min'           => 'Password baru minimal harus 8 karakter.',
             'password.confirmed'     => 'Konfirmasi password baru tidak cocok.',
         ]);
 

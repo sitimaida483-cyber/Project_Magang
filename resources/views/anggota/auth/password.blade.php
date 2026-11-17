@@ -40,7 +40,7 @@
                 <ul class="list-unstyled mb-0 d-flex flex-column gap-3 small text-muted">
                     <li class="d-flex align-items-start gap-2">
                         <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
-                        <span>Panjang kata sandi minimal <strong>8 karakter</strong>.</span>
+                        <span>Panjang kata sandi minimal <strong>10 karakter</strong>.</span>
                     </li>
                     <li class="d-flex align-items-start gap-2">
                         <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>

@@ -89,6 +89,21 @@
 
     <!-- Kolom Kanan: Rincian Kehadiran & Peta GPS -->
     <div class="col-12 col-lg-7">
+        @if($presensi->isAnomali())
+            <div class="alert alert-warning border-0 rounded-3 mb-4 p-3" style="background-color: #FEF3C7; border: 1px solid #FCD34D !important; color: #92400E;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-shield-exclamation fs-5 text-warning flex-shrink-0"></i>
+                    <strong class="fs-6">Rekaman Ini Ditandai: Perlu Ditinjau</strong>
+                </div>
+                <div class="small mb-2">Sistem mendeteksi indikasi anomali/kejanggalan pada data presensi ini:</div>
+                <ul class="mb-0 ps-3 small">
+                    @foreach($presensi->daftar_alasan_anomali as $alasan)
+                        <li>{{ $alasan }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Rincian Personel -->
         <div class="card np-card mb-4">
             <div class="card-body p-4">
@@ -97,11 +112,16 @@
                         <h4 class="fw-bold text-dark mb-1">{{ $presensi->anggota->nama ?? '-' }}</h4>
                         <div class="text-muted small">NRP {{ $presensi->anggota->nrp ?? '-' }} / {{ $presensi->anggota->unit_kerja ?? 'Bid TIK' }}</div>
                     </div>
-                    <div>
+                    <div class="d-flex flex-column align-items-end gap-1">
                         @if($presensi->status_kehadiran === 'tepat_waktu')
                             <span class="badge badge-np-success">Tepat Waktu</span>
                         @else
                             <span class="badge badge-np-danger">Terlambat</span>
+                        @endif
+                        @if($presensi->isAnomali())
+                            <span class="badge bg-warning text-dark" style="font-size: 11px;">
+                                <i class="bi bi-shield-exclamation me-1"></i>Perlu Ditinjau
+                            </span>
                         @endif
                     </div>
                 </div>
@@ -113,7 +133,7 @@
         </div>
 
         <!-- Peta Leaflet -->
-        <div class="card np-card">
+        <div class="card np-card mb-4">
             <div class="card-body p-3">
                 <div id="mapDetail"></div>
                 <div class="d-flex justify-content-between align-items-center mt-2 px-1">
@@ -122,6 +142,39 @@
                         <span class="small fw-bold {{ $jarakKeKantor <= ($pengaturan->radius_meter ?? 100) ? 'text-success' : 'text-danger' }}" style="font-size: 12px;">
                             Jarak: {{ number_format($jarakKeKantor, 1, ',', '.') }} m (Radius: {{ $pengaturan->radius_meter ?? 100 }}m)
                         </span>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetri & Jejak Audit Keamanan -->
+        <div class="card np-card">
+            <div class="card-header border-0 pb-0 pt-3 px-4">
+                <span class="fw-bold text-dark fs-6"><i class="bi bi-shield-check me-2 text-primary"></i>Telemetri & Jejak Audit Keamanan</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 small">
+                    <div class="col-12 col-md-6">
+                        <span class="text-muted d-block">Alamat IP Pengirim:</span>
+                        <strong class="text-dark font-monospace">{{ $presensi->ip_address ?? 'Tidak tercatat' }}</strong>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <span class="text-muted d-block">Akurasi Sinyal GPS:</span>
+                        <strong class="text-dark">{{ $presensi->akurasi_gps !== null ? number_format($presensi->akurasi_gps, 1) . ' meter' : 'Tidak dilaporkan perangkat' }}</strong>
+                    </div>
+                    <div class="col-12">
+                        <span class="text-muted d-block">User-Agent Perangkat:</span>
+                        <div class="text-secondary font-monospace" style="word-break: break-all; font-size: 11px;">
+                            {{ $presensi->user_agent ?? 'Tidak tercatat' }}
+                        </div>
+                    </div>
+                    @if($presensi->foto_hash)
+                    <div class="col-12">
+                        <span class="text-muted d-block">Hash SHA-256 Foto Selfie:</span>
+                        <div class="text-secondary font-monospace" style="word-break: break-all; font-size: 11px;">
+                            {{ $presensi->foto_hash }}
+                        </div>
+                    </div>
                     @endif
                 </div>
             </div>

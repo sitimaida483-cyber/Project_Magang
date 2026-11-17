@@ -39,8 +39,9 @@ class PresensiController extends Controller
         $totalPresensi   = $semuaData->count();
         $totalMasuk      = $semuaData->where('jenis_presensi', 'masuk')->count();
         $totalPulang     = $semuaData->where('jenis_presensi', 'pulang')->count();
-        $totalTerlambat  = $semuaData->where('status_kehadiran', 'terlambat')->count();
-        $totalKeterangan = $semuaData->where('is_surat', true)->count();
+        $totalTerlambat     = $semuaData->where('status_kehadiran', 'terlambat')->count();
+        $totalKeterangan    = $semuaData->where('is_surat', true)->count();
+        $totalPerluDitinjau = $semuaData->where('flag_anomali', true)->count();
 
         // Paginasi manual untuk gabungan Collection presensi & surat
         $page = LengthAwarePaginator::resolveCurrentPage();
@@ -67,7 +68,8 @@ class PresensiController extends Controller
             'totalMasuk',
             'totalPulang',
             'totalTerlambat',
-            'totalKeterangan'
+            'totalKeterangan',
+            'totalPerluDitinjau'
         ));
     }
 
@@ -211,7 +213,14 @@ class PresensiController extends Controller
             } else {
                 $sheet->setCellValue('H' . $row, strtoupper($p->jenis_presensi));
                 $sheet->setCellValue('I' . $row, $p->status_kehadiran === 'tepat_waktu' ? 'TEPAT WAKTU' : 'TERLAMBAT');
-                $sheet->setCellValue('J' . $row, $p->keterangan_surat ?? '-');
+
+                $ketTeks = $p->keterangan_surat ?? '-';
+                if ($p->flag_anomali) {
+                    $alasanStr = ! empty($p->daftar_alasan_anomali) ? implode('; ', $p->daftar_alasan_anomali) : 'Anomali terdeteksi';
+                    $ketTeks = '[PERLU DITINJAU] ' . $alasanStr;
+                    $sheet->getStyle('J' . $row)->getFont()->getColor()->setRGB('D97706'); // Oranye/Amber
+                }
+                $sheet->setCellValue('J' . $row, $ketTeks);
 
                 if ($p->status_kehadiran === 'terlambat') {
                     $sheet->getStyle('I' . $row)->getFont()->getColor()->setRGB('DC2626'); // Merah
@@ -276,6 +285,13 @@ class PresensiController extends Controller
         if ($request->filled('status_kehadiran') && in_array($request->status_kehadiran, ['tepat_waktu', 'terlambat'])) {
             $presensiQuery->where('status_kehadiran', $request->status_kehadiran);
         }
+        if ($request->filled('status_anomali')) {
+            if ($request->status_anomali === 'perlu_ditinjau') {
+                $presensiQuery->where('flag_anomali', true);
+            } elseif ($request->status_anomali === 'normal') {
+                $presensiQuery->where('flag_anomali', false);
+            }
+        }
 
         $presensiRecords = $presensiQuery->get();
 
@@ -330,8 +346,8 @@ class PresensiController extends Controller
         // 3. Tambahkan baris keterangan untuk tanggal tercakup surat disetujui yang BELUM ada presensi
         $barisSurat = collect();
 
-        // Hanya tambahkan baris surat jika filter jenis_presensi bukan masuk/pulang
-        if (! $request->filled('jenis_presensi') || $request->jenis_presensi === 'keterangan') {
+        // Hanya tambahkan baris surat jika filter jenis_presensi bukan masuk/pulang dan bukan filter perlu_ditinjau
+        if ((! $request->filled('jenis_presensi') || $request->jenis_presensi === 'keterangan') && $request->status_anomali !== 'perlu_ditinjau') {
             $batasMulai   = $request->filled('tanggal_mulai') ? Carbon::parse($request->tanggal_mulai) : null;
             $batasSelesai = $request->filled('tanggal_selesai') ? Carbon::parse($request->tanggal_selesai) : null;
 

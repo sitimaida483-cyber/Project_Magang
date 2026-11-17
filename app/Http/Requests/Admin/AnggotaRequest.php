@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 /**
  * AnggotaRequest — validasi form tambah dan edit anggota.
@@ -39,7 +40,10 @@ class AnggotaRequest extends FormRequest
             'password'    => [
                 $isCreate ? 'required' : 'nullable',
                 'string',
-                'min:8',
+                Password::min(10)
+                    ->mixedCase()
+                    ->numbers()
+                    ->uncompromised(),
             ],
             'jabatan'     => ['required', 'string', 'max:100'],
             'unit_kerja'  => ['required', 'string', 'max:100'],

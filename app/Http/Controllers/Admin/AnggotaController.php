@@ -8,6 +8,7 @@ use App\Models\Anggota;
 use App\Services\LogAktivitasService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 /**
@@ -170,10 +171,16 @@ class AnggotaController extends Controller
     public function resetPassword(Request $request, int $id): RedirectResponse
     {
         $request->validate([
-            'password' => ['required', 'string', 'min:8'],
+            'password' => [
+                'required',
+                'string',
+                Password::min(10)
+                    ->mixedCase()
+                    ->numbers()
+                    ->uncompromised(),
+            ],
         ], [
             'password.required' => 'Password baru wajib diisi.',
-            'password.min'      => 'Password baru minimal 8 karakter.',
         ]);
 
         $anggota = Anggota::findOrFail($id);

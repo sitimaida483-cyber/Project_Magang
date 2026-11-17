@@ -23,6 +23,7 @@ class PresensiRequest extends FormRequest
             'jenis_presensi' => ['required', 'in:masuk,pulang'],
             'latitude'       => ['required', 'numeric', 'between:-90,90'],
             'longitude'      => ['required', 'numeric', 'between:-180,180'],
+            'akurasi_gps'    => ['nullable', 'numeric'],
             'foto_selfie'    => ['required', 'string'],
             'tanda_tangan'   => ['nullable', 'string'],
         ];

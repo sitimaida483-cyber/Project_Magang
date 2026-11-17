@@ -37,6 +37,7 @@
     <input type="hidden" id="nrp" name="nrp" value="{{ $anggota->nrp }}">
     <input type="hidden" id="latitude" name="latitude">
     <input type="hidden" id="longitude" name="longitude">
+    <input type="hidden" id="akurasiGps" name="akurasi_gps">
     <input type="hidden" id="fotoSelfie" name="foto_selfie">
 
     <div class="row g-4">
@@ -693,6 +694,12 @@
                 latInput.value = lat;
                 lngInput.value = lng;
 
+                const akurasi = position.coords.accuracy || null;
+                const akurasiInput = document.getElementById('akurasiGps');
+                if (akurasiInput && akurasi !== null) {
+                    akurasiInput.value = akurasi;
+                }
+
                 // Hitung Jarak ke Kantor
                 const distance = calculateHaversine(lat, lng, KANTOR_CONFIG.lat, KANTOR_CONFIG.lng);
                 userCoordinates.distance = distance;
@@ -920,6 +927,7 @@
                     jenis_presensi: jenisPresensi,
                     latitude: lat,
                     longitude: lng,
+                    akurasi_gps: document.getElementById('akurasiGps')?.value || null,
                     foto_selfie: foto
                 })
             });

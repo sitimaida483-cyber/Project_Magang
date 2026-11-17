@@ -56,6 +56,20 @@
     </div>
 </div>
 
+@if(($total_perlu_ditinjau ?? 0) > 0)
+    <div class="alert alert-warning border-0 rounded-3 mb-4 d-flex align-items-center justify-content-between p-3 flex-wrap gap-2" style="background-color: #FEF3C7; border: 1px solid #FCD34D !important; color: #92400E;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-shield-exclamation fs-5 text-warning flex-shrink-0"></i>
+            <div>
+                <strong>Perhatian:</strong> Terdapat <strong>{{ $total_perlu_ditinjau }}</strong> presensi hari ini yang ditandai <strong>Perlu Ditinjau</strong> karena anomali telemetri lokasi atau foto.
+            </div>
+        </div>
+        <a href="{{ route('admin.presensi.index', ['status_anomali' => 'perlu_ditinjau', 'tanggal_mulai' => \Carbon\Carbon::parse($hari_ini)->toDateString(), 'tanggal_selesai' => \Carbon\Carbon::parse($hari_ini)->toDateString()]) }}" class="btn btn-sm btn-warning text-dark fw-bold px-3">
+            <i class="bi bi-eye me-1"></i> Tinjau Sekarang
+        </a>
+    </div>
+@endif
+
 <!-- Presensi Terbaru Hari Ini -->
 <div class="mb-4">
     <div class="fw-bold text-dark mb-3 fs-6">Presensi Terbaru Hari Ini</div>
@@ -96,6 +110,14 @@
                             @else
                                 <span class="badge rounded-pill badge-np-danger">Terlambat</span>
                             @endif
+
+                            @if($p->flag_anomali)
+                                <div class="mt-1">
+                                    <span class="badge rounded-pill bg-warning text-dark" style="font-size: 11px;" title="{{ implode('; ', $p->daftar_alasan_anomali) }}">
+                                        <i class="bi bi-shield-exclamation me-1"></i>Perlu Ditinjau
+                                    </span>
+                                </div>
+                            @endif
                         </td>
                         <td class="text-end pe-4">
                             <a href="{{ route('admin.presensi.show', $p->id_presensi) }}" class="btn btn-sm btn-outline-secondary rounded-pill">
@@ -121,11 +143,18 @@
             <div class="card np-card p-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="fw-bold text-dark fs-6">{{ $p->anggota->nama ?? '-' }}</div>
-                    @if($p->status_kehadiran === 'tepat_waktu')
-                        <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
-                    @else
-                        <span class="badge rounded-pill badge-np-danger">Terlambat</span>
-                    @endif
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        @if($p->status_kehadiran === 'tepat_waktu')
+                            <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
+                        @else
+                            <span class="badge rounded-pill badge-np-danger">Terlambat</span>
+                        @endif
+                        @if($p->flag_anomali)
+                            <span class="badge rounded-pill bg-warning text-dark" style="font-size: 11px;">
+                                <i class="bi bi-shield-exclamation me-1"></i>Perlu Ditinjau
+                            </span>
+                        @endif
+                    </div>
                 </div>
                 <div class="text-muted small mb-2">NRP {{ $p->anggota->nrp ?? '-' }} / {{ $p->anggota->unit_kerja ?? 'Bid TIK' }}</div>
                 <div class="text-secondary small mb-3">

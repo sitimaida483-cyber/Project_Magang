@@ -47,8 +47,8 @@ Route::middleware('anggota.auth')->group(function () {
     Route::prefix('presensi')->name('presensi.')->group(function () {
         Route::get('/', [AnggotaPresensiController::class, 'index'])->name('index');
         Route::post('/cek-nrp', [AnggotaPresensiController::class, 'cekNrp'])->name('cek_nrp'); // Cadangan endpoint AJAX
-        Route::post('/simpan', [AnggotaPresensiController::class, 'store'])->name('store');
-        Route::post('/simpan-perangkat', [NotifikasiController::class, 'subscribe'])->name('subscribe');
+        Route::post('/simpan', [AnggotaPresensiController::class, 'store'])->name('store')->middleware('throttle:6,1');
+        Route::post('/simpan-perangkat', [NotifikasiController::class, 'subscribe'])->name('subscribe')->middleware('throttle:15,1');
     });
 
     // Pengajuan Surat Keterangan Personel (Revisi 2)
@@ -107,5 +107,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Modul Log Aktivitas (Tahap 9)
         Route::get('/log', [LogAktivitasController::class, 'index'])->name('log.index');
+
+        // Ubah Password Mandiri Admin (Tahap 1 Keamanan)
+        Route::get('/ubah-password', [AdminAuthController::class, 'showUbahPassword'])->name('password');
+        Route::put('/ubah-password', [AdminAuthController::class, 'ubahPassword'])->name('password.update');
+
+        // Diagnostik Jalur Jaringan & Proxy (Dapat dinonaktifkan via DIAGNOSTIK_PROXY_ENABLED=false)
+        Route::get('/diagnostik/proxy', [\App\Http\Controllers\Admin\DiagnostikProxyController::class, 'index'])->name('diagnostik.proxy');
     });
 });

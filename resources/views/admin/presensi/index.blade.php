@@ -8,8 +8,8 @@
     <div class="subtitle-navy">Presensi Digital Bidtik Polda Kalimantan Selatan</div>
 </div>
 
-<!-- 4 Stat Cards -->
-<div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+<!-- 5 Stat Cards -->
+<div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 g-3 mb-4">
     <div class="col">
         <div class="np-stat-card">
             <span class="np-stat-label">Total Rekaman</span>
@@ -32,6 +32,12 @@
         <div class="np-stat-card">
             <span class="np-stat-label">Terlambat</span>
             <span class="np-stat-value text-primary">{{ $totalTerlambat }}</span>
+        </div>
+    </div>
+    <div class="col col-12 col-sm-6 col-md-4 col-xl">
+        <div class="np-stat-card">
+            <span class="np-stat-label">Perlu Ditinjau</span>
+            <span class="np-stat-value text-warning">{{ $totalPerluDitinjau ?? 0 }}</span>
         </div>
     </div>
 </div>
@@ -83,6 +89,14 @@
                 @endforeach
             </select>
         </div>
+        <div class="col-12 col-md-4">
+            <label class="form-label">Status Verifikasi</label>
+            <select name="status_anomali" class="form-select">
+                <option value="">Semua verifikasi</option>
+                <option value="perlu_ditinjau" {{ request('status_anomali') === 'perlu_ditinjau' ? 'selected' : '' }}>Perlu Ditinjau (Anomali)</option>
+                <option value="normal" {{ request('status_anomali') === 'normal' ? 'selected' : '' }}>Wajar (Tanpa Anomali)</option>
+            </select>
+        </div>
     </div>
 
     <!-- Tombol Aksi: Terapkan Filter di kiri, Ekspor di kanan -->
@@ -91,7 +105,7 @@
             <button type="submit" class="btn btn-primary fw-bold px-4">
                 Terapkan Filter
             </button>
-            @if(request()->hasAny(['tanggal_mulai', 'tanggal_selesai', 'id_anggota', 'jenis_presensi', 'status_kehadiran', 'jenis_keterangan']))
+            @if(request()->hasAny(['tanggal_mulai', 'tanggal_selesai', 'id_anggota', 'jenis_presensi', 'status_kehadiran', 'jenis_keterangan', 'status_anomali']))
                 <a href="{{ route('admin.presensi.index') }}" class="btn btn-outline-secondary fw-bold px-3">
                     Reset
                 </a>
@@ -156,6 +170,14 @@
                             @else
                                 <span class="badge rounded-pill badge-np-danger">Terlambat</span>
                             @endif
+
+                            @if(! ($p->is_surat ?? false) && $p->flag_anomali)
+                                <div class="mt-1">
+                                    <span class="badge rounded-pill bg-warning text-dark" style="font-size: 11px;" title="{{ implode('; ', $p->daftar_alasan_anomali) }}">
+                                        <i class="bi bi-shield-exclamation me-1"></i>Perlu Ditinjau
+                                    </span>
+                                </div>
+                            @endif
                         </td>
                         <td class="text-end pe-4">
                             @if($p->is_surat ?? false)
@@ -187,13 +209,21 @@
             <div class="card np-card p-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div class="fw-bold text-dark fs-6">{{ $p->anggota->nama ?? '-' }}</div>
-                    @if($p->is_surat ?? false)
-                        <span class="badge rounded-pill badge-np-info">Disetujui</span>
-                    @elseif($p->status_kehadiran === 'tepat_waktu')
-                        <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
-                    @else
-                        <span class="badge rounded-pill badge-np-danger">Terlambat</span>
-                    @endif
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        @if($p->is_surat ?? false)
+                            <span class="badge rounded-pill badge-np-info">Disetujui</span>
+                        @elseif($p->status_kehadiran === 'tepat_waktu')
+                            <span class="badge rounded-pill badge-np-success">Tepat Waktu</span>
+                        @else
+                            <span class="badge rounded-pill badge-np-danger">Terlambat</span>
+                        @endif
+
+                        @if(! ($p->is_surat ?? false) && $p->flag_anomali)
+                            <span class="badge rounded-pill bg-warning text-dark" style="font-size: 11px;">
+                                <i class="bi bi-shield-exclamation me-1"></i>Perlu Ditinjau
+                            </span>
+                        @endif
+                    </div>
                 </div>
                 <div class="text-muted small mb-2">NRP {{ $p->anggota->nrp ?? '-' }} / {{ $p->anggota->unit_kerja ?? 'Bid TIK' }}</div>
                 <div class="text-secondary small mb-3">

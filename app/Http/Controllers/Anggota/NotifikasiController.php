@@ -21,14 +21,19 @@ class NotifikasiController extends Controller
     public function subscribe(Request $request): JsonResponse
     {
         $request->validate([
-            'id_anggota'            => 'nullable|exists:anggota,id_anggota',
             'subscription'          => 'required|array',
             'subscription.endpoint' => 'required|string',
             'jenis_perangkat'       => 'nullable|string|max:100',
         ]);
 
-        $idAnggota = $request->id_anggota ?? auth('anggota')->id();
-        $anggota = Anggota::findOrFail($idAnggota);
+        // Selalu gunakan ID anggota yang sedang login untuk mencegah IDOR
+        $anggota = auth('anggota')->user();
+        if (! $anggota) {
+            return response()->json([
+                'sukses' => false,
+                'pesan'  => 'Sesi login tidak valid. Silakan login kembali.',
+            ], 401);
+        }
         $endpoint = $request->subscription['endpoint'];
         $tokenJson = json_encode($request->subscription);
 

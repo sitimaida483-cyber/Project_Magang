@@ -120,7 +120,29 @@
             <div class="np-topbar-right">
                 <div id="digitalClock" class="font-monospace text-dark fw-bold">--:--:-- WITA</div>
                 <span class="text-muted d-none d-md-inline">/</span>
-                <span class="d-none d-md-inline text-dark">{{ auth('admin')->user()->nama ?? 'Admin' }}</span>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-link text-decoration-none dropdown-toggle p-0 text-dark fw-medium d-flex align-items-center gap-1" type="button" id="adminProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-6 text-primary"></i>
+                        <span class="d-none d-md-inline">{{ auth('admin')->user()->nama ?? 'Admin' }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="adminProfileDropdown" style="font-size: 14px; min-width: 190px;">
+                        <li><h6 class="dropdown-header text-muted">Akun Administrator</h6></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 {{ request()->routeIs('admin.password') ? 'active' : '' }}" href="{{ route('admin.password') }}">
+                                <i class="bi bi-key-fill text-primary"></i>
+                                <span>Ubah Password</span>
+                            </a>
+                        </li>
+                        @if(config('trustedproxy.diagnostik_enabled', env('DIAGNOSTIK_PROXY_ENABLED', false)))
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 {{ request()->routeIs('admin.diagnostik.proxy') ? 'active' : '' }}" href="{{ route('admin.diagnostik.proxy') }}">
+                                <i class="bi bi-hdd-network text-warning"></i>
+                                <span>Diagnostik Proxy</span>
+                            </a>
+                        </li>
+                        @endif
+                    </ul>
+                </div>
                 <!-- Mobile Profile Avatar Initial -->
                 <div class="d-md-none rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 11px;">
                     {{ strtoupper(substr(auth('admin')->user()->nama ?? 'AD', 0, 2)) }}

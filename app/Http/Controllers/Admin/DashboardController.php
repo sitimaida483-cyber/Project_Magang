@@ -33,6 +33,11 @@ class DashboardController extends Controller
 
         $total_anggota_aktif = Anggota::where('status', 'aktif')->count();
 
+        // Total presensi hari ini yang ditandai perlu ditinjau (anomali)
+        $total_perlu_ditinjau = Presensi::whereDate('tanggal', $hari_ini)
+            ->where('flag_anomali', true)
+            ->count();
+
         // Total pengajuan surat yang menunggu verifikasi admin (Revisi 2)
         $total_pengajuan_menunggu = PengajuanSurat::where('status_pengajuan', 'menunggu')->count();
 
@@ -48,6 +53,7 @@ class DashboardController extends Controller
             'total_pulang',
             'total_terlambat',
             'total_anggota_aktif',
+            'total_perlu_ditinjau',
             'total_pengajuan_menunggu',
             'presensi_terbaru',
             'hari_ini'

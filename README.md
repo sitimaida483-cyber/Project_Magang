@@ -10,7 +10,7 @@ Sistem Presensi Web resmi untuk **Bidang Teknologi Informasi dan Komunikasi (Bid
 3. [Struktur Database](#struktur-database)
 4. [Persyaratan Sistem](#persyaratan-sistem)
 5. [Panduan Instalasi & Konfigurasi](#panduan-instalasi--konfigurasi)
-6. [Kredensial Default](#kredensial-default)
+6. [Inisialisasi Akun & Keamanan](#inisialisasi-akun--keamanan)
 7. [Menjalankan Background Scheduler](#menjalankan-background-scheduler)
 8. [Panduan Pengujian di Perangkat Mobile (HP)](#panduan-pengujian-di-perangkat-mobile-hp)
 
@@ -149,36 +149,26 @@ Akses aplikasi melalui peramban di: `http://127.0.0.1:8000`
 
 ---
 
-## Kredensial Default
+## Inisialisasi Akun & Keamanan
 
 ### 1. Akun Administrator Panel
-- **URL Login:** `http://127.0.0.1:8000/admin/login`
-- **Username:** `admin`
-- **Password:** `password123`
+Akun administrator awal dibuat melalui database seeder menggunakan konfigurasi file `.env` (bukan kredensial baku yang tertulis di kode).
+Tentukan nilai konfigurasi berikut pada berkas `.env`:
+```env
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=KombinasiPasswordKuat123!
+ADMIN_NAME="Administrator Bidtik"
+```
+Jika `ADMIN_PASSWORD` dikosongkan pada `.env`, seeder akan secara otomatis menghasilkan kata sandi acak berkekuatan tinggi (16 karakter acak) dan menampilkannya satu kali pada konsol terminal saat perintah seeding dijalankan.
 
-### 2. Akun Personel / Anggota (Login Mandiri)
-- **URL Login:** `http://127.0.0.1:8000/login`
-- **Daftar Akun Pengujian (Seeder):**
-  1. **Bripda Ahmad Rizki**
-     - Email: `ahmad.rizki@bidtik.polri.go.id`
-     - Password: `password123`
-     - Status: Aktif
-  2. **Bripda Siti Rahayu**
-     - Email: `siti.rahayu@bidtik.polri.go.id`
-     - Password: `password123`
-     - Status: Aktif
-  3. **Briptu Dedi Kurniawan**
-     - Email: `dedi.kurniawan@bidtik.polri.go.id`
-     - Password: `password123`
-     - Status: Aktif
-  4. **Aipda Hendra Susanto**
-     - Email: `hendra.susanto@bidtik.polri.go.id`
-     - Password: `password123`
-     - Status: Aktif
-  5. **Aiptu Wulandari (Contoh Personel Nonaktif)**
-     - Email: `wulandari@bidtik.polri.go.id`
-     - Password: `password123`
-     - Status: Nonaktif *(Akses login & presensi ditolak)*
+Jalankan perintah seeder untuk inisialisasi:
+```bash
+php artisan db:seed --class=AdminSeeder
+```
+Setelah login ke panel admin (`/admin/login`), administrator dapat memperbarui kata sandi kapan saja melalui menu profil **Ubah Password**.
+
+### 2. Akun Personel / Anggota
+Data personel dikelola secara terpusat oleh administrator melalui menu **Data Anggota** di panel admin. Pada lingkungan lokal (`APP_ENV=local`), data contoh personel dapat diinisialisasi melalui seeder lokal `AnggotaSeeder`.
 
 ---
 

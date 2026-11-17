@@ -8,6 +8,7 @@ use App\Models\Anggota;
 use App\Models\Pengaturan;
 use App\Models\PengajuanSurat;
 use App\Models\Presensi;
+use App\Services\DeteksiAnomaliService;
 use App\Services\HaversineService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -254,8 +255,9 @@ class PresensiController extends Controller
             }
         }
 
-        // 6. Simpan File Foto Selfie secara Aman (Tanda Tangan Opsional)
-        $pathFoto = $this->simpanBase64KeFile($request->foto_selfie, 'foto_selfie', $anggota->nrp, 'jpg');
+        // 6. Simpan File Foto Selfie secara Aman & Hitung Hash SHA-256 (Tanda Tangan Opsional)
+        $fotoHash = null;
+        $pathFoto = $this->simpanBase64KeFile($request->foto_selfie, 'foto_selfie', $anggota->nrp, 'jpg', $fotoHash);
         $pathTtd  = $request->filled('tanda_tangan')
             ? ($this->simpanBase64KeFile($request->tanda_tangan, 'tanda_tangan', $anggota->nrp, 'png') ?: '')
             : '';
@@ -267,7 +269,37 @@ class PresensiController extends Controller
             ], 500);
         }
 
-        // 7. Simpan Record ke Tabel Presensi
+        // 7. Evaluasi Deteksi Anomali Pemalsuan Presensi (Tahap 2)
+        $akurasiGps = $request->filled('akurasi_gps') && is_numeric($request->input('akurasi_gps'))
+            ? (float) $request->input('akurasi_gps')
+            : null;
+
+        $alasanAnomali = DeteksiAnomaliService::evaluasi(
+            anggota: $anggota,
+            pengaturan: $pengaturan,
+            jenisPresensi: $request->jenis_presensi,
+            userLat: $userLat,
+            userLng: $userLng,
+            jarakMeter: $jarakMeter,
+            akurasiGps: $akurasiGps,
+            fotoHash: $fotoHash ?? '',
+            ipAddress: $request->ip(),
+            tanggalHariIni: $tanggalHariIni,
+            waktuSekarang: $waktuSekarang
+        );
+
+        $flagAnomali = ! empty($alasanAnomali);
+        $modeAnomali = config('presensi.anomali.mode', 'catat');
+
+        // Jika mode 'tolak', tolak pengiriman presensi mencurigakan dengan pesan umum
+        if ($flagAnomali && $modeAnomali === 'tolak') {
+            return response()->json([
+                'sukses' => false,
+                'pesan'  => 'Presensi tidak dapat diproses karena data sinyal lokasi atau perangkat Anda tidak memenuhi syarat verifikasi.',
+            ], 422);
+        }
+
+        // 8. Simpan Record ke Tabel Presensi (Beserta Telemetri & Status Anomali)
         $presensi = Presensi::create([
             'id_anggota'       => $anggota->id_anggota,
             'tanggal'          => $tanggalHariIni,
@@ -278,6 +310,12 @@ class PresensiController extends Controller
             'latitude'         => $userLat,
             'longitude'        => $userLng,
             'status_kehadiran' => $statusKehadiran,
+            'ip_address'       => $request->ip(),
+            'user_agent'       => substr((string) $request->userAgent(), 0, 500),
+            'akurasi_gps'      => $akurasiGps,
+            'foto_hash'        => $fotoHash,
+            'flag_anomali'     => $flagAnomali,
+            'catatan_anomali'  => $flagAnomali ? json_encode($alasanAnomali, JSON_UNESCAPED_UNICODE) : null,
         ]);
 
         // Cek apakah anggota belum memiliki perangkat notifikasi aktif (untuk pemicu izin push)
@@ -310,31 +348,91 @@ class PresensiController extends Controller
     }
 
     /**
-     * Helper: Dekode data base64 dan simpan ke folder penyimpanan privat.
+     * Helper: Dekode data base64 dengan ketat, validasi tipe gambar, dimensi, ukuran,
+     * serta lakukan re-encode (stripping EXIF/metadata jahat) dan simpan dengan nama acak.
      */
-    private function simpanBase64KeFile(string $base64String, string $folder, string $nrp, string $extension): ?string
+    private function simpanBase64KeFile(string $base64String, string $folder, string $nrp, string $extension, ?string &$outHash = null): ?string
     {
         try {
-            // Pisahkan header data URI (misal: "data:image/jpeg;base64,....")
+            // 1. Ekstraksi data base64
             if (str_contains($base64String, ',')) {
-                $base64Data = explode(',', $base64String)[1];
+                $base64Data = explode(',', $base64String, 2)[1];
             } else {
                 $base64Data = $base64String;
             }
 
-            $decoded = base64_decode($base64Data);
-            if ($decoded === false) {
+            // Dekode secara ketat (strict mode = true)
+            $decoded = base64_decode($base64Data, true);
+            if ($decoded === false || empty($decoded)) {
                 return null;
             }
 
-            $namaFile = $folder . '_' . $nrp . '_' . date('Ymd_His') . '_' . Str::random(8) . '.' . $extension;
+            // 2. Batas ukuran byte berkas
+            $maxBytes = config('presensi.foto_max_bytes', 3 * 1024 * 1024);
+            if (strlen($decoded) > $maxBytes) {
+                return null;
+            }
+
+            // 3. Validasi struktur biner gambar
+            $imageInfo = @getimagesizefromstring($decoded);
+            if ($imageInfo === false) {
+                return null;
+            }
+
+            // Hanya izinkan JPEG dan PNG
+            $allowedImageTypes = [IMAGETYPE_JPEG, IMAGETYPE_PNG];
+            if (! in_array($imageInfo[2], $allowedImageTypes, true)) {
+                return null;
+            }
+
+            // 4. Batas resolusi dimensi gambar
+            $width     = $imageInfo[0];
+            $height    = $imageInfo[1];
+            $maxWidth  = config('presensi.foto_max_width', 1920);
+            $maxHeight = config('presensi.foto_max_height', 1920);
+
+            if ($width <= 0 || $height <= 0 || $width > $maxWidth || $height > $maxHeight) {
+                return null;
+            }
+
+            // 5. Re-encode menggunakan GD untuk membuang seluruh metadata/EXIF & payload polyglot
+            $gdImage = @imagecreatefromstring($decoded);
+            if ($gdImage === false) {
+                return null;
+            }
+
+            $finalExtension = 'jpg';
+            if ($folder === 'tanda_tangan') {
+                imagealphablending($gdImage, false);
+                imagesavealpha($gdImage, true);
+                ob_start();
+                imagepng($gdImage, 8);
+                $cleanBinary = ob_get_clean();
+                $finalExtension = 'png';
+            } else {
+                ob_start();
+                imagejpeg($gdImage, null, config('presensi.foto_jpeg_quality', 85));
+                $cleanBinary = ob_get_clean();
+                $finalExtension = 'jpg';
+            }
+            imagedestroy($gdImage);
+
+            if (empty($cleanBinary)) {
+                return null;
+            }
+
+            // Hitung hash SHA-256 berkas foto yang telah divalidasi dan di-clean
+            $outHash = hash('sha256', $cleanBinary);
+
+            // 6. Simpan dengan nama berkas acak (mencegah enumerasi & path traversal)
+            $namaFile = $folder . '_' . Str::random(32) . '.' . $finalExtension;
             $direktoriTujuan = storage_path('app/private_presensi/' . $folder);
 
             if (! file_exists($direktoriTujuan)) {
                 mkdir($direktoriTujuan, 0755, true);
             }
 
-            file_put_contents($direktoriTujuan . '/' . $namaFile, $decoded);
+            file_put_contents($direktoriTujuan . '/' . $namaFile, $cleanBinary);
 
             // Simpan path relatif ke database
             return $folder . '/' . $namaFile;
