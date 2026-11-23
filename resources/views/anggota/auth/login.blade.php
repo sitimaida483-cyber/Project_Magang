@@ -352,12 +352,12 @@
                 <form action="{{ route('login.proses') }}" method="POST" autocomplete="on">
                     @csrf
 
-                    <!-- Email Kedinasan -->
+                    <!-- NRP atau Email Kedinasan -->
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email Kedinasan <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                        <label for="email" class="form-label">NRP atau Email Kedinasan <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control @error('email') is-invalid @enderror" 
                                id="email" name="email" value="{{ old('email') }}" 
-                               placeholder="nama@bidtik.polri.go.id" required autofocus autocomplete="email">
+                               placeholder="NRP (contoh: 80010001) atau Email Kedinasan" required autofocus autocomplete="username">
                     </div>
 
                     <!-- Password -->

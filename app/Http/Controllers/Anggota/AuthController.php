@@ -37,21 +37,22 @@ class AuthController extends Controller
      */
     public function login(Request $request): RedirectResponse
     {
-        // 1. Validasi input
+        // 1. Validasi input (mendukung NRP atau Email kedinasan)
         $request->validate([
-            'email'    => ['required', 'string', 'email'],
+            'email'    => ['required', 'string'],
             'password' => ['required', 'string'],
         ], [
-            'email.required'    => 'Email kedinasan wajib diisi.',
-            'email.email'       => 'Format email tidak valid.',
+            'email.required'    => 'NRP atau Email kedinasan wajib diisi.',
             'password.required' => 'Password wajib diisi.',
         ]);
 
+        $loginIdentifier = trim((string) $request->input('email'));
+
         // 2. Rate Limiting Brute-Force Berlapis:
-        // Lapis 1: Per kombinasi email & IP (5 percobaan per 60 detik)
-        $throttleKeyIp = Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
-        // Lapis 2: Per email personel secara global (20 percobaan per 10 menit)
-        $throttleKeyUser = 'anggota_email:' . Str::transliterate(Str::lower($request->input('email')));
+        // Lapis 1: Per kombinasi pengenal & IP (5 percobaan per 60 detik)
+        $throttleKeyIp = Str::transliterate(Str::lower($loginIdentifier) . '|' . $request->ip());
+        // Lapis 2: Per pengenal personel secara global (20 percobaan per 10 menit)
+        $throttleKeyUser = 'anggota_login:' . Str::transliterate(Str::lower($loginIdentifier));
 
         if (RateLimiter::tooManyAttempts($throttleKeyIp, 5) || RateLimiter::tooManyAttempts($throttleKeyUser, 20)) {
             $seconds = max(
@@ -63,8 +64,10 @@ class AuthController extends Controller
                 ->with('error', "Terlalu banyak percobaan login yang gagal. Silakan coba kembali dalam {$seconds} detik.");
         }
 
-        // 3. Cari anggota berdasarkan email
-        $anggota = Anggota::where('email', $request->email)->first();
+        // 3. Cari anggota berdasarkan NRP atau Email
+        $anggota = Anggota::where('nrp', $loginIdentifier)
+            ->orWhere('email', $loginIdentifier)
+            ->first();
 
         // 4. Verifikasi kredensial (pesan error umum untuk keamanan)
         if (! $anggota || ! Hash::check($request->password, $anggota->password)) {
@@ -72,7 +75,7 @@ class AuthController extends Controller
             RateLimiter::hit($throttleKeyUser, 600);
 
             return back()->withInput($request->only('email'))
-                ->with('error', 'Email atau password salah.');
+                ->with('error', 'NRP/Email atau password salah.');
         }
 
         // 5. Cek keaktifan status keanggotaan
