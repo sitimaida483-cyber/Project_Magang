@@ -20,7 +20,9 @@ class ResetAnggotaPassword extends Command
      */
     protected $signature = 'anggota:reset-password 
                             {identifier : NRP atau Email anggota yang akan direset} 
-                            {password? : Password baru (opsional, jika kosong akan diminta atau dibuatkan)}';
+                            {password? : Password baru (opsional, jika kosong akan diminta atau dibuatkan)}
+                            {--email= : Perbarui alamat email anggota}
+                            {--status= : Perbarui status keanggotaan (aktif/nonaktif)}';
 
     /**
      * Deskripsi command artisan.
@@ -57,19 +59,29 @@ class ResetAnggotaPassword extends Command
             return self::FAILURE;
         }
 
-        // Jika anggota belum memiliki email, setel email default berbasis NRP
-        if (empty($anggota->email)) {
+        // Perbarui email jika opsi --email disertakan
+        if ($this->option('email')) {
+            $anggota->email = trim((string) $this->option('email'));
+        } elseif (empty($anggota->email)) {
             $anggota->email = $anggota->nrp . '@bidtik.polri.go.id';
+        }
+
+        // Perbarui status jika opsi --status disertakan, atau pastikan aktif
+        if ($this->option('status')) {
+            $anggota->status = $this->option('status');
+        } elseif ($anggota->status !== 'aktif') {
+            $anggota->status = 'aktif';
         }
 
         $anggota->password = Hash::make($password);
         $anggota->save();
 
         $this->info('====================================================');
-        $this->info("Password untuk anggota [{$anggota->nama}] BERHASIL direset!");
+        $this->info("Akun anggota [{$anggota->nama}] BERHASIL diperbarui!");
         $this->info("NRP      : {$anggota->nrp}");
         $this->info("Nama     : {$anggota->nama}");
         $this->info("Email    : {$anggota->email}");
+        $this->info("Status   : {$anggota->status}");
         $this->info("Password : {$password}");
         $this->info('====================================================');
 
