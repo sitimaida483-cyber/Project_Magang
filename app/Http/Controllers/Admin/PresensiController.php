@@ -286,10 +286,16 @@ class PresensiController extends Controller
             $presensiQuery->where('status_kehadiran', $request->status_kehadiran);
         }
         if ($request->filled('status_anomali')) {
-            if ($request->status_anomali === 'perlu_ditinjau') {
-                $presensiQuery->where('flag_anomali', true);
-            } elseif ($request->status_anomali === 'normal') {
-                $presensiQuery->where('flag_anomali', false);
+            try {
+                if (\Illuminate\Support\Facades\Schema::hasColumn('presensi', 'flag_anomali')) {
+                    if ($request->status_anomali === 'perlu_ditinjau') {
+                        $presensiQuery->where('flag_anomali', true);
+                    } elseif ($request->status_anomali === 'normal') {
+                        $presensiQuery->where('flag_anomali', false);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Lewati filter anomali jika skema belum memuat kolom flag_anomali
             }
         }
 

@@ -313,4 +313,19 @@ class SecurityTahap2Test extends TestCase
         $response->assertOk();
         $response->assertViewHas('totalPerluDitinjau', 1);
     }
+
+    /**
+     * Test Dashboard Admin dapat diakses dan menampilkan ringkasan presensi tanpa kendala skema.
+     */
+    public function test_admin_dashboard_renders_successfully_with_anomali_count(): void
+    {
+        $admin = Admin::first();
+
+        $response = $this->actingAs($admin, 'admin')
+            ->get('/admin/dashboard');
+
+        $response->assertOk();
+        $response->assertViewIs('admin.dashboard.index');
+        $response->assertViewHas('total_perlu_ditinjau');
+    }
 }
