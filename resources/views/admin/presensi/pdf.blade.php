@@ -17,43 +17,14 @@
             padding: 0;
         }
 
-        /* Kop Surat Resmi Kepolisian */
-        .kop-surat {
-            border-bottom: 2px solid #17263F;
-            padding-bottom: 8px;
-            margin-bottom: 14px;
-            text-align: left;
-        }
-        .kop-surat h4 {
-            margin: 0;
-            font-size: 10pt;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: #17263F;
-        }
-        .kop-surat h3 {
-            margin: 2px 0 0 0;
-            font-size: 11pt;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: #17263F;
-        }
-        .kop-surat p {
-            margin: 3px 0 0 0;
-            font-size: 8pt;
-            color: #52637A;
-        }
-
         /* Judul Laporan */
         .judul-laporan {
-            text-align: left;
+            text-align: center;
             margin-bottom: 16px;
         }
         .judul-laporan h2 {
             margin: 0;
-            font-size: 13pt;
+            font-size: 12pt;
             text-transform: uppercase;
             font-weight: 700;
             color: #17263F;
@@ -61,7 +32,7 @@
         }
         .judul-laporan .sub-judul {
             margin: 4px 0 0 0;
-            font-size: 9pt;
+            font-size: 8.5pt;
             color: #52637A;
         }
 
@@ -146,15 +117,8 @@
 </head>
 <body>
 
-    <!-- KOP RESMI KEPOLISIAN (Page 39) -->
-    <div class="kop-surat">
-        <h4>KEPOLISIAN NEGARA REPUBLIK INDONESIA</h4>
-        <h4>DAERAH KALIMANTAN SELATAN</h4>
-        <h3>BIDANG TEKNOLOGI INFORMASI DAN KOMUNIKASI</h3>
-        <p>
-            {{ $pengaturan->alamat_kantor ?? 'Jl. S. Parman No.16, Antasan Besar, Kec. Banjarmasin Tengah, Kota Banjarmasin, Kalimantan Selatan 70114' }}
-        </p>
-    </div>
+    <!-- KOP SURAT RESMI POLDA KALSEL (Partial Reusable) -->
+    @include('admin.partials.kop-surat')
 
     <!-- JUDUL REKAPITULASI (Page 39) -->
     <div class="judul-laporan">

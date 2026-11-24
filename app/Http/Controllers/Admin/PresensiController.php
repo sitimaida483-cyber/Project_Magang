@@ -113,12 +113,28 @@ class PresensiController extends Controller
             $periodeTeks = "Sampai " . Carbon::parse($request->tanggal_selesai)->translatedFormat('d M Y');
         }
 
+        // Tanggal unduh otomatis menggunakan timezone Asia/Makassar dan locale Indonesia
+        $tanggalUnduhTeks = 'Banjarbaru, ' . Carbon::now('Asia/Makassar')->locale('id')->translatedFormat('d F Y');
+
+        // Embed logo polri base64 jika file tersedia di public/images/logo-polri.png
+        $logoPolriPath = public_path('images/logo-polri.png');
+        $logoPolriBase64 = null;
+        if (file_exists($logoPolriPath) && is_readable($logoPolriPath)) {
+            $logoData = @file_get_contents($logoPolriPath);
+            if ($logoData !== false) {
+                $logoMime = mime_content_type($logoPolriPath) ?: 'image/png';
+                $logoPolriBase64 = 'data:' . $logoMime . ';base64,' . base64_encode($logoData);
+            }
+        }
+
         $pdf = Pdf::loadView('admin.presensi.pdf', [
-            'dataPresensi' => $dataPresensi,
-            'pengaturan'   => $pengaturan,
-            'periodeTeks'  => $periodeTeks,
-            'waktuCetak'   => Carbon::now()->translatedFormat('d F Y, H:i') . ' WITA',
-            'namaAdmin'    => auth('admin')->user()->nama ?? 'Administrator',
+            'dataPresensi'     => $dataPresensi,
+            'pengaturan'       => $pengaturan,
+            'periodeTeks'      => $periodeTeks,
+            'waktuCetak'       => Carbon::now('Asia/Makassar')->locale('id')->translatedFormat('d F Y, H:i') . ' WITA',
+            'tanggalUnduhTeks' => $tanggalUnduhTeks,
+            'logoPolriBase64'  => $logoPolriBase64,
+            'namaAdmin'        => auth('admin')->user()->nama ?? 'Administrator',
         ]);
 
         $pdf->setPaper('a4', 'landscape');
@@ -139,37 +155,53 @@ class PresensiController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Rekap Presensi');
 
-        // Judul Laporan
-        $sheet->setCellValue('A1', 'KEPOLISIAN DAERAH KALIMANTAN SELATAN');
-        $sheet->setCellValue('A2', 'BIDANG TEKNOLOGI INFORMASI DAN KOMUNIKASI (BIDTIK)');
-        $sheet->setCellValue('A3', 'LAPORAN REKAPITULASI PRESENSI PERSONEL');
+        // Tanggal unduh otomatis
+        $tanggalUnduhTeks = 'Banjarbaru, ' . Carbon::now('Asia/Makassar')->locale('id')->translatedFormat('d F Y');
+
+        // 3 Baris Judul Kop Surat Resmi Kepolisian (Tanpa Logo) Sesuai Format Surat Dinas Polda Kalsel
+        $sheet->setCellValue('A1', 'KEPOLISIAN NEGARA REPUBLIK INDONESIA');
+        $sheet->setCellValue('A2', 'DAERAH KALIMANTAN SELATAN');
+        $sheet->setCellValue('A3', 'Jalan Bina Praja Timur Sei Tiung Banjarbaru 70734');
+        $sheet->setCellValue('A4', $tanggalUnduhTeks);
+        $sheet->setCellValue('A5', 'LAPORAN REKAPITULASI PRESENSI PERSONEL');
 
         $periodeTeks = 'Semua Periode';
         if ($request->filled('tanggal_mulai') && $request->filled('tanggal_selesai')) {
             $periodeTeks = $request->tanggal_mulai . ' s/d ' . $request->tanggal_selesai;
         }
-        $sheet->setCellValue('A4', 'Periode: ' . $periodeTeks . ' | Dicetak: ' . Carbon::now()->format('d/m/Y H:i') . ' WITA');
+        $sheet->setCellValue('A6', 'Periode: ' . $periodeTeks);
 
+        // Merge cells judul kop dan laporan
         $sheet->mergeCells('A1:J1');
         $sheet->mergeCells('A2:J2');
         $sheet->mergeCells('A3:J3');
         $sheet->mergeCells('A4:J4');
+        $sheet->mergeCells('A5:J5');
+        $sheet->mergeCells('A6:J6');
 
-        $sheet->getStyle('A1:A3')->getFont()->setBold(true)->setSize(12);
-        $sheet->getStyle('A1:A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // Format font dan perataan kop
+        $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A3')->getFont()->setUnderline(true)->setSize(10);
+        $sheet->getStyle('A4')->getFont()->setSize(10);
+        $sheet->getStyle('A5')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A6')->getFont()->setSize(10);
 
-        // Header Tabel Kolom (Baris 6)
+        $sheet->getStyle('A1:A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('A5:A6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Header Tabel Kolom (Baris 8)
         $headers = [
-            'A6' => 'NO',
-            'B6' => 'TANGGAL',
-            'C6' => 'WAKTU (WITA)',
-            'D6' => 'NRP',
-            'E6' => 'NAMA PERSONEL',
-            'F6' => 'JABATAN',
-            'G6' => 'UNIT KERJA',
-            'H6' => 'JENIS PRESENSI',
-            'I6' => 'STATUS KEHADIRAN',
-            'J6' => 'KETERANGAN / IZIN',
+            'A8' => 'NO',
+            'B8' => 'TANGGAL',
+            'C8' => 'WAKTU (WITA)',
+            'D8' => 'NRP',
+            'E8' => 'NAMA PERSONEL',
+            'F8' => 'JABATAN',
+            'G8' => 'UNIT KERJA',
+            'H8' => 'JENIS PRESENSI',
+            'I8' => 'STATUS KEHADIRAN',
+            'J8' => 'KETERANGAN / IZIN',
         ];
 
         foreach ($headers as $cell => $text) {
@@ -191,11 +223,11 @@ class PresensiController extends Controller
                 'allBorders' => ['borderStyle' => Border::BORDER_THIN],
             ],
         ];
-        $sheet->getStyle('A6:J6')->applyFromArray($headerStyle);
-        $sheet->getRowDimension(6)->setRowHeight(26);
+        $sheet->getStyle('A8:J8')->applyFromArray($headerStyle);
+        $sheet->getRowDimension(8)->setRowHeight(26);
 
-        // Pengisian Data Baris
-        $row = 7;
+        // Pengisian Data Baris (Mulai Baris 9)
+        $row = 9;
         foreach ($dataPresensi as $index => $p) {
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, Carbon::parse($p->tanggal)->format('d/m/Y'));
@@ -241,9 +273,9 @@ class PresensiController extends Controller
             $row++;
         }
 
-        // Border seluruh tabel data
-        $lastRow = max(7, $row - 1);
-        $sheet->getStyle('A7:J' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        // Border seluruh tabel data (mulai dari baris header 8)
+        $lastRow = max(8, $row - 1);
+        $sheet->getStyle('A8:J' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         // Auto-width kolom
         foreach (range('A', 'J') as $col) {
