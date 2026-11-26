@@ -19,7 +19,7 @@
     <style>
         body.auth-page-body {
             margin: 0;
-            padding: 30px 16px;
+            padding: 40px 16px;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -50,6 +50,7 @@
             overflow: hidden;
             box-shadow: 0 25px 65px rgba(0, 0, 0, 0.55);
             border: 1px solid rgba(255, 255, 255, 0.25);
+            min-height: 570px;
         }
 
         /* Panel Kiri: Showcase Navy Precision (Sesuai Acuan Gambar) */
@@ -57,7 +58,7 @@
             width: 45%;
             background-color: #0B132B !important;
             color: #FFFFFF !important;
-            padding: 50px 42px;
+            padding: 58px 46px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -101,10 +102,10 @@
 
         .showcase-features {
             border-top: 1px solid rgba(255, 255, 255, 0.15);
-            padding-top: 26px;
+            padding-top: 32px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 18px;
         }
 
         .showcase-features .feature-item {
@@ -130,7 +131,7 @@
         /* Panel Kanan: Form Card */
         .auth-form-panel {
             width: 55%;
-            padding: 46px 40px;
+            padding: 56px 46px;
             background: #FFFFFF;
             display: flex;
             flex-direction: column;
@@ -148,7 +149,7 @@
             font-size: 14px !important;
             line-height: 1.5;
             color: #475569 !important;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
 
         .auth-form-panel .form-label {
@@ -162,7 +163,7 @@
         .auth-form-panel .form-control {
             border: 1.5px solid #CBD5E1;
             border-radius: 8px;
-            padding: 10px 14px;
+            padding: 11px 15px;
             font-size: 14px;
             color: #0F172A;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -246,13 +247,14 @@
             .auth-card-dual {
                 flex-direction: column;
                 border-radius: 16px;
+                min-height: auto;
             }
             .auth-showcase-panel {
                 display: none !important;
             }
             .auth-form-panel {
                 width: 100%;
-                padding: 32px 24px;
+                padding: 34px 24px;
             }
         }
     </style>
