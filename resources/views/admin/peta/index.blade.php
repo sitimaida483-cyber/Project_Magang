@@ -23,6 +23,16 @@
     .pin-terlambat { background-color: #DC2626; }
     .pin-pulang { background-color: #254BD6; }
     .pin-office { background-color: #17263F; border-color: #F59E0B; }
+    .legend-pin {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        display: inline-block;
+        border: 2px solid #FFFFFF;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+        margin-right: 6px;
+        vertical-align: -2px;
+    }
 </style>
 @endpush
 
@@ -90,17 +100,14 @@
                 </div>
             </div>
 
-            <!-- Tombol Aksi -->
-            <div class="d-flex flex-wrap gap-2">
+            <!-- Tombol Aksi Filter -->
+            <div class="d-flex flex-wrap align-items-center gap-2">
                 <button type="submit" class="btn btn-primary fw-bold px-4">
-                    Tampilkan Peta
+                    <i class="bi bi-funnel-fill me-1"></i> Terapkan Filter
                 </button>
-                <button type="button" class="btn btn-outline-secondary fw-bold px-3" id="btnFokusKantor">
-                    Fokus Kantor
-                </button>
-                <button type="button" class="btn btn-outline-secondary fw-bold px-3" id="btnFitMarkers">
-                    Semua Penanda
-                </button>
+                <a href="{{ route('admin.peta.index') }}" class="btn btn-outline-secondary fw-bold px-3">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                </a>
             </div>
         </form>
     </div>
@@ -108,7 +115,66 @@
 
 <!-- Map Container -->
 <div class="card np-card mb-4">
+    <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt-fill text-primary fs-5"></i>
+            <span class="fw-bold text-dark">Sebaran Spasial Presensi Personel</span>
+            @if(count($dataPresensiList) > 0)
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 ms-1">
+                    {{ count($dataPresensiList) }} Titik Terdeteksi
+                </span>
+            @else
+                <span class="badge bg-light text-muted border rounded-pill px-2 py-1 ms-1">
+                    0 Titik Presensi
+                </span>
+            @endif
+        </div>
+        
+        <!-- Tombol Kontrol Peta -->
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-outline-primary fw-semibold px-3" id="btnFokusKantor" title="Pusatkan peta ke lokasi kantor">
+                <i class="bi bi-building me-1"></i> Fokus Kantor
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-semibold px-3" id="btnFitMarkers" title="Lihat cakupan semua titik penanda">
+                <i class="bi bi-arrows-fullscreen me-1"></i> Semua Penanda
+            </button>
+        </div>
+    </div>
+    
+    <!-- Legenda Peta (Keterangan Warna) -->
+    <div class="bg-light px-3 py-2 border-bottom">
+        <div class="d-flex flex-wrap align-items-center justify-content-start gap-3 small text-secondary">
+            <span class="fw-bold text-dark me-1"><i class="bi bi-info-circle me-1"></i> Legenda:</span>
+            <span class="d-inline-flex align-items-center">
+                <span class="legend-pin pin-office"></span>
+                <strong class="text-dark">Kantor Bidtik</strong>
+            </span>
+            <span class="d-inline-flex align-items-center">
+                <span class="legend-pin pin-tepat"></span>
+                Tepat Waktu (Masuk)
+            </span>
+            <span class="d-inline-flex align-items-center">
+                <span class="legend-pin pin-terlambat"></span>
+                Terlambat (Masuk)
+            </span>
+            <span class="d-inline-flex align-items-center">
+                <span class="legend-pin pin-pulang"></span>
+                Presensi Pulang
+            </span>
+            <span class="d-inline-flex align-items-center">
+                <span class="legend-pin" style="background: rgba(37, 75, 214, 0.25); border-color: #254BD6;"></span>
+                Radius Presensi ({{ !empty($pengaturan->radius_meter) ? (int)$pengaturan->radius_meter : 100 }} m)
+            </span>
+        </div>
+    </div>
+
     <div class="card-body p-3">
+        @if(count($dataPresensiList) === 0)
+            <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2" role="alert" style="font-size: 13.5px;">
+                <i class="bi bi-info-circle-fill text-primary"></i>
+                <div>Tidak ada data titik presensi pada tanggal dan kriteria filter yang dipilih. Peta menampilkan posisi kantor default.</div>
+            </div>
+        @endif
         <div id="mapPresensi"></div>
     </div>
 </div>
