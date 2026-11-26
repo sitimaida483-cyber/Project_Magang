@@ -11,7 +11,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Konfigurasi UncompromisedVerifier dengan timeout singkat (3 detik)
+        // dan penanganan graceful agar form tidak gagal jika layanan luar tidak terjangkau.
+        $this->app->singleton(\Illuminate\Contracts\Validation\UncompromisedVerifier::class, function ($app) {
+            return new \Illuminate\Validation\NotPwnedVerifier($app['http.factory'], timeout: 3);
+        });
     }
 
     /**

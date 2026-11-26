@@ -78,7 +78,10 @@ class AnggotaSeeder extends Seeder
         foreach ($dataAnggota as $data) {
             Anggota::updateOrCreate(
                 ['nrp' => $data['nrp']],
-                array_merge($data, ['id_admin' => $admin ? $admin->id_admin : 1])
+                array_merge($data, [
+                    'id_admin'             => $admin ? $admin->id_admin : 1,
+                    'wajib_ganti_password' => true,
+                ])
             );
         }
     }

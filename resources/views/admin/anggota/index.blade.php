@@ -233,9 +233,20 @@
                             </div>
                         @endif
 
+                        <div class="alert alert-warning py-2 px-3 small mb-3 border-0" style="background-color: var(--np-warning-soft); color: var(--np-warning); border-radius: 8px;">
+                            <i class="bi bi-shield-exclamation me-1"></i>
+                            <strong>Perhatian:</strong> Sandi sementara ini harus diberikan langsung kepada pemiliknya dan personel akan diminta untuk menggantinya saat login berikutnya.
+                        </div>
+
                         <div class="mb-4">
                             <label class="form-label mb-1">Password Baru *</label>
-                            <input type="password" name="password" class="form-control" placeholder="Minimal 8 karakter" required minlength="8">
+                            <div class="position-relative">
+                                <input type="password" name="password" class="form-control pe-5" placeholder="Minimal 10 karakter campuran" required minlength="10" maxlength="128">
+                                <button type="button" class="btn-toggle-pwd" title="Lihat/Sembunyikan password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted" style="font-size: 12px;">Wajib huruf besar, kecil, angka, dan tidak memuat identitas personel.</small>
                         </div>
 
                         <div class="d-flex flex-column gap-2">
@@ -299,4 +310,46 @@
     </div>
 @endforeach
 @endpush
+
+<style>
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+.btn-toggle-pwd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94A3B8;
+    padding: 4px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 1055;
+}
+.btn-toggle-pwd:hover {
+    color: #475569;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-toggle-pwd').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const container = this.closest('.position-relative');
+            const input = container ? container.querySelector('input') : null;
+            const icon = this.querySelector('i');
+            if (input && icon) {
+                const isPassword = input.getAttribute('type') === 'password';
+                input.setAttribute('type', isPassword ? 'text' : 'password');
+                icon.classList.toggle('bi-eye', !isPassword);
+                icon.classList.toggle('bi-eye-slash', isPassword);
+            }
+        });
+    });
+});
+</script>
 @endsection

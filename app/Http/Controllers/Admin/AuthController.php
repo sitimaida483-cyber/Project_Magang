@@ -65,6 +65,7 @@ class AuthController extends Controller
             RateLimiter::clear($throttleKeyIp);
             RateLimiter::clear($throttleKeyUser);
             $request->session()->regenerate();
+            $request->session()->put('admin_last_activity', time());
 
             // Catat log aktivitas login
             $admin = auth('admin')->user();
@@ -75,6 +76,12 @@ class AuthController extends Controller
                 keterangan: "Admin '{$admin->username}' berhasil login."
             );
 
+            // Jika wajib ganti password, arahkan langsung ke formulir ganti sandi
+            if ($admin->wajib_ganti_password) {
+                return redirect()->route('admin.password')
+                    ->with('warning', 'Demi keamanan, Anda diwajibkan mengganti kata sandi terlebih dahulu sebelum mengakses halaman lain.');
+            }
+
             return redirect()->intended(route('admin.dashboard'))
                 ->with('sukses', 'Selamat datang, ' . $admin->nama . '!');
         }
@@ -82,6 +89,26 @@ class AuthController extends Controller
         // Login gagal — catat percobaan gagal di kedua lapis
         RateLimiter::hit($throttleKeyIp, 60);       // 60 detik
         RateLimiter::hit($throttleKeyUser, 600);    // 10 menit (600 detik)
+
+        // Catat login gagal ke tabel log_aktivitas (hanya username & alasan, tidak mencatat sandi)
+        $adminTarget = \App\Models\Admin::where('username', $request->username)->first();
+        $idAdminLog  = $adminTarget?->id_admin ?? \App\Models\Admin::value('id_admin');
+        $alasan      = $adminTarget ? "Password tidak sesuai untuk username '{$request->username}'" : "Username tidak terdaftar: '{$request->username}'";
+
+        if ($idAdminLog) {
+            LogAktivitasService::catat(
+                idAdmin: $idAdminLog,
+                aktivitas: 'Login Admin Gagal',
+                tabelTerkait: 'admin',
+                keterangan: "Percobaan login admin gagal dari IP {$request->ip()}. Alasan: {$alasan}."
+            );
+        } else {
+            \Illuminate\Support\Facades\Log::warning('Login admin gagal', [
+                'username'  => $request->username,
+                'alamat_ip' => $request->ip(),
+                'alasan'    => $alasan,
+            ]);
+        }
 
         return back()->withErrors([
             'username' => 'Username atau password salah.',
@@ -110,14 +137,24 @@ class AuthController extends Controller
                 'required',
                 'string',
                 'confirmed',
-                Password::min(10)
+                Password::min(12)
+                    ->max(128)
                     ->mixedCase()
                     ->numbers()
                     ->uncompromised(),
+                new \App\Rules\TidakMemuatDataPengguna([
+                    $admin->username,
+                    $admin->nama,
+                ]),
             ],
         ], [
             'password_lama.required' => 'Password saat ini wajib diisi.',
             'password.required'      => 'Password baru wajib diisi.',
+            'password.min'           => 'Password admin minimal harus :min karakter.',
+            'password.max'           => 'Password admin maksimal :max karakter.',
+            'password.mixed'         => 'Password baru wajib mengombinasikan huruf besar (kapital) dan huruf kecil.',
+            'password.numbers'       => 'Password baru wajib mengandung setidaknya satu angka (0-9).',
+            'password.uncompromised' => 'Password yang dipilih terdeteksi pernah mengalami kebocoran data publik. Silakan gunakan password lain.',
             'password.confirmed'     => 'Konfirmasi password baru tidak cocok.',
         ]);
 
@@ -126,8 +163,12 @@ class AuthController extends Controller
         }
 
         $admin->update([
-            'password' => $request->password, // Otomatis di-hash oleh cast 'hashed' pada model
+            'password'             => $request->password, // Otomatis di-hash oleh cast 'hashed' pada model
+            'wajib_ganti_password' => false,              // Kewajiban ganti password selesai
         ]);
+
+        // Cabut sesi di perangkat lain milik akun admin ini (sesi saat ini tetap aktif)
+        auth('admin')->logoutOtherDevices($request->password);
 
         LogAktivitasService::catat(
             idAdmin: $admin->id_admin,

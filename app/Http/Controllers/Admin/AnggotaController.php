@@ -66,15 +66,16 @@ class AnggotaController extends Controller
         $admin = auth('admin')->user();
 
         $anggota = Anggota::create([
-            'id_admin'   => $admin->id_admin,
-            'nrp'        => $request->nrp,
-            'nama'       => $request->nama,
-            'email'      => $request->email,
-            'password'   => $request->password, // Otomatis di-hash oleh cast 'hashed'
-            'jabatan'    => $request->jabatan,
-            'unit_kerja' => $request->unit_kerja,
-            'no_telepon' => $request->no_telepon,
-            'status'     => $request->status,
+            'id_admin'             => $admin->id_admin,
+            'nrp'                  => $request->nrp,
+            'nama'                 => $request->nama,
+            'email'                => $request->email,
+            'password'             => $request->password, // Otomatis di-hash oleh cast 'hashed'
+            'wajib_ganti_password' => true, // Akun baru wajib ganti password pada login pertama
+            'jabatan'              => $request->jabatan,
+            'unit_kerja'           => $request->unit_kerja,
+            'no_telepon'           => $request->no_telepon,
+            'status'               => $request->status,
         ]);
 
         // Catat aksi penambahan anggota ke log aktivitas
@@ -170,24 +171,36 @@ class AnggotaController extends Controller
      */
     public function resetPassword(Request $request, int $id): RedirectResponse
     {
+        $anggota = Anggota::findOrFail($id);
+        $admin   = auth('admin')->user();
+
         $request->validate([
             'password' => [
                 'required',
                 'string',
                 Password::min(10)
+                    ->max(128)
                     ->mixedCase()
                     ->numbers()
                     ->uncompromised(),
+                new \App\Rules\TidakMemuatDataPengguna([
+                    $anggota->nrp,
+                    $anggota->nama,
+                    $anggota->email,
+                ]),
             ],
         ], [
-            'password.required' => 'Password baru wajib diisi.',
+            'password.required'      => 'Password baru wajib diisi.',
+            'password.min'           => 'Password minimal harus :min karakter.',
+            'password.max'           => 'Password maksimal :max karakter.',
+            'password.mixed'         => 'Password wajib mengombinasikan huruf besar (kapital) dan huruf kecil.',
+            'password.numbers'       => 'Password wajib mengandung setidaknya satu angka (0-9).',
+            'password.uncompromised' => 'Password yang dipilih terdeteksi pernah mengalami kebocoran data publik. Silakan pilih password lain.',
         ]);
 
-        $anggota = Anggota::findOrFail($id);
-        $admin   = auth('admin')->user();
-
         $anggota->update([
-            'password' => $request->password, // Otomatis di-hash oleh model
+            'password'             => $request->password, // Otomatis di-hash oleh model
+            'wajib_ganti_password' => true, // Personel diwajibkan mengganti password pada login berikutnya
         ]);
 
         // Catat ke audit log
@@ -198,7 +211,9 @@ class AnggotaController extends Controller
             keterangan: "Mereset password untuk anggota: {$anggota->nama} (NRP: {$anggota->nrp}, Email: {$anggota->email})"
         );
 
-        return back()->with('sukses', "Password untuk anggota '{$anggota->nama}' (NRP: {$anggota->nrp}) berhasil direset.");
+        return back()
+            ->with('sukses', "Password untuk anggota '{$anggota->nama}' (NRP: {$anggota->nrp}) berhasil direset.")
+            ->with('warning', "Pemberitahuan Keamanan: Sandi sementara ini harus diberikan langsung kepada pemiliknya dan personel akan diminta untuk menggantinya saat login berikutnya.");
     }
 
     /**

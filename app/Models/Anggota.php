@@ -25,6 +25,7 @@ class Anggota extends Authenticatable
         'nama',
         'email',
         'password',
+        'wajib_ganti_password',
         'jabatan',
         'unit_kerja',
         'no_telepon',
@@ -37,7 +38,8 @@ class Anggota extends Authenticatable
     ];
 
     protected $casts = [
-        'password' => 'hashed',
+        'password'             => 'hashed',
+        'wajib_ganti_password' => 'boolean',
     ];
 
     // ===== RELASI =====

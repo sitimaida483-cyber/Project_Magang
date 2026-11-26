@@ -33,9 +33,10 @@ class AdminSeeder extends Seeder
         }
 
         Admin::create([
-            'username' => $username,
-            'password' => Hash::make($password),
-            'nama'     => env('ADMIN_NAME', 'Administrator Bidtik'),
+            'username'             => $username,
+            'password'             => Hash::make($password),
+            'nama'                 => env('ADMIN_NAME', 'Administrator Bidtik'),
+            'wajib_ganti_password' => true,
         ]);
 
         $this->command?->info('--------------------------------------------------');

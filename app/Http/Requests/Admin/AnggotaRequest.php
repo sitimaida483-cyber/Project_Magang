@@ -41,9 +41,15 @@ class AnggotaRequest extends FormRequest
                 $isCreate ? 'required' : 'nullable',
                 'string',
                 Password::min(10)
+                    ->max(128)
                     ->mixedCase()
                     ->numbers()
                     ->uncompromised(),
+                new \App\Rules\TidakMemuatDataPengguna([
+                    $this->input('nrp'),
+                    $this->input('nama'),
+                    $this->input('email'),
+                ]),
             ],
             'jabatan'     => ['required', 'string', 'max:100'],
             'unit_kerja'  => ['required', 'string', 'max:100'],
@@ -62,8 +68,12 @@ class AnggotaRequest extends FormRequest
             'email.required'      => 'Email kedinasan anggota wajib diisi.',
             'email.email'         => 'Format email tidak valid.',
             'email.unique'        => 'Email ini sudah digunakan oleh anggota lain.',
-            'password.required'   => 'Password akun anggota wajib diisi.',
-            'password.min'        => 'Password minimal harus 8 karakter.',
+            'password.required'      => 'Password akun anggota wajib diisi.',
+            'password.min'           => 'Password minimal harus :min karakter.',
+            'password.max'           => 'Password maksimal :max karakter.',
+            'password.mixed'         => 'Password wajib mengombinasikan huruf besar (kapital) dan huruf kecil.',
+            'password.numbers'       => 'Password wajib mengandung setidaknya satu angka (0-9).',
+            'password.uncompromised' => 'Password yang dipilih terdeteksi pernah mengalami kebocoran data publik. Silakan gunakan password lain.',
             'jabatan.required'    => 'Jabatan atau pangkat wajib diisi.',
             'unit_kerja.required' => 'Unit kerja atau divisi wajib diisi.',
             'status.required'     => 'Status keanggotaan wajib dipilih.',

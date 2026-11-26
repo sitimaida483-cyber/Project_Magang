@@ -60,6 +60,12 @@ class AuthController extends Controller
                 RateLimiter::availableIn($throttleKeyUser)
             );
 
+            // Catat ke log aplikasi Laravel (tanpa mencatat sandi)
+            \Illuminate\Support\Facades\Log::warning('Login personel ditolak: batas percobaan terlampaui', [
+                'identifier' => $loginIdentifier,
+                'alamat_ip'  => $request->ip(),
+            ]);
+
             return back()->withInput($request->only('email'))
                 ->with('error', "Terlalu banyak percobaan login yang gagal. Silakan coba kembali dalam {$seconds} detik.");
         }
@@ -74,6 +80,13 @@ class AuthController extends Controller
             RateLimiter::hit($throttleKeyIp, 60);
             RateLimiter::hit($throttleKeyUser, 600);
 
+            // Catat login gagal ke log aplikasi Laravel (tanpa mencatat sandi)
+            \Illuminate\Support\Facades\Log::warning('Login personel gagal: kredensial tidak sesuai', [
+                'identifier' => $loginIdentifier,
+                'alamat_ip'  => $request->ip(),
+                'alasan'     => $anggota ? 'Password salah' : 'Akun tidak ditemukan',
+            ]);
+
             return back()->withInput($request->only('email'))
                 ->with('error', 'NRP/Email atau password salah.');
         }
@@ -82,6 +95,13 @@ class AuthController extends Controller
         if (! $anggota->isAktif()) {
             RateLimiter::hit($throttleKeyIp, 60);
             RateLimiter::hit($throttleKeyUser, 600);
+
+            // Catat login ditolak karena nonaktif ke log aplikasi Laravel
+            \Illuminate\Support\Facades\Log::warning('Login personel ditolak: status nonaktif', [
+                'identifier' => $loginIdentifier,
+                'nrp'        => $anggota->nrp,
+                'alamat_ip'  => $request->ip(),
+            ]);
 
             return back()->withInput($request->only('email'))
                 ->with('error', 'Status keanggotaan Anda Nonaktif. Akses presensi dinonaktifkan.');
@@ -93,6 +113,13 @@ class AuthController extends Controller
 
         auth('anggota')->login($anggota, $request->boolean('remember'));
         $request->session()->regenerate();
+        $request->session()->put('anggota_last_activity', time());
+
+        // Jika wajib ganti password, arahkan langsung ke halaman ganti sandi
+        if ($anggota->wajib_ganti_password) {
+            return redirect()->route('anggota.password')
+                ->with('warning', 'Demi keamanan, Anda diwajibkan mengganti kata sandi terlebih dahulu sebelum mengakses halaman lain.');
+        }
 
         return redirect()->intended(route('presensi.index'))
             ->with('sukses', "Selamat datang, {$anggota->nama}! Silakan lakukan presensi kehadiran.");
@@ -134,15 +161,26 @@ class AuthController extends Controller
             'password'      => [
                 'required',
                 'string',
+                'confirmed',
                 Password::min(10)
+                    ->max(128)
                     ->mixedCase()
                     ->numbers()
                     ->uncompromised(),
-                'confirmed',
+                new \App\Rules\TidakMemuatDataPengguna([
+                    $anggota->nrp,
+                    $anggota->nama,
+                    $anggota->email,
+                ]),
             ],
         ], [
             'password_lama.required' => 'Password saat ini wajib diisi.',
             'password.required'      => 'Password baru wajib diisi.',
+            'password.min'           => 'Password personel minimal harus :min karakter.',
+            'password.max'           => 'Password personel maksimal :max karakter.',
+            'password.mixed'         => 'Password baru wajib mengombinasikan huruf besar (kapital) dan huruf kecil.',
+            'password.numbers'       => 'Password baru wajib mengandung setidaknya satu angka (0-9).',
+            'password.uncompromised' => 'Password yang dipilih terdeteksi pernah mengalami kebocoran data publik. Silakan gunakan password lain.',
             'password.confirmed'     => 'Konfirmasi password baru tidak cocok.',
         ]);
 
@@ -153,7 +191,19 @@ class AuthController extends Controller
 
         // Simpan password baru
         $anggota->update([
-            'password' => $request->password, // Otomatis di-hash oleh cast 'hashed' pada model
+            'password'             => $request->password, // Otomatis di-hash oleh cast 'hashed' pada model
+            'wajib_ganti_password' => false,              // Kewajiban ganti password selesai
+        ]);
+
+        // Cabut sesi di perangkat lain milik akun personel ini (sesi saat ini tetap aktif)
+        auth('anggota')->logoutOtherDevices($request->password);
+
+        // Catat ke log aplikasi Laravel (tanpa mencatat password)
+        \Illuminate\Support\Facades\Log::info('Password personel berhasil diperbarui', [
+            'id_anggota' => $anggota->id_anggota,
+            'nrp'        => $anggota->nrp,
+            'nama'       => $anggota->nama,
+            'alamat_ip'  => $request->ip(),
         ]);
 
         return back()->with('sukses', 'Password akun Anda berhasil diperbarui.');

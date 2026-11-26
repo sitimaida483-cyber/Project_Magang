@@ -45,17 +45,39 @@ class ResetAnggotaPassword extends Command
         $password = $this->argument('password');
 
         if (empty($password)) {
-            $password = $this->secret('Masukkan password baru (minimal 8 karakter)') 
+            $password = $this->secret('Masukkan password baru (minimal 10 karakter, campuran huruf besar, kecil, dan angka)') 
                 ?: $this->ask('Masukkan password baru');
         }
 
         if (empty($password)) {
-            $password = Str::random(12);
-            $this->warn("Password kosong, sistem membuatkan password acak baru: {$password}");
+            $this->error('Password baru tidak boleh kosong.');
+            return self::FAILURE;
         }
 
-        if (strlen($password) < 8) {
-            $this->error('Password baru minimal harus 8 karakter.');
+        // Validasi aturan password personel
+        $validator = \Illuminate\Support\Facades\Validator::make(['password' => $password], [
+            'password' => [
+                'required',
+                'string',
+                \Illuminate\Validation\Rules\Password::min(10)
+                    ->max(128)
+                    ->mixedCase()
+                    ->numbers(),
+                new \App\Rules\TidakMemuatDataPengguna([
+                    $anggota->nrp,
+                    $anggota->nama,
+                    $anggota->email,
+                ]),
+            ],
+        ], [
+            'password.min' => 'Password personel minimal harus 10 karakter.',
+            'password.max' => 'Password personel maksimal 128 karakter.',
+        ]);
+
+        if ($validator->fails()) {
+            foreach ($validator->errors()->all() as $err) {
+                $this->error($err);
+            }
             return self::FAILURE;
         }
 
@@ -74,15 +96,23 @@ class ResetAnggotaPassword extends Command
         }
 
         $anggota->password = Hash::make($password);
+        $anggota->wajib_ganti_password = true;
         $anggota->save();
+
+        \Illuminate\Support\Facades\Log::info('Password personel direset via CLI', [
+            'id_anggota' => $anggota->id_anggota,
+            'nrp'        => $anggota->nrp,
+            'email'      => $anggota->email,
+        ]);
 
         $this->info('====================================================');
         $this->info("Akun anggota [{$anggota->nama}] BERHASIL diperbarui!");
-        $this->info("NRP      : {$anggota->nrp}");
-        $this->info("Nama     : {$anggota->nama}");
-        $this->info("Email    : {$anggota->email}");
-        $this->info("Status   : {$anggota->status}");
-        $this->info("Password : {$password}");
+        $this->info("NRP                  : {$anggota->nrp}");
+        $this->info("Nama                 : {$anggota->nama}");
+        $this->info("Email                : {$anggota->email}");
+        $this->info("Status               : {$anggota->status}");
+        $this->info("Status Keamanan      : Wajib Ganti Password Diaktifkan");
+        $this->info("Keterangan           : Password telah tersimpan dengan aman");
         $this->info('====================================================');
 
         return self::SUCCESS;

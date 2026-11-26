@@ -48,9 +48,14 @@
                 <!-- Password (Opsional) -->
                 <div class="mb-3">
                     <label for="password" class="form-label mb-1">Password (Opsional)</label>
-                    <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                           id="password" name="password" placeholder="Minimal 8 karakter" minlength="8">
-                    <small class="text-muted" style="font-size: 12px;">Kosongkan jika tidak ingin mengganti password.</small>
+                    <div class="position-relative">
+                        <input type="password" class="form-control pe-5 @error('password') is-invalid @enderror" 
+                               id="password" name="password" placeholder="Minimal 10 karakter campuran" minlength="10" maxlength="128">
+                        <button type="button" class="btn-toggle-pwd" title="Lihat/Sembunyikan password">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted" style="font-size: 12px;">Kosongkan jika tidak ingin mengganti password. Wajib huruf besar, kecil, angka.</small>
                 </div>
 
                 <!-- Unit Kerja -->
@@ -110,4 +115,42 @@
         </div>
     </form>
 </div>
+
+<style>
+.btn-toggle-pwd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94A3B8;
+    padding: 4px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 5;
+}
+.btn-toggle-pwd:hover {
+    color: #475569;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-toggle-pwd').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const container = this.closest('.position-relative');
+            const input = container ? container.querySelector('input') : null;
+            const icon = this.querySelector('i');
+            if (input && icon) {
+                const isPassword = input.getAttribute('type') === 'password';
+                input.setAttribute('type', isPassword ? 'text' : 'password');
+                icon.classList.toggle('bi-eye', !isPassword);
+                icon.classList.toggle('bi-eye-slash', isPassword);
+            }
+        });
+    });
+});
+</script>
 @endsection

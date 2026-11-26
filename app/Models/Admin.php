@@ -25,6 +25,7 @@ class Admin extends Authenticatable
     protected $fillable = [
         'username',
         'password',
+        'wajib_ganti_password',
         'nama',
     ];
 
@@ -35,7 +36,8 @@ class Admin extends Authenticatable
 
     // Hash otomatis saat mengisi password
     protected $casts = [
-        'password' => 'hashed',
+        'password'             => 'hashed',
+        'wajib_ganti_password' => 'boolean',
     ];
 
     // ===== RELASI =====

@@ -40,7 +40,7 @@
                 <ul class="list-unstyled mb-0 d-flex flex-column gap-3 small text-muted">
                     <li class="d-flex align-items-start gap-2">
                         <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
-                        <span>Panjang kata sandi minimal <strong>10 karakter</strong>.</span>
+                        <span>Panjang kata sandi minimal <strong>12 karakter</strong> (maksimal 128 karakter).</span>
                     </li>
                     <li class="d-flex align-items-start gap-2">
                         <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
@@ -48,11 +48,15 @@
                     </li>
                     <li class="d-flex align-items-start gap-2">
                         <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
+                        <span>Dilarang memuat <strong>username</strong>, <strong>nama lengkap</strong>, atau pengenal akun.</span>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
                         <span>Sistem otomatis menolak password yang terdeteksi pernah mengalami kebocoran data publik.</span>
                     </li>
                     <li class="d-flex align-items-start gap-2">
                         <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
-                        <span>Setiap pergantian password admin dicatat ke dalam log aktivitas sistem demi jejak audit keamanan.</span>
+                        <span>Sesi aktif di perangkat lain akan dicabut secara otomatis demi keamanan akun.</span>
                     </li>
                 </ul>
             </div>
@@ -87,10 +91,15 @@
                         <label for="password_lama" class="form-label">
                             Password Saat Ini <span class="text-danger">*</span>
                         </label>
-                        <input type="password" class="form-control @error('password_lama') is-invalid @enderror" 
-                               id="password_lama" name="password_lama" placeholder="Masukkan kata sandi lama Anda" required autocomplete="current-password">
+                        <div class="position-relative">
+                            <input type="password" class="form-control pe-5 @error('password_lama') is-invalid @enderror" 
+                                   id="password_lama" name="password_lama" placeholder="Masukkan kata sandi lama Anda" required autocomplete="current-password">
+                            <button type="button" class="btn-toggle-pwd" title="Lihat/Sembunyikan password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         @error('password_lama')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -100,10 +109,15 @@
                             <label for="password" class="form-label">
                                 Password Baru <span class="text-danger">*</span>
                             </label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                   id="password" name="password" placeholder="Minimal 10 karakter campuran" required minlength="10" autocomplete="new-password">
+                            <div class="position-relative">
+                                <input type="password" class="form-control pe-5 @error('password') is-invalid @enderror" 
+                                       id="password" name="password" placeholder="Minimal 12 karakter campuran" required minlength="12" maxlength="128" autocomplete="new-password">
+                                <button type="button" class="btn-toggle-pwd" title="Lihat/Sembunyikan password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                             @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -112,10 +126,15 @@
                             <label for="password_confirmation" class="form-label">
                                 Konfirmasi Password Baru <span class="text-danger">*</span>
                             </label>
-                            <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror" 
-                                   id="password_confirmation" name="password_confirmation" placeholder="Ulangi password baru" required minlength="10" autocomplete="new-password">
+                            <div class="position-relative">
+                                <input type="password" class="form-control pe-5 @error('password_confirmation') is-invalid @enderror" 
+                                       id="password_confirmation" name="password_confirmation" placeholder="Ulangi password baru" required minlength="12" maxlength="128" autocomplete="new-password">
+                                <button type="button" class="btn-toggle-pwd" title="Lihat/Sembunyikan password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
                             @error('password_confirmation')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -131,5 +150,47 @@
         </div>
     </div>
 </div>
+
+<style>
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+.btn-toggle-pwd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #94A3B8;
+    padding: 4px;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 5;
+}
+.btn-toggle-pwd:hover {
+    color: #475569;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.btn-toggle-pwd').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const container = this.closest('.position-relative');
+            const input = container ? container.querySelector('input') : null;
+            const icon = this.querySelector('i');
+            if (input && icon) {
+                const isPassword = input.getAttribute('type') === 'password';
+                input.setAttribute('type', isPassword ? 'text' : 'password');
+                icon.classList.toggle('bi-eye', !isPassword);
+                icon.classList.toggle('bi-eye-slash', isPassword);
+            }
+        });
+    });
+});
+</script>
 @endsection
 

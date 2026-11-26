@@ -42,6 +42,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Header Keamanan Global (nosniff, SAMEORIGIN, Permissions-Policy)
         $middleware->append(\App\Http\Middleware\SecurityHeadersMiddleware::class);
 
+        // Autentikasi sesi: memastikan pencabutan sesi di perangkat lain (logoutOtherDevices) efektif
+        $middleware->authenticateSessions();
+
         $middleware->alias([
             'admin.auth'   => \App\Http\Middleware\AdminAuth::class,
             'anggota.auth' => \App\Http\Middleware\AnggotaAuth::class,
