@@ -112,10 +112,10 @@
             @endif
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('admin.presensi.ekspor_pdf', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_pdf') }}" class="btn btn-outline-secondary fw-bold px-4 np-export-link">
+            <a href="{{ route('admin.presensi.ekspor_pdf', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_pdf') }}" class="btn btn-export-toggle fw-bold px-4 np-export-link" id="btnExportPdf">
                 Ekspor PDF
             </a>
-            <a href="{{ route('admin.presensi.ekspor_excel', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_excel') }}" class="btn btn-outline-secondary fw-bold px-4 np-export-link">
+            <a href="{{ route('admin.presensi.ekspor_excel', request()->all()) }}" data-base-url="{{ route('admin.presensi.ekspor_excel') }}" class="btn btn-export-toggle fw-bold px-4 np-export-link" id="btnExportExcel">
                 Ekspor Excel
             </a>
         </div>
@@ -270,4 +270,57 @@
         </div>
     @endif
 </div>
+
+<style>
+.btn-export-toggle {
+    transition: all 0.2s ease-in-out;
+    border-radius: 8px;
+    font-size: 14.5px;
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+.btn-export-toggle:hover {
+    background-color: #F8FAFC;
+    border-color: #94A3B8;
+    color: #1E293B;
+}
+.btn-export-toggle.is-active {
+    background-color: #254BD6 !important;
+    border-color: #254BD6 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(37, 75, 214, 0.40);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const exportButtons = document.querySelectorAll('.np-export-link');
+    
+    exportButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            // Perbarui parameter URL dari form filter terkini sebelum mengunduh
+            const form = this.closest('form');
+            if (form) {
+                const formData = new FormData(form);
+                const params = new URLSearchParams(formData);
+                const baseUrl = this.getAttribute('data-base-url') || this.href.split('?')[0];
+                this.href = baseUrl + '?' + params.toString();
+            }
+
+            // Lepas warna biru aktif dari semua tombol ekspor
+            exportButtons.forEach(function (btn) {
+                btn.classList.remove('is-active');
+            });
+
+            // Berikan warna biru aktif pada tombol yang baru saja dipencet
+            this.classList.add('is-active');
+        });
+    });
+});
+</script>
 @endsection
