@@ -39,26 +39,26 @@
 
         .auth-wrapper {
             width: 100%;
-            max-width: 960px;
+            max-width: 920px;
             margin: auto;
         }
 
         .auth-card-dual {
             display: flex;
             background: #FFFFFF;
-            border-radius: 20px;
+            border-radius: 22px;
             overflow: hidden;
-            box-shadow: 0 25px 65px rgba(0, 0, 0, 0.55);
+            box-shadow: 0 30px 75px rgba(0, 0, 0, 0.60);
             border: 1px solid rgba(255, 255, 255, 0.25);
-            min-height: 570px;
+            min-height: 680px;
         }
 
         /* Panel Kiri: Showcase Navy Precision (Sesuai Acuan Gambar) */
         .auth-showcase-panel {
-            width: 45%;
+            width: 44%;
             background-color: #0B132B !important;
             color: #FFFFFF !important;
-            padding: 58px 46px;
+            padding: 64px 44px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -102,16 +102,16 @@
 
         .showcase-features {
             border-top: 1px solid rgba(255, 255, 255, 0.15);
-            padding-top: 32px;
+            padding-top: 36px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 22px;
         }
 
         .showcase-features .feature-item {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 15px;
         }
 
         .showcase-features .feature-num {
@@ -130,8 +130,8 @@
 
         /* Panel Kanan: Form Card */
         .auth-form-panel {
-            width: 55%;
-            padding: 56px 46px;
+            width: 56%;
+            padding: 64px 48px;
             background: #FFFFFF;
             display: flex;
             flex-direction: column;
@@ -139,7 +139,7 @@
         }
 
         .auth-form-panel .form-title {
-            font-size: 24px;
+            font-size: 25px;
             font-weight: 700;
             color: #0B132B;
             margin-bottom: 0;
@@ -149,7 +149,7 @@
             font-size: 14px !important;
             line-height: 1.5;
             color: #475569 !important;
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
 
         .auth-form-panel .form-label {
@@ -157,14 +157,14 @@
             font-weight: 600 !important;
             letter-spacing: normal !important;
             color: #1E293B !important;
-            margin-bottom: 6px;
+            margin-bottom: 7px;
         }
 
         .auth-form-panel .form-control {
             border: 1.5px solid #CBD5E1;
-            border-radius: 8px;
-            padding: 11px 15px;
-            font-size: 14px;
+            border-radius: 9px;
+            padding: 12px 16px;
+            font-size: 14.5px;
             color: #0F172A;
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
@@ -208,8 +208,8 @@
             background-color: #254BD6;
             color: #FFFFFF;
             border: none;
-            border-radius: 8px;
-            padding: 11px 16px;
+            border-radius: 9px;
+            padding: 13px 20px;
             font-weight: 600;
             font-size: 15px;
             width: 100%;
@@ -355,7 +355,7 @@
                     @csrf
 
                     <!-- NRP atau Email Kedinasan -->
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="email" class="form-label">NRP atau Email Kedinasan <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('email') is-invalid @enderror" 
                                id="email" name="email" value="{{ old('email') }}" 
@@ -363,7 +363,7 @@
                     </div>
 
                     <!-- Password -->
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                         <div class="position-relative">
                             <input type="password" class="form-control pe-5 @error('password') is-invalid @enderror" 
@@ -376,7 +376,7 @@
                     </div>
 
                     <!-- Ingat Saya -->
-                    <div class="mb-4">
+                    <div class="mb-4 pb-1">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
                             <label class="form-check-label text-muted" for="remember" style="font-size: 14px;">
@@ -392,7 +392,7 @@
                 </form>
 
                 <!-- Link Login Admin -->
-                <div class="mt-2 text-start">
+                <div class="mt-3 text-start">
                     <a href="{{ route('admin.login') }}" class="auth-link">
                         Login Administrator
                     </a>
